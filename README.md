@@ -9,3 +9,9 @@
 - [DB Technology Quadrant](db-quadrant-selection.html)
 - [Hosting Platform Comparison](hosting-comparison.html)
 - [System Tier Architecture](tier-architecture-comparison.html)
+
+## History
+
+- [The History of Application Architecture](architecture-styles-history.html)
+- [The History of Database Technology](database-technology-history.html)
+- [The History of System Tier Architecture](tier-architecture-history.html)
