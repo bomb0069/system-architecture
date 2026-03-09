@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The History of Database Technology · 1960–2025</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@300;400;600;700&family=Oswald:wght@300;400;500;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0A0F14;--paper:#F0F5EC;--paper2:#E4EDE0;--paper3:#D8E5D2;
+  --green:#1A4A2A;--green2:#2D7A45;--green3:#86EFAC;
+  --forest:#0F3320;--moss:#4A7A55;
+  --amber:#7A4510;--amber2:#C47820;--amber3:#FCD34D;
+  --rust:#7C1D1D;--rust2:#C44040;
+  --teal:#0C3A40;--teal2:#0F7085;
+  --purple:#2D1A5C;--purple2:#6D3ABA;
+  --muted:#4A5E45;--dim:#8A9E85;--faint:#C0D0B8;
+  --line:#B8CEAC;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);color:var(--ink);
+  font-family:'Libre Baskerville',serif;min-height:100vh;overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:100;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ── MASTHEAD ── */
+.masthead{
+  background:var(--ink);color:var(--paper);
+  padding:28px 40px 22px;border-bottom:4px double var(--green2);
+  text-align:center;position:relative;overflow:hidden;
+}
+.masthead::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.01) 3px,rgba(255,255,255,.01) 4px);pointer-events:none;}
+.masthead-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.5em;color:var(--green3);text-transform:uppercase;margin-bottom:10px;}
+.masthead h1{font-family:'Oswald',sans-serif;font-size:42px;font-weight:600;letter-spacing:-.01em;line-height:1;margin-bottom:8px;color:#F0F5EC;}
+.masthead h1 span{color:var(--amber3);}
+.masthead-sub{font-family:'Libre Baskerville',serif;font-style:italic;font-size:13px;color:#7A9E80;letter-spacing:.03em;}
+.masthead-rule{margin:14px auto 0;border:none;border-top:1px solid #1A2A1A;width:60%;}
+
+/* ── LEGEND ── */
+.legend{display:flex;gap:22px;justify-content:center;align-items:center;padding:10px 40px;background:var(--paper2);border-bottom:2px solid var(--line);flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── ERA FILTER ── */
+.era-strip{display:flex;gap:3px;padding:10px 40px;background:var(--ink);overflow-x:auto;border-bottom:3px solid var(--forest);position:sticky;top:0;z-index:50;}
+.era-btn{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border:1px solid #1A2A1A;background:transparent;color:#4A6A4A;cursor:pointer;border-radius:3px;white-space:nowrap;transition:all .15s;}
+.era-btn:hover{background:#0A1A0A;color:var(--green3);}
+.era-btn.active{background:var(--green);color:var(--paper);border-color:var(--green2);}
+
+/* ── TIMELINE ── */
+.timeline-outer{padding:40px 0 60px;position:relative;}
+.spine{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line);transform:translateX(-50%);}
+.spine::before,.spine::after{content:'';position:absolute;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:var(--green2);}
+.spine::before{top:0;} .spine::after{bottom:0;}
+
+.year-marker{position:relative;display:flex;align-items:center;justify-content:center;margin:6px 0;z-index:10;}
+.year-label{background:var(--ink);color:var(--amber3);font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;padding:4px 16px;border:1px solid var(--green);letter-spacing:.08em;z-index:10;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+
+.era-header{text-align:center;padding:20px 0 8px;position:relative;z-index:10;}
+.era-header-inner{display:inline-block;background:var(--paper);padding:6px 24px;border:1px solid var(--green);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--green2);}
+
+/* ── CARD ── */
+.tl-item{position:relative;display:flex;align-items:flex-start;margin-bottom:8px;padding:0 calc(50% + 28px) 0 40px;min-height:10px;}
+.tl-item.right{padding:0 40px 0 calc(50% + 28px);flex-direction:row-reverse;}
+.tl-item::before{content:'';position:absolute;left:calc(50% - 7px);top:18px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:2px solid var(--green2);z-index:5;box-shadow:0 0 0 3px var(--paper);transition:all .2s;}
+.tl-item:hover::before{transform:scale(1.3);background:var(--green2);}
+.tl-item:not(.right)::after{content:'';position:absolute;top:24px;right:calc(50% + 7px);width:40px;height:1px;background:var(--line);}
+.tl-item.right::after{content:'';position:absolute;top:24px;left:calc(50% + 7px);width:40px;height:1px;background:var(--line);}
+
+.tl-card{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:14px 16px;cursor:pointer;transition:all .2s;box-shadow:2px 3px 8px rgba(10,30,10,.07);max-width:390px;width:100%;}
+.tl-card:hover{box-shadow:4px 6px 18px rgba(10,30,10,.14);transform:translateY(-1px);border-color:var(--green2);}
+.tl-card.expanded{border-color:var(--green2);background:var(--paper2);}
+
+/* Highlights */
+.tl-card.hl-relational{border-left:3px solid #C47820;}
+.tl-card.hl-nosql{border-left:3px solid #0F7085;}
+.tl-card.hl-newsql{border-left:3px solid #6D3ABA;}
+.tl-card.hl-cloud{border-left:3px solid #2D7A45;}
+.tl-card.hl-antipattern{border-left:3px solid #C44040;border-style:dashed;}
+
+.card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:0;}
+.card-icon{font-size:22px;flex-shrink:0;margin-top:2px;line-height:1;}
+.card-meta{flex:1;min-width:0;}
+.card-year-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:1px 7px;border-radius:2px;display:inline-block;margin-bottom:4px;letter-spacing:.12em;}
+.card-title{font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;line-height:1.2;letter-spacing:.01em;color:var(--ink);}
+.card-subtitle{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);margin-top:3px;letter-spacing:.08em;}
+.status-bar{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+.s-badge{font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:2px 7px;border-radius:2px;letter-spacing:.08em;}
+.s-active{background:rgba(45,122,69,.12);color:#1A4A2A;border:1px solid rgba(45,122,69,.25);}
+.s-legacy{background:rgba(180,90,20,.1);color:#7A4510;border:1px solid rgba(180,90,20,.2);}
+.s-modern{background:rgba(15,112,133,.12);color:#0C3A40;border:1px solid rgba(15,112,133,.25);}
+.s-obsolete{background:rgba(80,70,40,.08);color:#6B5A30;border:1px dashed rgba(100,80,40,.25);}
+.s-emerging{background:rgba(109,58,186,.1);color:#2D1A5C;border:1px solid rgba(109,58,186,.25);}
+.s-dominant{background:rgba(196,120,32,.12);color:#7A4510;border:1px solid rgba(196,120,32,.3);}
+
+/* Expand */
+.card-expand{max-height:0;overflow:hidden;transition:max-height .35s ease,opacity .25s ease;opacity:0;}
+.tl-card.expanded .card-expand{max-height:800px;opacity:1;}
+.expand-divider{margin:12px 0 10px;border:none;border-top:1px solid var(--line);}
+.card-desc{font-size:11.5px;color:var(--muted);line-height:1.75;margin-bottom:10px;}
+
+.mini-stack{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
+.mini-layer{display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:2px;}
+.mini-layer-icon{font-size:12px;flex-shrink:0;}
+.mini-layer-name{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;width:110px;flex-shrink:0;}
+.mini-layer-desc{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);}
+.mini-arrow{text-align:center;color:var(--faint);font-size:9px;margin:1px 0 1px 18px;}
+
+.qa-chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+.qa-chip{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 8px;border-radius:2px;border:1px solid var(--line);background:var(--paper3);color:var(--muted);}
+.qa-chip.strong{border-color:var(--green2);color:var(--green);background:rgba(45,122,69,.07);}
+.qa-chip.weak{border-color:var(--rust2);color:var(--rust2);background:rgba(196,64,64,.05);text-decoration:line-through;opacity:.7;}
+
+.examples-row{display:flex;gap:6px;flex-wrap:wrap;}
+.ex-pill{font-size:9.5px;color:var(--ink);background:var(--paper3);border:1px solid var(--line);padding:2px 9px;border-radius:12px;}
+
+.obsolete-note{background:rgba(180,50,20,.05);border:1px dashed rgba(180,50,20,.22);border-radius:3px;padding:7px 10px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--rust2);line-height:1.6;}
+.why-note{background:rgba(45,122,69,.05);border:1px solid rgba(45,122,69,.15);border-radius:3px;padding:7px 10px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#1A4A2A;line-height:1.6;}
+.insight-note{background:rgba(15,112,133,.05);border:1px solid rgba(15,112,133,.18);border-radius:3px;padding:7px 10px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#0C3A40;line-height:1.6;}
+.sec-mini{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--dim);margin-bottom:5px;text-transform:uppercase;}
+
+.hidden{display:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.tl-item{animation:fadeUp .45s ease both;}
+
+.footer{background:var(--ink);color:var(--dim);text-align:center;padding:20px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;border-top:3px double var(--green);}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-track{background:var(--paper2);}
+::-webkit-scrollbar-thumb{background:var(--green2);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-eyebrow">System Analysis · Data Storage Design · Historical Survey</div>
+  <h1>The History of<br><span>Database Technology</span></h1>
+  <hr class="masthead-rule">
+  <div class="masthead-sub">From Punched Card Files to Vector Embeddings &ensp;·&ensp; 1960 — 2025</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#1A4A2A"></div>Still Active / Dominant</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#0C3A40"></div>Modern / Mainstream</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2D1A5C"></div>Emerging</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7A4510"></div>Legacy (still in use)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#6B5A30;outline:1px dashed"></div>Largely Obsolete</div>
+  <div style="width:1px;height:16px;background:var(--line)"></div>
+  <div class="legend-item" style="font-size:9px;color:var(--amber2)">🏅 = Invented the standard others follow</div>
+</div>
+
+<div class="era-strip">
+  <button class="era-btn active" data-era="all" onclick="filterEra('all',this)">All Eras</button>
+  <button class="era-btn" data-era="predb" onclick="filterEra('predb',this)">Pre-Database (1960s)</button>
+  <button class="era-btn" data-era="hierarchical" onclick="filterEra('hierarchical',this)">Hierarchical / Network (1960s–70s)</button>
+  <button class="era-btn" data-era="relational" onclick="filterEra('relational',this)">Relational Era (1970s–90s)</button>
+  <button class="era-btn" data-era="internet" onclick="filterEra('internet',this)">Internet Scale (1990s–2000s)</button>
+  <button class="era-btn" data-era="nosql" onclick="filterEra('nosql',this)">NoSQL Revolution (2007–2012)</button>
+  <button class="era-btn" data-era="newsql" onclick="filterEra('newsql',this)">NewSQL & Cloud DB (2010s)</button>
+  <button class="era-btn" data-era="modern" onclick="filterEra('modern',this)">Modern & Specialized (2013–present)</button>
+  <button class="era-btn" data-era="ai" onclick="filterEra('ai',this)">AI Era (2020–present)</button>
+</div>
+
+<div class="timeline-outer">
+  <div class="spine"></div>
+  <div id="timeline-content"></div>
+</div>
+
+<div class="footer">SYSTEM ANALYSIS COURSE · DATABASE TECHNOLOGY HISTORY · CLICK ANY CARD TO EXPAND</div>
+
+<script>
+const ERA_NAMES = {
+  predb:       "Pre-Database Era · 1960s",
+  hierarchical:"Hierarchical & Network Model · 1960s–70s",
+  relational:  "Relational Era · 1970s–1990s",
+  internet:    "Internet Scale Era · 1993–2007",
+  nosql:       "NoSQL Revolution · 2007–2013",
+  newsql:      "NewSQL & Cloud DB · 2010–2018",
+  modern:      "Modern Specialized DBs · 2013–Present",
+  ai:          "AI & Embedding Era · 2020–Present",
+};
+
+const HISTORY = [
+  // ── PRE-DATABASE ──
+  {
+    era:"predb", year:"~1960", side:"left",
+    icon:"📁", title:"Flat File Storage",
+    subtitle:"Sequential tape files · COBOL VSAM · No query language",
+    hl:"",
+    status:[{t:"Ancestor of Everything",c:"s-legacy"},{t:"Still: Log Files, CSVs",c:"s-active"}],
+    born:"~1960", obsolete:null,
+    desc:"Before databases existed, all data was stored in flat files on magnetic tape or disk. COBOL programs read files record-by-record, sequentially. IBM's VSAM (Virtual Storage Access Method) added indexed access. There was no query language — to find a record you wrote a program that read every record until it found the right one. Every application owned its own files.",
+    layers:[
+      {icon:"💾",name:"Magnetic Tape",desc:"Sequential read — must scan from start",c:"#7A4510"},
+      {icon:"📁",name:"VSAM / ISAM",desc:"Indexed Sequential Access Method",c:"#7A4510"},
+      {icon:"⚙️",name:"COBOL Program",desc:"Opens file, reads records in loops",c:"#7A4510"},
+    ],
+    qaStrong:["Simplicity","No Software Overhead","Fast Sequential Reads"],
+    qaWeak:["No Ad-hoc Query","Data Duplication","No Relationships","Application Coupling"],
+    examples:["COBOL VSAM files","IBM ISAM","Punch card data files","Modern: CSV, JSON lines, Parquet files"],
+    whyNote:"Flat files never died. Parquet (columnar flat file) is what BigQuery and Spark use internally. CSV files are still the universal data exchange format.",
+    obsoleteNote:null,
+  },
+  {
+    era:"predb", year:"1964", side:"right",
+    icon:"🗂️", title:"IMS — First Real Database",
+    subtitle:"IBM IMS · Hierarchical model · Apollo Moon program",
+    hl:"hl-relational",
+    status:[{t:"Still Running (IBM)",c:"s-legacy"},{t:"Ancestor of all DBs",c:"s-dominant"}],
+    born:"1966 (IBM IMS)", obsolete:null,
+    desc:"IBM's Information Management System (IMS) was created to manage the bill of materials for the Apollo moon program (1966). The US could not manage the 1 million+ parts of the Saturn V rocket with flat files. IMS became the first production database management system — hierarchical tree structure, a rudimentary query interface, and transaction support. Banks and insurers still run IMS today for core processing.",
+    layers:[
+      {icon:"🌳",name:"Hierarchical Tree",desc:"Parent → Child records — rigid structure",c:"#C47820"},
+      {icon:"🔑",name:"Physical Keys",desc:"Direct physical pointers to records",c:"#C47820"},
+      {icon:"💾",name:"IBM DASD",desc:"Direct Access Storage Device",c:"#C47820"},
+    ],
+    qaStrong:["First DBMS","Transaction Support","High Throughput","Proven Reliability"],
+    qaWeak:["Rigid Hierarchy","No Ad-hoc Query","Redundancy for Cross-hierarchy Access","Requires IBM Hardware"],
+    examples:["NASA Apollo (1966)","Every major US bank","American Airlines Sabre system","Still: 95% of Fortune 500 run IMS workloads"],
+    whyNote:"IMS still processes over $1 trillion in financial transactions daily. The 'mainframe is dead' narrative is 40 years old and still wrong.",
+    obsoleteNote:null,
+  },
+
+  // ── HIERARCHICAL / NETWORK ──
+  {
+    era:"hierarchical", year:"1969", side:"left",
+    icon:"🕸️", title:"CODASYL Network Model",
+    subtitle:"Set-based navigation · DBTG standard · Many-to-many relationships",
+    hl:"",
+    status:[{t:"Obsolete",c:"s-obsolete"}],
+    born:"1969 (CODASYL DBTG)", obsolete:"~1985",
+    desc:"The CODASYL Database Task Group defined the Network Model standard in 1969. Unlike IMS's strict hierarchy, the network model allowed many-to-many relationships via explicit 'set' links. Programs navigated by following physical pointers. Charles Bachman won the Turing Award for this work. It was more powerful than hierarchical but equally rigid — you had to know the access paths at design time.",
+    layers:[
+      {icon:"🕸️",name:"Record Types",desc:"Nodes in a network graph",c:"#6B5A30"},
+      {icon:"🔗",name:"Set Types",desc:"Named relationship links — physical pointers",c:"#6B5A30"},
+      {icon:"⚙️",name:"DML Navigation",desc:"FIND NEXT WITHIN SET — cursor-based",c:"#6B5A30"},
+    ],
+    qaStrong:["Many-to-Many Relationships","Performance (pointer navigation)","Complex Data Models"],
+    qaWeak:["Schema Rigidity","No Ad-hoc Query","Physical Data Independence Violation"],
+    examples:["IDMS (Cullinet)","IDS (GE / Honeywell)","DMS 1100","Cincom TOTAL"],
+    obsoleteNote:"Replaced by the Relational Model. E.F. Codd's 1970 paper mathematically proved that relational was more expressive and physically independent.",
+    whyNote:null,
+  },
+
+  // ── RELATIONAL ERA ──
+  {
+    era:"relational", year:"1970", side:"right",
+    icon:"🏅", title:"Relational Model — E.F. Codd",
+    subtitle:"A Relational Model of Data for Large Shared Data Banks · IBM Research",
+    hl:"hl-relational",
+    status:[{t:"Still the Dominant Model",c:"s-dominant"},{t:"50+ years later",c:"s-active"}],
+    born:"1970 (Codd's paper)", obsolete:null,
+    desc:"E.F. Codd's 1970 paper at IBM Research is the most influential paper in the history of computing after von Neumann's stored-program paper. Codd proved mathematically that data could be represented as simple tables (relations), queries expressed as set operations (relational algebra), and physical storage could be completely independent of logical structure. Users query with predicates, not navigation. He invented the foundation of all modern databases.",
+    layers:[
+      {icon:"📊",name:"Tables (Relations)",desc:"Rows and columns — set-oriented data model",c:"#C47820"},
+      {icon:"🔑",name:"Primary/Foreign Keys",desc:"Logical identity and relationship",c:"#C47820"},
+      {icon:"🔍",name:"Relational Algebra",desc:"SELECT, PROJECT, JOIN, UNION — set math",c:"#C47820"},
+    ],
+    qaStrong:["Data Independence","Ad-hoc Query","Mathematical Foundation","Simplicity","Universality"],
+    qaWeak:["Object-Relational Mismatch","Horizontal Scaling (initially)","Schema Rigidity"],
+    examples:["IBM System R (first prototype 1974)","Ingres (Berkeley 1973)","Oracle (1979)","IBM DB2 (1983)","PostgreSQL","MySQL","SQL Server"],
+    whyNote:"🏅 Codd received the Turing Award in 1981. The relational model's 50-year dominance is unprecedented in technology. Every database you will ever recommend to a client starts its justification from 'why we deviated from Codd'.",
+    obsoleteNote:null,
+  },
+  {
+    era:"relational", year:"1974", side:"left",
+    icon:"📝", title:"SQL — Structured Query Language",
+    subtitle:"IBM System R · Chamberlin & Boyce · ANSI standard 1986",
+    hl:"hl-relational",
+    status:[{t:"The Universal Query Language",c:"s-dominant"}],
+    born:"1974 (IBM System R)", obsolete:null,
+    desc:"Donald Chamberlin and Raymond Boyce at IBM Research designed SQL (originally SEQUEL) as the human-readable interface to Codd's relational model. Instead of relational algebra syntax, SQL reads like English: SELECT name FROM users WHERE age > 18. IBM System R was the prototype. Oracle commercialized it first (1979). ANSI standardized SQL in 1986. Today SQL is the most widely known programming language after HTML.",
+    layers:[
+      {icon:"📝",name:"DDL",desc:"CREATE TABLE, ALTER, DROP — schema definition",c:"#C47820"},
+      {icon:"🔍",name:"DML",desc:"SELECT, INSERT, UPDATE, DELETE — data ops",c:"#C47820"},
+      {icon:"⚙️",name:"Query Optimizer",desc:"Execution plan — physical independence preserved",c:"#C47820"},
+    ],
+    qaStrong:["Human Readable","Declarative","Physical Independence","Universal","Composable"],
+    qaWeak:["Verbose for Complex Queries","Dialects Differ","NULL semantics controversial"],
+    examples:["Oracle SQL","PostgreSQL SQL","MySQL","SQLite","SQL Server T-SQL","BigQuery Standard SQL"],
+    whyNote:"SQL has outlasted every competitor. OQL (OOP era), SPARQL (semantic web), XQuery (XML era) — all tried to replace it. Every NoSQL database eventually added a SQL-like query layer. SQL wins.",
+    obsoleteNote:null,
+  },
+  {
+    era:"relational", year:"1979", side:"right",
+    icon:"🔶", title:"Oracle Database",
+    subtitle:"First commercial RDBMS · Larry Ellison · SQL on disk",
+    hl:"hl-relational",
+    status:[{t:"Enterprise Dominant",c:"s-dominant"},{t:"$50B+ market",c:"s-active"}],
+    born:"1979 (Oracle V2)", obsolete:null,
+    desc:"Larry Ellison founded Software Development Laboratories (later Oracle) in 1977 after reading Codd's paper and IBM's System R documentation. Oracle Version 2 (1979) was the first commercially available SQL RDBMS — beating IBM's own DB2 to market by 4 years. Oracle pioneered row-level locking, hot backups, and multi-version concurrency control (MVCC). IBM DB2 (1983) followed. These two products defined enterprise data for 40 years.",
+    layers:[
+      {icon:"⚙️",name:"Query Engine",desc:"CBO — Cost-Based Optimizer",c:"#E25A1A"},
+      {icon:"🔒",name:"MVCC / Locking",desc:"Multi-version concurrency — readers don't block writers",c:"#E25A1A"},
+      {icon:"💾",name:"Tablespace / Redo Logs",desc:"Storage management + durability",c:"#E25A1A"},
+    ],
+    qaStrong:["ACID Transactions","Enterprise Features","High Availability","Mature Optimizer"],
+    qaWeak:["Expensive","Complex Administration","Vendor Lock-in","Horizontal Scaling"],
+    examples:["Oracle Database","IBM DB2 (1983)","Sybase (1984) → SQL Server","Informix"],
+    whyNote:"Oracle's architecture decisions — MVCC, redo logs, cost-based optimizer — became the template every RDBMS since has copied, including PostgreSQL.",
+    obsoleteNote:null,
+  },
+  {
+    era:"relational", year:"1986", side:"left",
+    icon:"🐘", title:"PostgreSQL",
+    subtitle:"Post-Ingres · UC Berkeley · Extensible open-source RDBMS",
+    hl:"hl-relational",
+    status:[{t:"#1 Advanced RDBMS",c:"s-dominant"}],
+    born:"1986 (POSTGRES project) · 1996 (PostgreSQL name)",
+    obsolete:null,
+    desc:"Michael Stonebraker at UC Berkeley started POSTGRES in 1986 as the successor to Ingres. The key innovation: extensibility — custom data types, operators, functions, and index methods. PostgreSQL (renamed 1996) became open source and added full SQL compliance. Today it is the 'most admired database' in Stack Overflow surveys. It handles JSON (JSONB), full-text search, GIS (PostGIS), time-series (TimescaleDB), vectors (pgvector) — all in one engine.",
+    layers:[
+      {icon:"📊",name:"MVCC Engine",desc:"Non-blocking reads — VACUUM maintains dead tuples",c:"#336791"},
+      {icon:"🔌",name:"Extension System",desc:"PostGIS, pgvector, TimescaleDB, Citus…",c:"#336791"},
+      {icon:"🔍",name:"Advanced Indexes",desc:"B-tree, GIN, GiST, BRIN, Hash",c:"#336791"},
+      {icon:"📁",name:"JSONB + Full Types",desc:"Native JSON, UUID, Arrays, Range types",c:"#336791"},
+    ],
+    qaStrong:["SQL Compliance","Extensibility","ACID","JSONB","Full-Text Search","PostGIS","Open Source"],
+    qaWeak:["Write Scaling (vs distributed DBs)","VACUUM Complexity","Configuration Tuning Required"],
+    examples:["Heroku Postgres","Supabase (built on Postgres)","Amazon RDS Postgres","Neon","Render","Railway"],
+    whyNote:"PostgreSQL is often the correct answer for a new project. It can act as RDBMS, document store (JSONB), time-series (TimescaleDB), vector DB (pgvector), and GIS database (PostGIS) simultaneously.",
+    obsoleteNote:null,
+  },
+  {
+    era:"relational", year:"1995", side:"right",
+    icon:"🐬", title:"MySQL",
+    subtitle:"Open source · LAMP stack · Web-scale RDBMS",
+    hl:"hl-relational",
+    status:[{t:"Widely Used",c:"s-dominant"}],
+    born:"1995 (MySQL AB)", obsolete:null,
+    desc:"Michael Widenius and David Axmark released MySQL in 1995 as a fast, simple, open-source database. Its integration into the LAMP stack (Linux, Apache, MySQL, PHP) made it the database of the early web. Wikipedia, Facebook, Twitter, YouTube all started on MySQL. Sun acquired MySQL (2008) for $1 billion; Oracle acquired Sun (2010). MySQL's uncertain future under Oracle led to the MariaDB fork.",
+    layers:[
+      {icon:"⚙️",name:"Pluggable Storage",desc:"InnoDB (ACID) or MyISAM (fast reads)",c:"#E98300"},
+      {icon:"🔍",name:"Query Cache",desc:"(deprecated in 8.0 — was a mixed blessing)",c:"#E98300"},
+      {icon:"🔄",name:"Replication",desc:"Binary log replication — master/replica",c:"#E98300"},
+    ],
+    qaStrong:["Simplicity","Speed (reads)","LAMP Ecosystem","Replication","Wide Hosting Support"],
+    qaWeak:["Fewer Advanced Features vs PostgreSQL","Historical InnoDB issues","Oracle stewardship concerns"],
+    examples:["WordPress","Wikipedia","Facebook (early)","Twitter (early)","Booking.com","MariaDB (fork)"],
+    whyNote:"MySQL powers more websites than any other database. WordPress alone = 43% of the web = MySQL. Understanding MySQL is understanding the web.",
+    obsoleteNote:null,
+  },
+
+  // ── INTERNET SCALE ──
+  {
+    era:"internet", year:"1998", side:"left",
+    icon:"🗃️", title:"SQLite",
+    subtitle:"Embedded database · Zero-config · D. Richard Hipp",
+    hl:"hl-relational",
+    status:[{t:"Most Deployed DB on Earth",c:"s-dominant"}],
+    born:"2000 (D. Richard Hipp)", obsolete:null,
+    desc:"D. Richard Hipp created SQLite in 2000 for the US Navy. It is a self-contained, serverless, zero-configuration, transactional SQL database engine stored in a single file. Every Android phone, every iPhone, every browser, every Windows 10 machine runs SQLite. It is estimated that there are over 1 trillion SQLite databases in active use — more than all other databases combined.",
+    layers:[
+      {icon:"📄",name:"Single File",desc:"Entire database in one .db file",c:"#4A7A55"},
+      {icon:"⚙️",name:"Library (not server)",desc:"Linked into the application — no process",c:"#4A7A55"},
+      {icon:"🔒",name:"WAL Mode",desc:"Write-Ahead Log — concurrent reads",c:"#4A7A55"},
+    ],
+    qaStrong:["Zero Config","Embedded","Cross-platform","ACID","Serverless","Offline","Portable"],
+    qaWeak:["Single Writer","Not for High-Concurrency Web","No Network Access","No User Management"],
+    examples:["Every iOS/Android app","Every browser (Firefox, Chrome)","Python standard library","WhatsApp","Turso (distributed SQLite)"],
+    whyNote:"SQLite is the most tested software in the world — its test suite has 100% branch coverage. It is the only database with a formal correctness proof.",
+    obsoleteNote:null,
+  },
+  {
+    era:"internet", year:"2003", side:"right",
+    icon:"📊", title:"OLAP / Data Warehouses",
+    subtitle:"Columnar storage · Analytical queries · Read-optimized",
+    hl:"hl-relational",
+    status:[{t:"Essential for Analytics",c:"s-modern"}],
+    born:"1992 (Red Brick) · 1995 (Teradata) · 2000s mainstream",
+    obsolete:null,
+    desc:"As companies accumulated petabytes of transactional data, running analytical queries on OLTP databases became impossible. Columnar storage engines emerged: data stored by column instead of row means analytical queries (SELECT AVG(price) FROM billion_rows) only read the one column they need, not all columns. Teradata (1979), Red Brick (1992), Netezza, and later Vertica (2005) served enterprise analytics before the cloud era.",
+    layers:[
+      {icon:"📊",name:"Columnar Storage",desc:"Data stored by column — analytics read efficiency",c:"#0F7085"},
+      {icon:"⚡",name:"MPP Engine",desc:"Massively Parallel Processing — distribute query",c:"#0F7085"},
+      {icon:"🗄️",name:"Star / Snowflake Schema",desc:"Fact + Dimension tables — denormalized for reads",c:"#0F7085"},
+    ],
+    qaStrong:["Analytical Query Speed","Compression (columnar)","Business Intelligence","Aggregate Functions"],
+    qaWeak:["Write Performance","Row-level Updates Expensive","Not for OLTP","Cost"],
+    examples:["Teradata","Vertica","Netezza","Amazon Redshift (2012)","Google BigQuery (2010)","Snowflake (2012)"],
+    whyNote:"The split between OLTP (row store) and OLAP (column store) is a fundamental architectural decision. Every system above a certain size needs both — for different purposes.",
+    obsoleteNote:null,
+  },
+  {
+    era:"internet", year:"2004", side:"left",
+    icon:"📄", title:"Google Bigtable Paper",
+    subtitle:"Wide-column store · Distributed · Foundation of NoSQL",
+    hl:"hl-nosql",
+    status:[{t:"Foundation of NoSQL",c:"s-dominant"}],
+    born:"2004 (Google internal) · 2006 (OSDI paper)", obsolete:null,
+    desc:"Google published the Bigtable paper at OSDI 2006 (internal use from 2004). Bigtable stores data in a sparse, distributed, persistent multi-dimensional sorted map indexed by row key, column key, and timestamp. Designed to run on commodity hardware at massive scale. This paper launched the NoSQL movement — HBase, Cassandra, and DynamoDB all directly cite it.",
+    layers:[
+      {icon:"🗝️",name:"Row Key",desc:"Lexicographically sorted — range scans efficient",c:"#4285F4"},
+      {icon:"📊",name:"Column Families",desc:"Grouped columns — stored together on disk",c:"#4285F4"},
+      {icon:"🌊",name:"Tablet Servers",desc:"Range partitioning — auto rebalanced",c:"#4285F4"},
+    ],
+    qaStrong:["Petabyte Scale","Commodity Hardware","Sorted Key Access","Timestamp Versioning"],
+    qaWeak:["No SQL","No Joins","Schema Design Complexity","Steep Learning Curve"],
+    examples:["Google Bigtable","Apache HBase (open source Bigtable)","Apache Accumulo","Google Cloud Bigtable"],
+    whyNote:"🏅 The Bigtable paper is the intellectual origin of wide-column stores. Every key-value and wide-column NoSQL database traces its lineage here.",
+    obsoleteNote:null,
+  },
+  {
+    era:"internet", year:"2007", side:"right",
+    icon:"📃", title:"Amazon Dynamo Paper",
+    subtitle:"Key-value · Eventual consistency · CAP theorem in practice",
+    hl:"hl-nosql",
+    status:[{t:"Foundation of NoSQL",c:"s-dominant"}],
+    born:"2007 (Amazon SOSP paper)", obsolete:null,
+    desc:"Amazon's Dynamo paper (SOSP 2007) described how Amazon built a highly available key-value store for the shopping cart. Dynamo chose availability over consistency (AP in CAP theorem) — the cart would always write, and conflicts resolved later. It introduced consistent hashing for partitioning, vector clocks for conflict detection, and quorum reads/writes. This paper is the second founding document of NoSQL alongside Bigtable.",
+    layers:[
+      {icon:"🗝️",name:"Consistent Hashing",desc:"Distribute keys across nodes — no hot spots",c:"#FF9900"},
+      {icon:"🔀",name:"Vector Clocks",desc:"Conflict detection for eventual consistency",c:"#FF9900"},
+      {icon:"⚖️",name:"Quorum R/W",desc:"N replicas, R reads, W writes — tunable consistency",c:"#FF9900"},
+    ],
+    qaStrong:["Always Available","Horizontal Scale","Tunable Consistency","No Single Point of Failure"],
+    qaWeak:["Eventual Consistency Complexity","No Complex Queries","Key Design Critical"],
+    examples:["AWS DynamoDB (commercial)","Apache Cassandra (inspired by)","Riak","Voldemort (LinkedIn)"],
+    whyNote:"🏅 The CAP theorem trade-off Dynamo made explicit — choosing A over C — became the central design choice of the NoSQL generation.",
+    obsoleteNote:null,
+  },
+
+  // ── NOSQL REVOLUTION ──
+  {
+    era:"nosql", year:"2007", side:"left",
+    icon:"🍃", title:"MongoDB — Document Database",
+    subtitle:"JSON documents · Flexible schema · Developer-friendly",
+    hl:"hl-nosql",
+    status:[{t:"Mainstream",c:"s-modern"}],
+    born:"2007 (10gen / MongoDB)", obsolete:null,
+    desc:"10gen (later MongoDB Inc.) released MongoDB in 2009 as a document-oriented database storing BSON (binary JSON) documents. No schema required — documents in the same collection can have different fields. Querying is JSON-based. For developers who thought in objects, not tables, MongoDB felt natural. It became the face of the NoSQL movement and the 'M' in MEAN stack.",
+    layers:[
+      {icon:"📄",name:"BSON Documents",desc:"JSON-like — nested objects, arrays native",c:"#47A248"},
+      {icon:"🗂️",name:"Collections",desc:"Schema-free groupings of documents",c:"#47A248"},
+      {icon:"🔍",name:"Query Language",desc:"JSON predicates — aggregation pipeline",c:"#47A248"},
+      {icon:"🔀",name:"Replica Set",desc:"Primary + secondaries — automatic failover",c:"#47A248"},
+    ],
+    qaStrong:["Schema Flexibility","Developer Experience","Nested Data","Horizontal Sharding","Aggregation Pipeline"],
+    qaWeak:["No Multi-doc ACID (pre-4.0)","Joins Require $lookup","Memory Usage","Duplication Risk"],
+    examples:["MongoDB Atlas","MEAN stack apps","Content management","Catalogs","IoT data"],
+    whyNote:"MongoDB added multi-document ACID transactions in v4.0 (2018) — closing the largest gap with relational DBs. It now occupies the 'flexible relational' space.",
+    obsoleteNote:null,
+  },
+  {
+    era:"nosql", year:"2008", side:"right",
+    icon:"💍", title:"Apache Cassandra",
+    subtitle:"Wide-column · Facebook origin · Masterless · Always-on",
+    hl:"hl-nosql",
+    status:[{t:"Active / Large Scale",c:"s-modern"}],
+    born:"2008 (Facebook) · 2010 (Apache top-level)",
+    obsolete:null,
+    desc:"Cassandra was built at Facebook by Avinash Lakshman (former Amazon Dynamo engineer) and Prashant Malik to handle Facebook Inbox search. It combines Bigtable's data model (column families) with Dynamo's distributed architecture (consistent hashing, eventual consistency). Masterless ring topology — no single point of failure. Linear write scalability: 2x nodes = 2x write throughput.",
+    layers:[
+      {icon:"💍",name:"Ring Topology",desc:"Masterless — any node accepts any request",c:"#1287B1"},
+      {icon:"📊",name:"Wide-Column Model",desc:"Partition key → clustering key → columns",c:"#1287B1"},
+      {icon:"📝",name:"SSTable + Memtable",desc:"LSM tree — optimized for write throughput",c:"#1287B1"},
+    ],
+    qaStrong:["Write Throughput","Masterless HA","Linear Scaling","Multi-datacenter","Tunable Consistency"],
+    qaWeak:["No ACID (eventual)","Denormalization Required","No Ad-hoc Queries","Partition Key Design Critical"],
+    examples:["Facebook Inbox (original)","Netflix","Apple (75K+ nodes)","Instagram","Uber","Discord messages"],
+    whyNote:"Cassandra is the correct database when write throughput and multi-region availability are the primary QAs. Discord stores billions of messages on Cassandra.",
+    obsoleteNote:null,
+  },
+  {
+    era:"nosql", year:"2009", side:"left",
+    icon:"⚡", title:"Redis — In-Memory Key-Value",
+    subtitle:"RAM-first · Data structures · Pub/Sub · Sub-ms latency",
+    hl:"hl-nosql",
+    status:[{t:"Ubiquitous Cache Layer",c:"s-dominant"}],
+    born:"2009 (Salvatore Sanfilippo)", obsolete:null,
+    desc:"Salvatore Sanfilippo created Redis (Remote Dictionary Server) in 2009 to solve real-time analytics for a startup. Redis stores everything in RAM with optional persistence. It is not just a key-value store — it supports strings, hashes, lists, sorted sets, bitmaps, HyperLogLog, and streams. Most importantly, all operations are O(1) or O(log N) with sub-millisecond latency. Used as cache, session store, rate limiter, leaderboard, pub/sub bus, and job queue.",
+    layers:[
+      {icon:"⚡",name:"In-Memory Store",desc:"All data in RAM — optional AOF/RDB persistence",c:"#DC382D"},
+      {icon:"📊",name:"Data Structures",desc:"String, Hash, List, Set, ZSet, Stream",c:"#DC382D"},
+      {icon:"📡",name:"Pub/Sub + Streams",desc:"Message broadcasting and consumer groups",c:"#DC382D"},
+    ],
+    qaStrong:["Sub-ms Latency","Data Structures","Atomic Operations","Pub/Sub","Widely Supported"],
+    qaWeak:["Memory Cost","Not Primary Store (usually)","Single-Threaded Core","Persistence Complexity"],
+    examples:["Cache layer in every major stack","Twitter timeline","GitHub session store","Stack Overflow leaderboards","Slack rate limiting"],
+    whyNote:"Redis is the most common 'second database' in any architecture — used alongside PostgreSQL or MongoDB as the caching and real-time layer.",
+    obsoleteNote:null,
+  },
+  {
+    era:"nosql", year:"2010", side:"right",
+    icon:"🔍", title:"Elasticsearch",
+    subtitle:"Full-text search · Inverted index · Distributed · Kibana",
+    hl:"hl-nosql",
+    status:[{t:"Standard Search Layer",c:"s-modern"}],
+    born:"2010 (Shay Banon)", obsolete:null,
+    desc:"Shay Banon built Elasticsearch on top of Apache Lucene (2000) to make distributed full-text search accessible. Elasticsearch provides an HTTP REST API over Lucene's inverted index engine. It indexes JSON documents and enables full-text search, faceted search, autocomplete, and relevance scoring at scale. The ELK Stack (Elasticsearch + Logstash + Kibana) became the standard for log analytics.",
+    layers:[
+      {icon:"📑",name:"Inverted Index",desc:"Term → document list — search-optimized",c:"#F9A825"},
+      {icon:"🔀",name:"Shards + Replicas",desc:"Distributed Lucene — horizontal search",c:"#F9A825"},
+      {icon:"🌐",name:"REST API",desc:"JSON over HTTP — query DSL",c:"#F9A825"},
+    ],
+    qaStrong:["Full-Text Search","Relevance Scoring","Log Analytics","Faceted Search","Near-Real-Time"],
+    qaWeak:["Not a Primary DB","Schema Mapping Complexity","Memory Intensive","ACID Not Supported"],
+    examples:["Wikipedia search","GitHub code search","Netflix content search","ELK Stack (logs)","Shopify","Uber"],
+    whyNote:"Elasticsearch is the correct answer whenever the QA is 'search relevance' or 'log analytics'. It is a search engine, not a database — do not use it as your primary data store.",
+    obsoleteNote:null,
+  },
+
+  // ── NEWSQL ──
+  {
+    era:"newsql", year:"2010", side:"left",
+    icon:"☁️", title:"Amazon DynamoDB (Cloud)",
+    subtitle:"Managed key-value · Serverless · Single-digit ms · AWS",
+    hl:"hl-cloud",
+    status:[{t:"AWS Standard",c:"s-dominant"}],
+    born:"2012 (public) · internal 2007-era Dynamo successor",
+    obsolete:null,
+    desc:"AWS DynamoDB (2012) commercialized the Dynamo paper's principles as a fully managed service. No servers to provision, automatically scaled, single-digit millisecond latency at any scale. DynamoDB Streams enable event-driven patterns. On-demand pricing means zero cost at zero traffic. The trade-off: rigid key design, no SQL, and significant learning curve for access patterns.",
+    layers:[
+      {icon:"🗝️",name:"Partition + Sort Key",desc:"Primary key design = performance",c:"#FF9900"},
+      {icon:"🌊",name:"LSM Storage",desc:"Write-optimized — SSD-backed",c:"#FF9900"},
+      {icon:"📡",name:"Streams",desc:"Change data capture — event triggers",c:"#FF9900"},
+    ],
+    qaStrong:["Fully Managed","Serverless Scaling","Single-digit ms","Global Tables","Streams"],
+    qaWeak:["Key Design Critical (hard to change)","No SQL","Limited Query Patterns","AWS Lock-in","Cost Surprises"],
+    examples:["Amazon retail (internal)","Lyft","Snapchat","Duolingo","Finra"],
+    whyNote:"DynamoDB is correct when you need extreme scale with simple access patterns and want zero operational overhead. Wrong when you need flexible queries.",
+    obsoleteNote:null,
+  },
+  {
+    era:"newsql", year:"2012", side:"right",
+    icon:"❄️", title:"Snowflake — Cloud Data Warehouse",
+    subtitle:"Separation of compute + storage · Multi-cluster · SQL at petabyte scale",
+    hl:"hl-cloud",
+    status:[{t:"Data Warehouse Standard",c:"s-modern"}],
+    born:"2012 (Benoit Dageville, Thierry Cruanes, Marcin Żukowski)",
+    obsolete:null,
+    desc:"Snowflake's key innovation: completely separate compute (Virtual Warehouses) from storage (S3/Blob). You pay for compute only when queries run. Multiple teams can run queries simultaneously against the same data without contention. Standard SQL on semi-structured data (VARIANT type for JSON/Parquet). Snowflake's $33 billion IPO (2020) was the largest software IPO ever at that time.",
+    layers:[
+      {icon:"🗄️",name:"Cloud Storage",desc:"S3/Azure Blob — columnar micro-partitions",c:"#29B5E8"},
+      {icon:"⚡",name:"Virtual Warehouses",desc:"Compute clusters — independently scaled",c:"#29B5E8"},
+      {icon:"🔧",name:"Query Services",desc:"SQL + metadata layer — multi-cluster",c:"#29B5E8"},
+    ],
+    qaStrong:["Compute/Storage Separation","Concurrency","SQL on Semi-Structured Data","Data Sharing","Multi-cloud"],
+    qaWeak:["Cost Management","Vendor Lock-in","Not for OLTP","Cold Query Latency"],
+    examples:["Capital One","DoorDash","Instacart","Square","The Weather Company"],
+    whyNote:"Snowflake proved that separating compute from storage was the correct cloud data warehouse architecture. Every competitor (BigQuery, Redshift) copied this model.",
+    obsoleteNote:null,
+  },
+  {
+    era:"newsql", year:"2012", side:"left",
+    icon:"🌍", title:"Google Spanner",
+    subtitle:"Globally distributed · External consistency · TrueTime API",
+    hl:"hl-newsql",
+    status:[{t:"Technically Advanced",c:"s-modern"}],
+    born:"2012 (OSDI paper) · 2017 (Cloud Spanner)",
+    obsolete:null,
+    desc:"Google Spanner (2012 OSDI) achieved what the CAP theorem suggested was impossible: a globally distributed SQL database with ACID transactions and external consistency. The secret: TrueTime API — atomic clocks and GPS receivers in every Google datacenter. Transactions are assigned timestamps based on real wall-clock time, ensuring global consistency. Cloud Spanner brought this to the market in 2017. The OSDI paper is considered one of the most important systems papers ever written.",
+    layers:[
+      {icon:"🕐",name:"TrueTime API",desc:"Atomic clock + GPS — bounded time uncertainty",c:"#4285F4"},
+      {icon:"🌍",name:"Paxos Groups",desc:"Consensus across global datacenters",c:"#4285F4"},
+      {icon:"📝",name:"SQL + F1",desc:"Full SQL with global joins",c:"#4285F4"},
+    ],
+    qaStrong:["Global ACID","External Consistency","99.999% SLA","SQL","Horizontal Scale"],
+    qaWeak:["Very Expensive","Latency (speed of light)","Proprietary (TrueTime)","Google Cloud Only"],
+    examples:["Google Ads (internal)","Google Cloud Spanner","CockroachDB (inspired by)","YugabyteDB"],
+    whyNote:"🏅 The Spanner paper is a landmark. It proved that global ACID is physically possible. CockroachDB and YugabyteDB are open-source implementations of the Spanner model.",
+    obsoleteNote:null,
+  },
+  {
+    era:"newsql", year:"2015", side:"right",
+    icon:"🪳", title:"CockroachDB / NewSQL",
+    subtitle:"Distributed SQL · Survives datacenter failure · PostgreSQL compatible",
+    hl:"hl-newsql",
+    status:[{t:"Growing Adoption",c:"s-modern"}],
+    born:"2015 (CockroachDB) · 2016 (YugabyteDB)",
+    obsolete:null,
+    desc:"NewSQL databases attempt to give developers the best of both worlds: the familiar SQL interface and ACID guarantees of relational databases, combined with the horizontal scalability of NoSQL. CockroachDB (inspired by Spanner) uses Raft consensus for replication and automatically shards across nodes. YugabyteDB supports both PostgreSQL and Cassandra APIs. TiDB (PingCAP) is widely adopted in China.",
+    layers:[
+      {icon:"🔀",name:"Raft Consensus",desc:"Distributed coordination — automatic failover",c:"#6933FF"},
+      {icon:"📊",name:"Distributed SQL",desc:"PostgreSQL wire protocol — queries rewritten",c:"#6933FF"},
+      {icon:"🗄️",name:"RocksDB",desc:"LSM-tree storage per node",c:"#6933FF"},
+    ],
+    qaStrong:["ACID at Scale","PostgreSQL Compatible","Survive Datacenter Loss","Horizontal SQL"],
+    qaWeak:["Latency (cross-node transactions)","Operational Complexity","Expensive","Ecosystem Maturity"],
+    examples:["CockroachDB","YugabyteDB","TiDB (PingCAP)","PlanetScale (MySQL sharding)","Vitess"],
+    whyNote:"NewSQL is the answer to 'I need SQL AND horizontal scale'. The trade-off is latency for cross-shard transactions. Design your schema to minimize cross-shard joins.",
+    obsoleteNote:null,
+  },
+
+  // ── MODERN SPECIALIZED ──
+  {
+    era:"modern", year:"2013", side:"left",
+    icon:"🕒", title:"Time-Series Databases",
+    subtitle:"InfluxDB · TimescaleDB · Write-optimized for time-stamped data",
+    hl:"hl-nosql",
+    status:[{t:"Standard for Metrics/IoT",c:"s-modern"}],
+    born:"2013 (InfluxDB) · 2017 (TimescaleDB)",
+    obsolete:null,
+    desc:"Time-series databases are optimized for appending time-stamped values at very high ingest rates. Every IoT sensor, every Prometheus metric, every financial tick generates time-series data. Regular databases are too slow for this — writing 100K events/second into PostgreSQL requires partitioning tricks. InfluxDB built a purpose-built engine (TSM) that compresses time-series data 10:1 and queries time-ranges efficiently. TimescaleDB extends PostgreSQL with time-series superpowers.",
+    layers:[
+      {icon:"🕒",name:"Time-Ordered Storage",desc:"Data sorted by timestamp — efficient range queries",c:"#22ADF6"},
+      {icon:"🗜️",name:"Columnar Compression",desc:"Delta encoding + XOR — 10:1 compression typical",c:"#22ADF6"},
+      {icon:"⚡",name:"Downsampling / Rollups",desc:"Auto-aggregation for historical retention",c:"#22ADF6"},
+    ],
+    qaStrong:["Write Throughput","Time-Range Queries","Compression","Retention Policies","IoT Native"],
+    qaWeak:["Not General Purpose","No Complex Joins","Schema Immutable (InfluxDB)","Learning Curve"],
+    examples:["InfluxDB","TimescaleDB","Prometheus + Thanos","Amazon Timestream","QuestDB","VictoriaMetrics"],
+    whyNote:"If your QA is 'store 1M sensor readings per second' — time-series DB is the answer. Every monitoring system (Prometheus, Grafana) is built on this.",
+    obsoleteNote:null,
+  },
+  {
+    era:"modern", year:"2010", side:"right",
+    icon:"🌐", title:"Graph Databases",
+    subtitle:"Neo4j · Nodes + Edges · Relationship traversal · Cypher query",
+    hl:"hl-nosql",
+    status:[{t:"Specialized Active",c:"s-modern"}],
+    born:"2007 (Neo4j) · Concept older",
+    obsolete:null,
+    desc:"Graph databases store data as nodes and edges — entities and their relationships. The key QA: traversing connected data is O(1) per hop (following a pointer) regardless of dataset size, vs O(N log N) for a JOIN on a relational database. Facebook's social graph, LinkedIn's network, Google's Knowledge Graph, fraud detection networks — all are graph problems. Neo4j uses the Cypher query language.",
+    layers:[
+      {icon:"🔵",name:"Nodes",desc:"Entities — Person, Product, Location",c:"#018BFF"},
+      {icon:"🔗",name:"Edges",desc:"Typed relationships with properties",c:"#018BFF"},
+      {icon:"🔍",name:"Cypher / Gremlin",desc:"MATCH (a)-[:KNOWS]->(b) — graph traversal",c:"#018BFF"},
+    ],
+    qaStrong:["Relationship Traversal","Variable-Depth Paths","Fraud Detection","Recommendations","Knowledge Graphs"],
+    qaWeak:["Not for Tabular Data","Small Ecosystem","Read Performance (vs RDBMS for simple queries)","Scaling"],
+    examples:["Neo4j","Amazon Neptune","ArangoDB","TigerGraph","LinkedIn Skills Graph","PayPal fraud detection"],
+    whyNote:"Use a graph database when the QA is 'find all paths between X and Y' or 'find influencers within 3 hops'. For simple relationships, a relational DB with proper indexing is usually faster.",
+    obsoleteNote:null,
+  },
+  {
+    era:"modern", year:"2019", side:"left",
+    icon:"☁️", title:"Serverless Databases",
+    subtitle:"PlanetScale · Neon · Supabase · Scale-to-zero · Branching",
+    hl:"hl-cloud",
+    status:[{t:"Fast Growing",c:"s-emerging"}],
+    born:"2018 (FaunaDB) · 2021 (PlanetScale, Neon) · 2020 (Supabase)",
+    obsolete:null,
+    desc:"Serverless databases separate the database engine from storage and scale to zero when idle. Neon (serverless Postgres) branches your database like Git — create a branch for every PR to test schema changes safely. PlanetScale (Vitess-based MySQL) enables non-blocking schema changes. Supabase adds an instant REST/GraphQL API over PostgreSQL. Turso (libSQL) runs SQLite at the edge globally.",
+    layers:[
+      {icon:"⚡",name:"Compute (scales to 0)",desc:"DB engine spins up per connection",c:"#2D7A45"},
+      {icon:"🗄️",name:"Decoupled Storage",desc:"S3-backed — compute and storage billed separately",c:"#2D7A45"},
+      {icon:"🌿",name:"Branching / Dev DBs",desc:"Git-like branches for schema development",c:"#2D7A45"},
+    ],
+    qaStrong:["Zero Idle Cost","Git-like Branching","Developer Experience","Auto-scaling","Edge Ready"],
+    qaWeak:["Cold Start Latency","New Paradigm","Cost Unpredictability","Limited Configuration"],
+    examples:["Neon (Postgres)","PlanetScale (MySQL)","Supabase","Turso (SQLite)","CockroachDB Serverless","Fauna"],
+    whyNote:"Serverless databases are the developer-experience revolution. Branching databases like code changes the development workflow fundamentally — no more 'who changed the schema in production?'",
+    obsoleteNote:null,
+  },
+  {
+    era:"modern", year:"2013", side:"right",
+    icon:"🗺️", title:"Spatial / GIS Databases",
+    subtitle:"PostGIS · Geography types · Proximity queries · ST_Distance",
+    hl:"hl-relational",
+    status:[{t:"Essential for Location",c:"s-active"}],
+    born:"2001 (PostGIS) · long before as Oracle Spatial",
+    obsolete:null,
+    desc:"Spatial databases store and query geographic data — points, lines, polygons. PostGIS extends PostgreSQL with geometry types and hundreds of spatial functions. R-tree indexes enable O(log N) proximity queries. 'Find all restaurants within 2km of a user' is trivially expressible in PostGIS. Uber's H3 library quantizes the globe into hexagons. Google Maps' backend is spatial.",
+    layers:[
+      {icon:"📍",name:"Geometry Types",desc:"Point, LineString, Polygon, MultiPolygon",c:"#34A853"},
+      {icon:"🌐",name:"Spatial Index",desc:"R-tree / GiST — bounding box queries",c:"#34A853"},
+      {icon:"📏",name:"Spatial Functions",desc:"ST_Distance, ST_Within, ST_Intersects",c:"#34A853"},
+    ],
+    qaStrong:["Proximity Queries","Geofencing","Route Analysis","Map Rendering","H3 Integration"],
+    qaWeak:["Complex Coordinate Systems","Large Data Size","Specialist Knowledge Required"],
+    examples:["PostGIS (PostgreSQL)","Oracle Spatial","MongoDB Geo","BigQuery Geography","Uber H3","Foursquare"],
+    whyNote:"If your system has a location component (delivery, ride-sharing, real-estate, logistics) — PostGIS on PostgreSQL is almost always the correct data model.",
+    obsoleteNote:null,
+  },
+
+  // ── AI ERA ──
+  {
+    era:"ai", year:"2021", side:"left",
+    icon:"🔮", title:"Vector Databases",
+    subtitle:"Embedding storage · Semantic search · ANN queries · AI backbone",
+    hl:"hl-nosql",
+    status:[{t:"Rapidly Growing",c:"s-emerging"}],
+    born:"2019 (Pinecone) · 2021 (Weaviate, Qdrant) · 2022 (mainstream)",
+    obsolete:null,
+    desc:"Vector databases store high-dimensional numerical vectors (embeddings) produced by ML models. A text embedding represents semantic meaning as a 1536-dimensional vector — documents with similar meaning have vectors close in geometric space. The key query: Approximate Nearest Neighbor (ANN) search — 'find the 10 most semantically similar documents to this query'. Every RAG (Retrieval-Augmented Generation) system needs a vector database.",
+    layers:[
+      {icon:"🔢",name:"Embedding Vectors",desc:"Float32[1536] per document/image/audio",c:"#7C3AED"},
+      {icon:"🗂️",name:"ANN Index",desc:"HNSW / IVFFlat — approximate nearest neighbor",c:"#7C3AED"},
+      {icon:"🔍",name:"Similarity Search",desc:"Cosine / dot product / L2 distance",c:"#7C3AED"},
+      {icon:"🏷️",name:"Metadata Filter",desc:"Pre/post filter on structured fields",c:"#7C3AED"},
+    ],
+    qaStrong:["Semantic Search","RAG Retrieval","Image Similarity","Recommendation","ML Native"],
+    qaWeak:["Not for Exact Lookups","High Memory (vectors are large)","Approximate Results","New Paradigm"],
+    examples:["Pinecone","Weaviate","Qdrant","Milvus","pgvector (PostgreSQL)","Chroma","Redis VSS"],
+    whyNote:"pgvector brings vector search into PostgreSQL — often good enough for under 1M vectors without a specialized database. Only scale to dedicated vector DBs when pgvector is too slow.",
+    obsoleteNote:null,
+  },
+  {
+    era:"ai", year:"2022", side:"right",
+    icon:"🦆", title:"OLAP Renaissance — DuckDB",
+    subtitle:"Embedded OLAP · In-process analytics · SQL on Parquet/CSV",
+    hl:"hl-cloud",
+    status:[{t:"Emerging Standard",c:"s-emerging"}],
+    born:"2018 (research) · 2022 (mainstream adoption)",
+    obsolete:null,
+    desc:"DuckDB is SQLite for analytics — a columnar, in-process OLAP database that runs inside your Python or Node.js process. No server, no setup, just query a CSV or Parquet file with SQL. It can scan 1 billion rows in seconds on a laptop. DuckDB challenged the assumption that analytical queries require a dedicated data warehouse. Combined with Parquet on S3, it enables 'poor man's BigQuery' for a fraction of the cost.",
+    layers:[
+      {icon:"⚙️",name:"In-Process Engine",desc:"Runs in Python/R/Node.js — no server",c:"#FCC700"},
+      {icon:"📊",name:"Columnar Vectorized",desc:"SIMD-optimized — processes columns in batches",c:"#FCC700"},
+      {icon:"📁",name:"Open Formats",desc:"Reads CSV, Parquet, Arrow, JSON directly",c:"#FCC700"},
+    ],
+    qaStrong:["Zero Setup","Fast Analytics","Parquet/Arrow Native","Local Analytics","Cost (free)"],
+    qaWeak:["Single Machine Only","Write Performance","Not for OLTP","Limited Concurrent Writes"],
+    examples:["DuckDB","MotherDuck (cloud DuckDB)","Data science pipelines","BI on local files","Replacing pandas for large CSV"],
+    whyNote:"DuckDB is changing how data analysts work. 'Why spin up Redshift when I can query a 10GB CSV file at 1B rows/second on my laptop with SQL?'",
+    obsoleteNote:null,
+  },
+  {
+    era:"ai", year:"2023", side:"left",
+    icon:"🌊", title:"Streaming Databases",
+    subtitle:"Apache Kafka + Flink · Real-time SQL · Materialized views",
+    hl:"hl-nosql",
+    status:[{t:"Emerging",c:"s-emerging"}],
+    born:"2011 (Kafka) · 2014 (Flink) · 2022 (Materialize, RisingWave mainstream)",
+    obsolete:null,
+    desc:"Streaming databases merge stream processing with database semantics. Instead of batch queries against stored data, you define SQL queries that continuously run on live event streams, maintaining incrementally updated materialized views. Materialize and RisingWave make this accessible. Apache Kafka (2011) is the event backbone — not a database but the foundation everything streams from.",
+    layers:[
+      {icon:"🌊",name:"Event Streams",desc:"Kafka topics — append-only ordered log",c:"#0891B2"},
+      {icon:"📊",name:"Streaming SQL",desc:"Continuous queries — always up-to-date results",c:"#0891B2"},
+      {icon:"🗂️",name:"Materialized Views",desc:"Pre-computed results maintained incrementally",c:"#0891B2"},
+    ],
+    qaStrong:["Real-time Analytics","Event Replay","Decoupled Producers/Consumers","Horizontal Scale","Durability"],
+    qaWeak:["Eventual Consistency","Operational Complexity","New Mental Model","Latency vs Batch"],
+    examples:["Apache Kafka","Apache Flink","Materialize","RisingWave","ksqlDB","Redpanda"],
+    whyNote:"Streaming databases close the gap between data warehouses (batch) and operational databases (OLTP). When the QA is 'analytics updated within 1 second', this is the answer.",
+    obsoleteNote:null,
+  },
+];
+
+const ERA_NAMES_MAP = ERA_NAMES;
+
+function renderTimeline(filter){
+  const container = document.getElementById("timeline-content");
+  container.innerHTML = "";
+  let lastEra = null;
+  let itemIdx = 0;
+
+  HISTORY.forEach((item) => {
+    const visible = filter==="all" || item.era===filter;
+
+    if(item.era !== lastEra){
+      const eraDiv = document.createElement("div");
+      eraDiv.className = "era-header" + (visible?"":" hidden");
+      eraDiv.dataset.era = item.era;
+      eraDiv.innerHTML = `<div class="era-header-inner">${ERA_NAMES_MAP[item.era]||item.era}</div>`;
+      container.appendChild(eraDiv);
+      lastEra = item.era;
+    }
+
+    const ym = document.createElement("div");
+    ym.className = "year-marker" + (visible?"":" hidden");
+    ym.dataset.era = item.era;
+    ym.innerHTML = `<div class="year-label">${item.year}</div>`;
+    container.appendChild(ym);
+
+    const div = document.createElement("div");
+    div.className = `tl-item${item.side==="right"?" right":""}${visible?"":" hidden"}`;
+    div.dataset.era = item.era;
+    div.style.animationDelay = (itemIdx * 0.04) + "s";
+
+    const statusHTML = item.status.map(s=>`<span class="s-badge ${s.c}">${s.t}</span>`).join("");
+
+    const layersHTML = item.layers.map((l,li)=>`
+      ${li>0?`<div class="mini-arrow">↕</div>`:""}
+      <div class="mini-layer" style="background:${l.c}10;border:1px solid ${l.c}28">
+        <span class="mini-layer-icon">${l.icon}</span>
+        <span class="mini-layer-name" style="color:${l.c}">${l.name}</span>
+        <span class="mini-layer-desc">${l.desc}</span>
+      </div>`).join("");
+
+    const qaHTML = [
+      ...item.qaStrong.map(q=>`<span class="qa-chip strong">✓ ${q}</span>`),
+      ...item.qaWeak.map(q=>`<span class="qa-chip weak">✗ ${q}</span>`)
+    ].join("");
+
+    const exHTML = item.examples.map(e=>`<span class="ex-pill">${e}</span>`).join("");
+
+    const extra = [
+      item.obsoleteNote ? `<div class="obsolete-note">⚰ Why it declined: ${item.obsoleteNote}</div>` : "",
+      item.whyNote ? `<div class="why-note">💡 ${item.whyNote}</div>` : "",
+      item.insightNote ? `<div class="insight-note">🔬 ${item.insightNote}</div>` : "",
+    ].join("");
+
+    div.innerHTML = `<div class="tl-card${item.hl?" "+item.hl:""}" onclick="toggleExpand(this)">
+      <div class="card-head">
+        <div class="card-icon">${item.icon}</div>
+        <div class="card-meta">
+          <span class="card-year-badge" style="background:rgba(45,122,69,.1);color:var(--green2)">Born: ${item.born}${item.obsolete?` · Obsolete: ~${item.obsolete}`:""}</span>
+          <div class="card-title">${item.title}</div>
+          <div class="card-subtitle">${item.subtitle}</div>
+          <div class="status-bar">${statusHTML}</div>
+        </div>
+      </div>
+      <div class="card-expand">
+        <hr class="expand-divider">
+        <div class="card-desc">${item.desc}</div>
+        <div class="sec-mini">Internal Architecture</div>
+        <div class="mini-stack">${layersHTML}</div>
+        <div class="sec-mini" style="margin-top:8px">QA Characteristics</div>
+        <div class="qa-chips">${qaHTML}</div>
+        <div class="sec-mini">Key Systems &amp; Examples</div>
+        <div class="examples-row">${exHTML}</div>
+        ${extra}
+      </div>
+    </div>`;
+
+    container.appendChild(div);
+    if(visible) itemIdx++;
+  });
+}
+
+function toggleExpand(card){ card.classList.toggle("expanded"); }
+
+function filterEra(era, btn){
+  document.querySelectorAll(".era-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  renderTimeline(era);
+}
+
+renderTimeline("all");
+</script>
+</body>
+</html>

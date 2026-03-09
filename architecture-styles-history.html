@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The History of Application Architecture · 1960–2025</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@300;400;600;700&family=Oswald:wght@300;400;500;600&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0D1117;--paper:#EEF2F8;--paper2:#E2E8F2;--paper3:#D5DCF0;
+  --blue:#1E3A8A;--blue2:#2563EB;--blue3:#93C5FD;
+  --teal:#0F4C5C;--teal2:#0891B2;
+  --amber:#92400E;--amber2:#D97706;--amber3:#FCD34D;
+  --rust:#7C2D12;--rust2:#DC2626;
+  --green:#064E3B;--green2:#059669;
+  --purple:#4C1D95;--purple2:#7C3AED;
+  --muted:#475569;--dim:#94A3B8;--faint:#CBD5E1;
+  --line:#B8C8E0;
+}
+html{scroll-behavior:smooth}
+body{
+  background:var(--paper);
+  color:var(--ink);
+  font-family:'Libre Baskerville',serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:100;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  opacity:0.5;
+}
+
+/* ── MASTHEAD ── */
+.masthead{
+  background:var(--ink);color:var(--paper);
+  padding:28px 40px 22px;
+  border-bottom:4px double var(--blue2);
+  text-align:center;position:relative;overflow:hidden;
+}
+.masthead::after{
+  content:'';position:absolute;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.012) 3px,rgba(255,255,255,.012) 4px);
+  pointer-events:none;
+}
+.masthead-eyebrow{
+  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.5em;
+  color:var(--blue3);text-transform:uppercase;margin-bottom:10px;
+}
+.masthead h1{
+  font-family:'Oswald',sans-serif;font-size:42px;font-weight:600;
+  letter-spacing:-.01em;line-height:1;margin-bottom:8px;color:#EEF2F8;
+}
+.masthead h1 span{color:var(--amber3);}
+.masthead-sub{font-family:'Libre Baskerville',serif;font-style:italic;font-size:13px;color:#8899BB;letter-spacing:.03em;}
+.masthead-rule{margin:14px auto 0;border:none;border-top:1px solid #1E2A40;width:60%;}
+
+/* ── LEGEND ── */
+.legend{
+  display:flex;gap:24px;justify-content:center;align-items:center;
+  padding:10px 40px;background:var(--paper2);
+  border-bottom:2px solid var(--line);flex-wrap:wrap;
+}
+.legend-item{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted)}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ── ERA FILTER ── */
+.era-strip{
+  display:flex;gap:3px;padding:10px 40px;background:var(--ink);
+  overflow-x:auto;border-bottom:3px solid var(--blue);
+  position:sticky;top:0;z-index:50;
+}
+.era-btn{
+  font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:5px 14px;border:1px solid #1E2A40;background:transparent;
+  color:#5A7090;cursor:pointer;border-radius:3px;white-space:nowrap;transition:all .15s;
+}
+.era-btn:hover{background:#0D1A30;color:#93C5FD;}
+.era-btn.active{background:var(--blue);color:var(--paper);border-color:var(--blue2);}
+
+/* ── TIMELINE ── */
+.timeline-outer{padding:40px 0 60px;position:relative;}
+.spine{
+  position:absolute;left:50%;top:0;bottom:0;
+  width:2px;background:var(--line);transform:translateX(-50%);
+}
+.spine::before,.spine::after{
+  content:'';position:absolute;left:50%;transform:translateX(-50%);
+  width:8px;height:8px;border-radius:50%;background:var(--blue2);
+}
+.spine::before{top:0;} .spine::after{bottom:0;}
+
+.year-marker{position:relative;display:flex;align-items:center;justify-content:center;margin:6px 0;z-index:10;}
+.year-label{
+  background:var(--ink);color:var(--amber3);
+  font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;
+  padding:4px 16px;border:1px solid var(--blue);
+  letter-spacing:.08em;z-index:10;position:relative;
+  box-shadow:0 2px 8px rgba(0,0,0,.2);
+}
+
+.era-header{text-align:center;padding:20px 0 8px;position:relative;z-index:10;}
+.era-header-inner{
+  display:inline-block;background:var(--paper);
+  padding:6px 24px;border:1px solid var(--blue);
+  font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.4em;
+  text-transform:uppercase;color:var(--blue2);
+}
+
+/* ── CARD ── */
+.tl-item{
+  position:relative;display:flex;align-items:flex-start;
+  margin-bottom:8px;padding:0 calc(50% + 28px) 0 40px;
+  min-height:10px;
+}
+.tl-item.right{padding:0 40px 0 calc(50% + 28px);flex-direction:row-reverse;}
+.tl-item::before{
+  content:'';position:absolute;left:calc(50% - 7px);top:18px;
+  width:14px;height:14px;border-radius:50%;
+  background:var(--paper);border:2px solid var(--blue2);
+  z-index:5;box-shadow:0 0 0 3px var(--paper);transition:all .2s;
+}
+.tl-item:hover::before{transform:scale(1.3);background:var(--blue2);}
+.tl-item:not(.right)::after{content:'';position:absolute;top:24px;right:calc(50% + 7px);width:40px;height:1px;background:var(--line);}
+.tl-item.right::after{content:'';position:absolute;top:24px;left:calc(50% + 7px);width:40px;height:1px;background:var(--line);}
+
+.tl-card{
+  background:var(--paper);border:1px solid var(--line);border-radius:3px;
+  padding:14px 16px;cursor:pointer;transition:all .2s;
+  box-shadow:2px 3px 8px rgba(10,20,50,.07);max-width:390px;width:100%;
+}
+.tl-card:hover{box-shadow:4px 6px 18px rgba(10,20,50,.14);transform:translateY(-1px);border-color:var(--blue2);}
+.tl-card.expanded{border-color:var(--blue2);background:var(--paper2);}
+
+/* Special highlights */
+.tl-card.highlight-mono{border-left:3px solid #D97706;}
+.tl-card.highlight-micro{border-left:3px solid #059669;}
+.tl-card.highlight-antipattern{border-left:3px solid #DC2626;border-style:dashed;}
+
+.card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:0;}
+.card-icon{font-size:22px;flex-shrink:0;margin-top:2px;line-height:1;}
+.card-meta{flex:1;min-width:0;}
+.card-year-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:1px 7px;border-radius:2px;display:inline-block;margin-bottom:4px;letter-spacing:.12em;}
+.card-title{font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;line-height:1.2;letter-spacing:.01em;color:var(--ink);}
+.card-subtitle{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);margin-top:3px;letter-spacing:.08em;}
+.status-bar{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
+.s-badge{font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:2px 7px;border-radius:2px;letter-spacing:.08em;}
+.s-active{background:rgba(5,150,105,.12);color:#064E3B;border:1px solid rgba(5,150,105,.25);}
+.s-legacy{background:rgba(180,80,20,.1);color:#92400E;border:1px solid rgba(180,80,20,.2);}
+.s-modern{background:rgba(37,99,235,.1);color:#1E3A8A;border:1px solid rgba(37,99,235,.2);}
+.s-obsolete{background:rgba(80,70,50,.08);color:#7C6040;border:1px dashed rgba(100,80,40,.25);}
+.s-emerging{background:rgba(124,58,237,.1);color:#4C1D95;border:1px solid rgba(124,58,237,.25);}
+.s-antipattern{background:rgba(220,38,38,.1);color:#7C2D12;border:1px dashed rgba(220,38,38,.3);}
+
+/* Expand */
+.card-expand{max-height:0;overflow:hidden;transition:max-height .35s ease,opacity .25s ease;opacity:0;}
+.tl-card.expanded .card-expand{max-height:700px;opacity:1;}
+.expand-divider{margin:12px 0 10px;border:none;border-top:1px solid var(--line);}
+.card-desc{font-size:11.5px;color:var(--muted);line-height:1.75;margin-bottom:10px;}
+
+.mini-stack{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
+.mini-layer{display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:2px;font-size:9px;}
+.mini-layer-icon{font-size:12px;flex-shrink:0;}
+.mini-layer-name{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;width:100px;flex-shrink:0;}
+.mini-layer-desc{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);}
+.mini-arrow{text-align:center;color:var(--faint);font-size:9px;line-height:1;margin:1px 0 1px 18px;}
+
+.qa-chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
+.qa-chip{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 8px;border-radius:2px;border:1px solid var(--line);background:var(--paper3);color:var(--muted);}
+.qa-chip.strong{border-color:var(--blue);color:var(--blue);background:rgba(30,58,138,.07);}
+.qa-chip.weak{border-color:var(--rust2);color:var(--rust2);background:rgba(220,38,38,.05);text-decoration:line-through;opacity:.7;}
+
+.examples-row{display:flex;gap:6px;flex-wrap:wrap;}
+.ex-pill{font-size:9.5px;color:var(--ink);background:var(--paper3);border:1px solid var(--line);padding:2px 9px;border-radius:12px;}
+
+.obsolete-note{background:rgba(180,50,20,.05);border:1px dashed rgba(180,50,20,.22);border-radius:3px;padding:7px 10px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--rust2);line-height:1.6;}
+.why-note{background:rgba(5,150,105,.05);border:1px solid rgba(5,150,105,.15);border-radius:3px;padding:7px 10px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#065F46;line-height:1.6;}
+.antipattern-note{background:rgba(220,38,38,.05);border:1px dashed rgba(220,38,38,.25);border-radius:3px;padding:7px 10px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#991B1B;line-height:1.6;}
+
+.sec-mini{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--dim);margin-bottom:5px;text-transform:uppercase;}
+
+.hidden{display:none;}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.tl-item{animation:fadeUp .45s ease both;}
+
+.footer{background:var(--ink);color:var(--dim);text-align:center;padding:20px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;border-top:3px double var(--blue);}
+::-webkit-scrollbar{width:8px;}
+::-webkit-scrollbar-track{background:var(--paper2);}
+::-webkit-scrollbar-thumb{background:var(--blue);border-radius:4px;}
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="masthead-eyebrow">System Analysis · Architecture Design · Historical Survey</div>
+  <h1>The History of<br><span>Application Architecture</span></h1>
+  <hr class="masthead-rule">
+  <div class="masthead-sub">From Monolithic Mainframes to Serverless Functions &ensp;·&ensp; 1960 — 2025</div>
+</div>
+
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:#064E3B"></div>Still Active</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#1E3A8A"></div>Modern / Mainstream</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#4C1D95"></div>Emerging</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#92400E"></div>Legacy (still exists)</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#7C6040;outline:1px dashed #7C6040"></div>Largely Obsolete</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#DC2626;outline:1px dashed #DC2626"></div>Anti-Pattern</div>
+</div>
+
+<div class="era-strip">
+  <button class="era-btn active" data-era="all" onclick="filterEra('all',this)">All Eras</button>
+  <button class="era-btn" data-era="mainframe" onclick="filterEra('mainframe',this)">Mainframe Era (1960s)</button>
+  <button class="era-btn" data-era="structured" onclick="filterEra('structured',this)">Structured Programming (1970s)</button>
+  <button class="era-btn" data-era="oop" onclick="filterEra('oop',this)">OOP Era (1980s–90s)</button>
+  <button class="era-btn" data-era="web" onclick="filterEra('web',this)">Web Era (1990s–2000s)</button>
+  <button class="era-btn" data-era="soa" onclick="filterEra('soa',this)">SOA Era (2000s)</button>
+  <button class="era-btn" data-era="agile" onclick="filterEra('agile',this)">Agile / DDD (2000s–2010s)</button>
+  <button class="era-btn" data-era="cloud" onclick="filterEra('cloud',this)">Cloud Native (2010s)</button>
+  <button class="era-btn" data-era="modern" onclick="filterEra('modern',this)">Modern (2015–present)</button>
+</div>
+
+<div class="timeline-outer">
+  <div class="spine"></div>
+  <div id="timeline-content"></div>
+</div>
+
+<div class="footer">SYSTEM ANALYSIS COURSE · APPLICATION ARCHITECTURE HISTORY · CLICK ANY CARD TO EXPAND</div>
+
+<script>
+const ERA_NAMES = {
+  mainframe:"Mainframe Era · 1960s",
+  structured:"Structured Programming Era · 1970s",
+  oop:"Object-Oriented Era · 1980s–90s",
+  web:"Web Application Era · 1993–2005",
+  soa:"SOA & Enterprise Era · 2000s",
+  agile:"Agile, DDD & Modularity · 2000s–2010s",
+  cloud:"Cloud Native Era · 2010–2016",
+  modern:"Modern & Reactive Era · 2015–Present",
+};
+
+const HISTORY = [
+  // ── MAINFRAME ERA ──
+  {
+    era:"mainframe", year:"~1960s", side:"left",
+    icon:"🧱", title:"Monolithic Batch Processing",
+    subtitle:"Single program · Sequential execution · No interactivity",
+    style:"highlight-mono",
+    status:[{t:"Ancestor of Monolith",c:"s-legacy"},{t:"Still in Banking/Gov",c:"s-active"}],
+    born:"~1960", obsolete:null,
+    desc:"The original application architecture. Programs were written in COBOL or FORTRAN, compiled to a single executable, submitted as a job, and run to completion. No user interaction during runtime. All logic — business rules, data access, output formatting — lived in one program unit. This was not a design choice; it was the only option available.",
+    layers:[
+      {icon:"📋",name:"Job Control",desc:"JCL — defines input, output, program to run",c:"#92400E"},
+      {icon:"⚙️",name:"Monolithic Program",desc:"COBOL/FORTRAN — all logic in one binary",c:"#92400E"},
+      {icon:"💾",name:"Sequential Files",desc:"Tape storage — no random access DB yet",c:"#92400E"},
+    ],
+    qaStrong:["Reliability","Throughput","Predictability"],
+    qaWeak:["Interactivity","Flexibility","Reusability","Maintainability (GOTO hell)"],
+    examples:["IBM System/360 programs","Bank batch processing (still runs today)","Payroll systems","Tax calculation jobs"],
+    obsoleteNote:null,
+    whyNote:"COBOL batch jobs still process $3 trillion in daily commerce. The monolithic batch pattern never died — it just moved to cloud Lambda functions and Kubernetes Jobs.",
+  },
+  {
+    era:"mainframe", year:"~1965", side:"right",
+    icon:"📚", title:"Subroutine Libraries",
+    subtitle:"First reuse pattern · CALL statements · Shared code",
+    status:[{t:"Foundation of all architecture",c:"s-active"}],
+    born:"~1965", obsolete:null,
+    desc:"As programs grew, programmers discovered code duplication. The solution: subroutines (GOSUB in BASIC, CALL in COBOL, PERFORM in later COBOL). Libraries of reusable routines were compiled separately and linked in. This was the first architectural pattern — separating reusable logic from specific business logic. Every modern component/module system descends from this.",
+    layers:[
+      {icon:"⚙️",name:"Main Program",desc:"Calls subroutines by name",c:"#1E3A8A"},
+      {icon:"📚",name:"Library Routines",desc:"Math, I/O, string utilities — reused",c:"#1E3A8A"},
+    ],
+    qaStrong:["Code Reuse","DRY Principle","First Modularity"],
+    qaWeak:["Global State","No Encapsulation","GOTO still everywhere"],
+    examples:["COBOL PERFORM","FORTRAN SUBROUTINE","IBM SYS1.LINKLIB","C standard library (later)"],
+    obsoleteNote:null,
+    whyNote:"The concept of 'call a function, get a result' is the atom of all software architecture. Everything from microservices to AWS Lambda is an evolution of the subroutine call.",
+  },
+
+  // ── STRUCTURED PROGRAMMING ──
+  {
+    era:"structured", year:"1968", side:"left",
+    icon:"🏗️", title:"Structured Programming",
+    subtitle:"No GOTO · Dijkstra's letter · Sequence, Selection, Iteration",
+    status:[{t:"Foundation",c:"s-active"}],
+    born:"1968", obsolete:null,
+    desc:"Edsger Dijkstra's famous 1968 letter 'Go To Statement Considered Harmful' launched structured programming. Programs should use only three control structures: sequence, selection (if/else), and iteration (loops). No GOTO. This was the first architectural principle that governed how code is organized within a program — the foundation of every modern language.",
+    layers:[
+      {icon:"🔢",name:"Functions/Procedures",desc:"Named blocks — no GOTO between them",c:"#0F4C5C"},
+      {icon:"🔀",name:"Control Structures",desc:"if/else, while, for — no arbitrary jumps",c:"#0F4C5C"},
+    ],
+    qaStrong:["Readability","Testability","Maintainability","Predictable Flow"],
+    qaWeak:["Still monolithic","No encapsulation of state","Global variables everywhere"],
+    examples:["Pascal (1970)","C (1972)","Ada (1980)","Structured COBOL","Modula-2"],
+    obsoleteNote:null,
+    whyNote:"Every program written today is structured. This was the first successful architectural revolution — a change in how we organize code, not just what it does.",
+  },
+  {
+    era:"structured", year:"~1974", side:"right",
+    icon:"🗂️", title:"Layered Architecture (N-Tier Logical)",
+    subtitle:"Separation of concerns · Data access layer · Business logic layer",
+    status:[{t:"Still the Default",c:"s-active"}],
+    born:"~1974 (formalized in 1970s–80s)", obsolete:null,
+    desc:"As programs grew complex, developers started separating concerns into logical layers. Dijkstra and Parnas wrote about layering in the early 1970s. The idea: a higher layer calls a lower layer, never the reverse. UI calls business logic. Business logic calls data access. Data access calls the database. This pattern predates the web and still dominates enterprise software today.",
+    layers:[
+      {icon:"🌐",name:"Presentation Layer",desc:"UI — what user sees and interacts with",c:"#D97706"},
+      {icon:"⚙️",name:"Business Logic Layer",desc:"Domain rules — validation, calculations",c:"#D97706"},
+      {icon:"🗄️",name:"Data Access Layer",desc:"CRUD operations — abstracts DB queries",c:"#D97706"},
+    ],
+    qaStrong:["Separation of Concerns","Replaceability of Layers","Testability","Familiarity"],
+    qaWeak:["Layer leakage (logic in UI)","Rigidity","Performance (all layers in sequence)"],
+    examples:["MVC (1979)","Spring MVC","ASP.NET WebForms","Django MTV","Rails MVC","Laravel"],
+    obsoleteNote:null,
+    whyNote:"Layered architecture is the architecture every developer learns first. It's the default in Rails, Django, Spring, and Laravel. Simple, universally understood, and still correct for most applications.",
+  },
+
+  // ── OOP ERA ──
+  {
+    era:"oop", year:"1972–1983", side:"left",
+    icon:"🔷", title:"Object-Oriented Programming",
+    subtitle:"Encapsulation · Inheritance · Polymorphism · Simula/Smalltalk/C++",
+    status:[{t:"Dominant Paradigm",c:"s-modern"}],
+    born:"1967 (Simula) · 1972 (Smalltalk) · 1983 (C++)", obsolete:null,
+    desc:"Simula (1967) introduced classes and objects. Smalltalk (1972) made everything an object. C++ (1983) brought OOP to systems programming. Java (1995) made it the mainstream enterprise standard. OOP changed the architectural unit from 'function' to 'object' — data and behavior bundled together. Architectures like MVC, Domain-Driven Design, and Clean Architecture are all OOP-first.",
+    layers:[
+      {icon:"🔷",name:"Objects / Classes",desc:"Data + behavior bundled — encapsulation",c:"#4C1D95"},
+      {icon:"🧬",name:"Inheritance Hierarchy",desc:"Shared behavior via parent classes",c:"#4C1D95"},
+      {icon:"🔌",name:"Interfaces",desc:"Contracts — polymorphic behavior",c:"#4C1D95"},
+    ],
+    qaStrong:["Encapsulation","Reusability (theory)","Modelling Real World","Testability"],
+    qaWeak:["Inheritance Overuse","God Objects","Tight Coupling","OOP Complexity"],
+    examples:["Simula 67","Smalltalk-80","C++ (1983)","Java (1995)","Python","Ruby","C#"],
+    obsoleteNote:null,
+    whyNote:"OOP gave us the mental model that makes large codebases navigable. Even when we use functional patterns today, the structural influence of OOP (modules, encapsulation, interfaces) remains dominant.",
+  },
+  {
+    era:"oop", year:"1979–1988", side:"right",
+    icon:"🎮", title:"MVC — Model View Controller",
+    subtitle:"GUI pattern · Trygve Reenskaug · Smalltalk-80",
+    status:[{t:"Still the Standard",c:"s-active"}],
+    born:"1979 (Reenskaug/Smalltalk)", obsolete:null,
+    desc:"Trygve Reenskaug invented MVC in 1979 at Xerox PARC while working on Smalltalk-80. The Model holds data, the View displays it, and the Controller handles user input. This clean separation allowed independent evolution of UI and business logic. Rails, Django, Spring MVC, and Laravel all implement MVC or its close variants (MTV, MVVM). Still the dominant pattern for web frameworks today.",
+    layers:[
+      {icon:"📊",name:"Model",desc:"Business logic + data — domain objects",c:"#059669"},
+      {icon:"🎨",name:"View",desc:"Rendering — templates, UI components",c:"#059669"},
+      {icon:"🎮",name:"Controller",desc:"HTTP handling — maps request to action",c:"#059669"},
+    ],
+    qaStrong:["Separation of Concerns","Testable Business Logic","Framework Support","Universal Pattern"],
+    qaWeak:["Fat Controllers","Anemic Models","View logic creep"],
+    examples:["Smalltalk-80 (1979)","Ruby on Rails (2004)","Django (2005)","Spring MVC","Laravel","ASP.NET MVC","Angular"],
+    obsoleteNote:null,
+    whyNote:"MVC is 45 years old and still the framework default. The pattern is simple enough to teach in week 1 and scalable enough to run billion-dollar apps.",
+  },
+  {
+    era:"oop", year:"1994", side:"left",
+    icon:"📐", title:"Design Patterns (Gang of Four)",
+    subtitle:"23 patterns · Reusable OOP solutions · Vocabulary for architects",
+    status:[{t:"Foundational",c:"s-active"}],
+    born:"1994", obsolete:null,
+    desc:"Gamma, Helm, Johnson, and Vlissides published 'Design Patterns: Elements of Reusable Object-Oriented Software' in 1994. 23 patterns (Singleton, Factory, Observer, Strategy, Decorator…) gave architects a shared vocabulary. These patterns are building blocks of all modern architectures — microservices use Observer (events), clean architecture uses Strategy (ports/adapters), and DDD uses Factory.",
+    layers:[
+      {icon:"🏭",name:"Creational Patterns",desc:"Factory, Builder, Singleton — object creation",c:"#2563EB"},
+      {icon:"🔧",name:"Structural Patterns",desc:"Decorator, Adapter, Facade — composition",c:"#2563EB"},
+      {icon:"🎭",name:"Behavioral Patterns",desc:"Observer, Strategy, Command — interaction",c:"#2563EB"},
+    ],
+    qaStrong:["Shared Vocabulary","Proven Solutions","Team Communication","Flexibility"],
+    qaWeak:["Overengineering risk","Pattern obsession","Complexity for simple problems"],
+    examples:["Observer → Event-Driven","Strategy → Ports/Adapters","Factory → DI Containers","Facade → API Gateway"],
+    obsoleteNote:null,
+    whyNote:"You cannot understand microservices, event-driven, or clean architecture without knowing GoF patterns. Observer IS the event bus. Strategy IS the port/adapter.",
+  },
+
+  // ── WEB ERA ──
+  {
+    era:"web", year:"1995–2001", side:"right",
+    icon:"🌐", title:"Traditional Monolith (Web Era)",
+    subtitle:"Single deployable unit · Shared codebase · Vertical scaling",
+    style:"highlight-mono",
+    status:[{t:"Still Correct for Most Apps",c:"s-active"}],
+    born:"~1995", obsolete:null,
+    desc:"The first generation of web applications were monoliths by default — one Rails app, one Django project, one Spring Boot jar. All features deployed together. One database. One team. One codebase. This is not an anti-pattern — it is the starting point for every successful company. Shopify, Basecamp, GitHub, Stack Overflow all ran monoliths for years at significant scale.",
+    layers:[
+      {icon:"🌐",name:"Web/UI Layer",desc:"Controllers, views, templates",c:"#D97706"},
+      {icon:"⚙️",name:"Business Logic",desc:"Services, domain objects",c:"#D97706"},
+      {icon:"📁",name:"Data Layer",desc:"ORM, repositories",c:"#D97706"},
+      {icon:"🗄️",name:"Single Database",desc:"PostgreSQL / MySQL",c:"#D97706"},
+    ],
+    qaStrong:["Dev Velocity","Simple Deployment","Easy Debugging","Atomic Transactions","Team Clarity"],
+    qaWeak:["Scales as one unit","Long build times (large)","Team coupling (at scale)"],
+    examples:["Shopify (Rails monolith)","Basecamp","GitHub (early)","Stack Overflow","Twitch (early)","Craigslist (still monolith!)"],
+    obsoleteNote:null,
+    whyNote:"A well-maintained monolith beats a poorly-executed microservices architecture every time. Shopify runs a modular monolith with Packwerk today. Monolith is not legacy — it is the appropriate starting point.",
+  },
+  {
+    era:"web", year:"~2000", side:"left",
+    icon:"💥", title:"Big Ball of Mud",
+    subtitle:"No structure · Spaghetti code · Accidental architecture",
+    style:"highlight-antipattern",
+    status:[{t:"Anti-Pattern",c:"s-antipattern"},{t:"Everywhere",c:"s-legacy"}],
+    born:"Recognized ~1997 (Foote & Yoder)", obsolete:null,
+    desc:"Brian Foote and Joseph Yoder named this in their 1997 paper. A Big Ball of Mud is a system with no recognizable structure — classes calling each other freely, global state everywhere, no layer discipline, no domain boundaries. It is not a deliberate choice: it is what happens to every system when architectural governance is absent. The first legacy system you encounter will likely be this.",
+    layers:[
+      {icon:"🍝",name:"Everything mixed",desc:"UI + logic + SQL all in one file",c:"#DC2626"},
+      {icon:"🔗",name:"Random dependencies",desc:"Module A → B → C → A (circular)",c:"#DC2626"},
+    ],
+    qaStrong:["Ships Fast (initially)"],
+    qaWeak:["Testability","Maintainability","Onboarding","Feature Confidence","Refactoring Safety"],
+    examples:["Every inherited legacy codebase","PHP spaghetti from 2005","'It works, don't touch it' systems"],
+    obsoleteNote:null,
+    antipatternNote:"This is the failure mode. Recognize early warning signs: God Classes, circular imports, business logic in controllers, SQL in views.",
+  },
+
+  // ── SOA ERA ──
+  {
+    era:"soa", year:"~2000–2005", side:"right",
+    icon:"🏢", title:"SOA — Service-Oriented Architecture",
+    subtitle:"Coarse-grained services · ESB · WSDL/SOAP contracts",
+    status:[{t:"Legacy",c:"s-legacy"},{t:"Enterprise Integration",c:"s-active"}],
+    born:"~2000", obsolete:null,
+    desc:"SOA was the enterprise answer to the monolith scalability problem in the 2000s. Large systems were decomposed into coarse-grained services communicating through an Enterprise Service Bus (ESB). IBM WebSphere, Oracle SOA Suite, and MuleSoft became billion-dollar products. The promise was reusable services — but the ESB often became the new bottleneck and God Object.",
+    layers:[
+      {icon:"🌐",name:"Consumer App",desc:"Calls services via ESB",c:"#7C3AED"},
+      {icon:"🚌",name:"Enterprise Service Bus",desc:"Routing, transformation, orchestration",c:"#7C3AED"},
+      {icon:"⚙️",name:"Business Services",desc:"Coarse-grained reusable services",c:"#7C3AED"},
+      {icon:"🗄️",name:"Data Services",desc:"Abstracted data access layer",c:"#7C3AED"},
+    ],
+    qaStrong:["Reusability (theory)","Enterprise Integration","Formal Contracts (WSDL)","Governance"],
+    qaWeak:["ESB becomes bottleneck","SOAP complexity","Tight coupling via ESB","Slow development"],
+    examples:["IBM WebSphere","Oracle SOA Suite","MuleSoft","BizTalk","WebLogic","BPEL workflows"],
+    obsoleteNote:"ESB-centric SOA largely replaced by microservices and REST APIs. But the integration use case is still served by MuleSoft, Apache Camel, and AWS EventBridge.",
+    whyNote:null,
+  },
+  {
+    era:"soa", year:"2000", side:"left",
+    icon:"🌀", title:"Event-Driven Architecture (Early)",
+    subtitle:"Message queues · Async decoupling · Publisher/Subscriber",
+    status:[{t:"Foundational",c:"s-active"},{t:"More Relevant Than Ever",c:"s-modern"}],
+    born:"~1980s (MQ Series) · 2000s (mainstream)", obsolete:null,
+    desc:"IBM MQ Series (1993) formalized message queue architecture. Applications communicate by publishing messages to queues or topics — the producer doesn't know who consumes. This async decoupling became the alternative to synchronous SOA calls. AMQP (2003), ActiveMQ (2004), and RabbitMQ (2007) made this accessible. Later, Kafka (2011) reinvented it at massive scale.",
+    layers:[
+      {icon:"📤",name:"Producer",desc:"Publishes event — doesn't know consumers",c:"#0891B2"},
+      {icon:"📨",name:"Message Broker",desc:"RabbitMQ / Kafka — routes, buffers, delivers",c:"#0891B2"},
+      {icon:"📥",name:"Consumer(s)",desc:"Subscribe to topics — process async",c:"#0891B2"},
+    ],
+    qaStrong:["Decoupling","Scalability","Resilience","Async Processing","Replay (Kafka)"],
+    qaWeak:["Eventual Consistency","Debugging Complexity","Message Ordering","Dead Letters"],
+    examples:["IBM MQ Series (1993)","ActiveMQ (2004)","RabbitMQ (2007)","Apache Kafka (2011)","AWS SQS/SNS","Azure Service Bus"],
+    obsoleteNote:null,
+    whyNote:"Event-driven architecture is the backbone of modern microservices. Kafka is now the de-facto event streaming platform. This pattern has only grown in importance.",
+  },
+
+  // ── AGILE / DDD ──
+  {
+    era:"agile", year:"2003", side:"right",
+    icon:"🗺️", title:"Domain-Driven Design (DDD)",
+    subtitle:"Bounded Contexts · Ubiquitous Language · Aggregate roots · Eric Evans",
+    status:[{t:"Industry Standard",c:"s-modern"}],
+    born:"2003 (Evans book)", obsolete:null,
+    desc:"Eric Evans' 'Domain-Driven Design' (2003) gave architects a vocabulary for tackling complex business domains. Bounded Contexts define explicit boundaries between subdomains. Aggregate Roots protect consistency boundaries. Ubiquitous Language aligns code with business vocabulary. DDD is not a deployment architecture — it is the design language that makes microservices work correctly. Without DDD, microservices become a distributed monolith.",
+    layers:[
+      {icon:"🗺️",name:"Domain Layer",desc:"Entities, Value Objects, Aggregates — pure business logic",c:"#059669"},
+      {icon:"⚙️",name:"Application Layer",desc:"Use Cases / Commands / Queries — orchestration",c:"#059669"},
+      {icon:"🔌",name:"Infrastructure Layer",desc:"DB, APIs, messaging — implements interfaces",c:"#059669"},
+      {icon:"🌐",name:"Interface Layer",desc:"HTTP, gRPC, CLI — delivery mechanisms",c:"#059669"},
+    ],
+    qaStrong:["Business Alignment","Bounded Context Clarity","Team Ownership","Complex Domain Handling"],
+    qaWeak:["Learning Curve","Overkill for Simple CRUD","Requires Domain Expert Access"],
+    examples:["Vaughn Vernon's IDDD","Martin Fowler's patterns","Every serious microservices design","Any complex financial/insurance system"],
+    obsoleteNote:null,
+    whyNote:"DDD is the intellectual foundation of modern microservices. 'How do you split services?' — you split at Bounded Context boundaries. Sam Newman's 'Building Microservices' is applied DDD.",
+  },
+  {
+    era:"agile", year:"2005", side:"left",
+    icon:"📦", title:"Modular Monolith",
+    subtitle:"Single deploy · Strict module boundaries · Pre-microservices discipline",
+    style:"highlight-mono",
+    status:[{t:"Ideal for Most Teams",c:"s-modern"}],
+    born:"~2005 (concept) · 2016 (mainstream term)", obsolete:null,
+    desc:"The Modular Monolith is a deliberate design: a single deployable artifact internally organized into strict, decoupled modules with defined public APIs. Modules cannot access each other's internals. This gives the team autonomy of domain ownership without the operational overhead of microservices. GitHub uses Packwerk for this. Shopify publicly advocates for it over microservices for most teams.",
+    layers:[
+      {icon:"📦",name:"Module: Orders",desc:"Public API only — private internals hidden",c:"#2563EB"},
+      {icon:"📦",name:"Module: Payments",desc:"Own domain models — calls Orders via API",c:"#2563EB"},
+      {icon:"📦",name:"Module: Users",desc:"Isolated bounded context",c:"#2563EB"},
+      {icon:"🗄️",name:"Shared Database",desc:"Shared or module-segregated schemas",c:"#2563EB"},
+    ],
+    qaStrong:["Team Autonomy (within monolith)","Easy Refactoring","Single Deploy","Clean Domain Boundaries","Path to Microservices"],
+    qaWeak:["Still scales as one unit","Requires discipline to maintain boundaries","Shared DB is coupling risk"],
+    examples:["GitHub (Packwerk)","Shopify (modular Rails)","NX Monorepo (frontend)","Laravel Modules","Elixir Umbrella Apps"],
+    obsoleteNote:null,
+    whyNote:"The modular monolith is the recommended starting architecture for most teams today. It is the upgrade path from a monolith and the prerequisite for microservices. 'Make it modular first, distributed second.'",
+  },
+  {
+    era:"agile", year:"2005", side:"right",
+    icon:"⬡", title:"Hexagonal Architecture (Ports & Adapters)",
+    subtitle:"Alistair Cockburn · Domain isolation · Framework-agnostic core",
+    status:[{t:"Growing Adoption",c:"s-modern"}],
+    born:"2005 (Cockburn)", obsolete:null,
+    desc:"Alistair Cockburn's 'Ports and Adapters' (2005) — also called Hexagonal Architecture — isolates the domain core from all infrastructure. The core has no dependencies on databases, HTTP frameworks, or message queues. Instead it defines Ports (interfaces), and Adapters (implementations) plug in from the outside. The domain can be tested without any infrastructure. Uncle Bob's Clean Architecture (2012) and Onion Architecture are variants.",
+    layers:[
+      {icon:"⬡",name:"Domain Core",desc:"Pure business logic — no imports from infra",c:"#7C3AED"},
+      {icon:"🔌",name:"Ports",desc:"Interfaces defined by domain — inbound & outbound",c:"#7C3AED"},
+      {icon:"🔧",name:"Adapters",desc:"HTTP, DB, MQ — implement ports from outside",c:"#7C3AED"},
+    ],
+    qaStrong:["Testability","Framework Independence","Domain Longevity","Swap Infrastructure Easily"],
+    qaWeak:["Indirection overhead","More files/interfaces","Slower to start","Overkill for simple CRUD"],
+    examples:["Spring Boot (with clean arch)","NestJS (inspired by)","Django REST with clean arch","FastAPI domain-separated","Any DDD implementation"],
+    obsoleteNote:null,
+    whyNote:"If your domain logic is complex and needs to outlive its infrastructure, Hexagonal Architecture is the answer. It is the most testable architecture pattern.",
+  },
+
+  // ── CLOUD NATIVE ──
+  {
+    era:"cloud", year:"2011–2014", side:"left",
+    icon:"🔬", title:"Microservices Architecture",
+    subtitle:"Martin Fowler · James Lewis · Netflix / Amazon pattern",
+    style:"highlight-micro",
+    status:[{t:"Enterprise Standard",c:"s-modern"}],
+    born:"2011 (Netflix) · 2014 (Fowler/Lewis article)", obsolete:null,
+    desc:"Martin Fowler and James Lewis coined 'microservices' in 2014 after Netflix, Amazon, and Uber had already been practicing it. Each business capability is a separately deployed service with its own database. Teams are autonomous — they own their service end to end. The pattern solves the team-scale problem: at 500+ engineers, a shared monolith creates deployment conflicts. Microservices solve organizational problems through technical decomposition.",
+    layers:[
+      {icon:"🚪",name:"API Gateway",desc:"Single entry point — auth, routing, rate limit",c:"#059669"},
+      {icon:"🔬",name:"Service: Orders",desc:"Own DB + own deploy pipeline",c:"#059669"},
+      {icon:"🔬",name:"Service: Payments",desc:"Own DB + own deploy pipeline",c:"#059669"},
+      {icon:"🔬",name:"Service: Users",desc:"Own DB + own deploy pipeline",c:"#059669"},
+    ],
+    qaStrong:["Team Autonomy","Independent Scaling","Technology Choice","Fault Isolation","Independent Deploy"],
+    qaWeak:["Ops Complexity","Distributed Tracing","Network Latency","Data Consistency","Testing Complexity"],
+    examples:["Netflix (~700 services)","Amazon (invented it)","Uber","Spotify","Airbnb","Twitter (partial)"],
+    obsoleteNote:null,
+    whyNote:"Microservices is a solution for a specific problem: team autonomy at scale. If you have < 50 engineers, you almost certainly don't need it. Start with a modular monolith.",
+  },
+  {
+    era:"cloud", year:"2013", side:"right",
+    icon:"☠️", title:"Distributed Monolith",
+    subtitle:"Split physically · Coupled logically · Worst of both worlds",
+    style:"highlight-antipattern",
+    status:[{t:"Anti-Pattern",c:"s-antipattern"},{t:"Most Common Mistake",c:"s-legacy"}],
+    born:"Recognized ~2013 (as a failure mode)", obsolete:null,
+    desc:"The Distributed Monolith is what teams produce when they split a monolith into services without first establishing domain boundaries, data ownership, or loose coupling. Services deploy separately but cannot operate independently — they share databases, call each other synchronously in chains, and must be deployed together for any feature. This combines ALL the downsides of microservices (network, complexity) with ALL the downsides of monoliths (coupling, coordinated deploys).",
+    layers:[
+      {icon:"☠️",name:"Service A",desc:"Shares DB with B and C",c:"#DC2626"},
+      {icon:"🔗",name:"Service B",desc:"Calls A synchronously — can't run without A",c:"#DC2626"},
+      {icon:"🔗",name:"Service C",desc:"Calls B which calls A — chain coupling",c:"#DC2626"},
+    ],
+    qaStrong:[],
+    qaWeak:["Independent Deploy (impossible)","Fault Isolation (none)","Network Overhead","Team Autonomy (still none)","Debug Complexity"],
+    examples:["Most failed microservice migrations","Teams that split code without splitting data","'Microservices' that deploy together"],
+    obsoleteNote:null,
+    antipatternNote:"⚠ If you recognize your system here: STOP splitting further. Fix the coupling first. Extract a shared kernel. Use async events instead of synchronous chains. Merge services that cannot deploy independently.",
+  },
+  {
+    era:"cloud", year:"2014", side:"left",
+    icon:"⚡", title:"Serverless / FaaS Architecture",
+    subtitle:"No application process · Function per action · AWS Lambda",
+    status:[{t:"Growing",c:"s-modern"}],
+    born:"2014 (AWS Lambda)", obsolete:null,
+    desc:"AWS Lambda (2014) pushed decomposition to its logical extreme: each business action is a separate deployable function. No server to manage. Pay per execution. Zero cost at zero traffic. The application tier evaporates — replaced by individual functions triggered by events (HTTP, S3, SQS, schedule). Backend-as-a-Service (BaaS) replaces the data tier. The architecture is the most granular form of microservices.",
+    layers:[
+      {icon:"⚡",name:"Function: createOrder",desc:"Own deploy unit — runs on event",c:"#D97706"},
+      {icon:"⚡",name:"Function: sendEmail",desc:"Triggered by SQS message",c:"#D97706"},
+      {icon:"☁️",name:"BaaS",desc:"Auth + DB + Storage — fully managed",c:"#D97706"},
+    ],
+    qaStrong:["Zero Ops","Pay per Use","Auto-scaling","Event-Driven Native"],
+    qaWeak:["Cold Starts","Vendor Lock-in","15-min Limit","Local Dev Complexity","Stateless Only"],
+    examples:["AWS Lambda","Google Cloud Functions","Azure Functions","Vercel Functions","Netlify Functions","Supabase Edge Functions"],
+    obsoleteNote:null,
+    whyNote:"Serverless is ideal for event-triggered workloads with variable traffic. The trade-off: operational simplicity for architectural constraints (stateless, time-limited, vendor-dependent).",
+  },
+  {
+    era:"cloud", year:"2014", side:"right",
+    icon:"🖼️", title:"Micro-Frontend Architecture",
+    subtitle:"Microservices for the frontend · Module Federation · Team slice ownership",
+    status:[{t:"Selective Adoption",c:"s-modern"}],
+    born:"2016 (ThoughtWorks Radar) · Module Federation 2020", obsolete:null,
+    desc:"Applying microservices principles to the frontend. Each team owns a vertical slice of the product — from backend API to browser-rendered UI. Frontend modules deploy independently. A shell application composes the page from separately deployed frontend modules at runtime. Webpack Module Federation (2020) made this practical. IKEA, Zalando, and large e-commerce platforms use this for team autonomy.",
+    layers:[
+      {icon:"🏠",name:"Shell Application",desc:"Loads and composes remote modules",c:"#0891B2"},
+      {icon:"🖼️",name:"Remote Module: Cart",desc:"Team A deploys independently",c:"#0891B2"},
+      {icon:"🖼️",name:"Remote Module: Product",desc:"Team B deploys independently",c:"#0891B2"},
+    ],
+    qaStrong:["Frontend Team Autonomy","Independent Deploy","Technology Flexibility"],
+    qaWeak:["Bundle Size","Routing Complexity","Shared Design System Required","CSS Isolation"],
+    examples:["IKEA","Zalando","Single-SPA","Webpack Module Federation","Vite Federation","NX"],
+    obsoleteNote:null,
+    whyNote:"Only justified when multiple teams own the same frontend and have deployment conflicts. Most teams should use a monorepo with shared components instead.",
+  },
+
+  // ── MODERN ──
+  {
+    era:"modern", year:"2015", side:"left",
+    icon:"↕️", title:"CQRS + Event Sourcing",
+    subtitle:"Separate read/write models · Immutable event log · Greg Young",
+    status:[{t:"Domain-Specific Standard",c:"s-active"}],
+    born:"2010 (Greg Young CQRS) · Event Sourcing: ~2005", obsolete:null,
+    desc:"Command Query Responsibility Segregation separates the write model (Commands that change state) from the read model (Queries that return data). Event Sourcing goes further: every state change is stored as an immutable event, never overwritten. The current state is derived by replaying events. This gives complete audit trail, time-travel debugging, and the ability to project any read model from history. Required in FinTech, healthcare, and any system with compliance audit requirements.",
+    layers:[
+      {icon:"📝",name:"Command Side",desc:"Validates + emits domain events",c:"#059669"},
+      {icon:"📚",name:"Event Store",desc:"Immutable append-only event log",c:"#059669"},
+      {icon:"📊",name:"Query Side",desc:"Projected read model — optimized for queries",c:"#059669"},
+    ],
+    qaStrong:["Audit Trail","Time-Travel Debug","Read Performance","Event Replay","Domain Alignment"],
+    qaWeak:["Complexity","Eventual Consistency","Learning Curve","Tooling Immaturity"],
+    examples:["Any banking transaction system","Axon Framework (Java)","EventStore DB","Azure Cosmos Change Feed","Kafka as event store"],
+    obsoleteNote:null,
+    whyNote:"CQRS/ES is the correct architecture when audit trail is a core business requirement, not a nice-to-have. Financial systems, medical records, legal documents — these domains need it.",
+  },
+  {
+    era:"modern", year:"2018", side:"right",
+    icon:"🔀", title:"Backend for Frontend (BFF)",
+    subtitle:"API layer per client type · Mobile BFF · Web BFF · Sam Newman",
+    status:[{t:"Common Pattern",c:"s-modern"}],
+    born:"2015 (SoundCloud) · 2015 (Sam Newman article)", obsolete:null,
+    desc:"SoundCloud originated the BFF pattern. Instead of one generic API for all clients, each client type (mobile app, web SPA, third-party) gets a dedicated API layer that aggregates and shapes data specifically for that client's needs. Eliminates over-fetching (mobile getting desktop data) and under-fetching (multiple round trips). The BFF owns the orchestration of backend microservices for its specific client.",
+    layers:[
+      {icon:"📱",name:"Mobile BFF",desc:"Aggregates services — mobile-shaped responses",c:"#2563EB"},
+      {icon:"🌐",name:"Web BFF",desc:"Aggregates services — web-shaped responses",c:"#2563EB"},
+      {icon:"🔬",name:"Backend Services",desc:"Shared microservices — provide raw data",c:"#2563EB"},
+    ],
+    qaStrong:["Client-Specific APIs","No Over-fetching","Team Alignment (client team owns BFF)","Orchestration Isolation"],
+    qaWeak:["Duplication Risk","N BFFs = N more services","Logic scatter across BFFs"],
+    examples:["SoundCloud (originated)","Netflix Falcor","GraphQL federation as BFF","AWS AppSync"],
+    obsoleteNote:null,
+    whyNote:"BFF naturally emerges when mobile and web teams have different data needs. GraphQL federation is often a BFF done at schema level.",
+  },
+  {
+    era:"modern", year:"2020", side:"left",
+    icon:"🧩", title:"Composable / Modular Architecture",
+    subtitle:"MACH · Headless · Best-of-breed SaaS components",
+    status:[{t:"Emerging Mainstream",c:"s-emerging"}],
+    born:"2020 (MACH Alliance)", obsolete:null,
+    desc:"MACH Architecture (Microservices, API-first, Cloud-native, Headless) defines a composable enterprise: replace any component without rebuilding. Headless CMS (Contentful), headless commerce (Commercetools), headless checkout (Stripe) — each SaaS product is a composable building block. The application is assembled from best-of-breed services, not built from scratch. The architecture question shifts from 'how do we build this?' to 'which services do we compose?'",
+    layers:[
+      {icon:"🏪",name:"Commerce Service",desc:"Commercetools — product catalog, cart, orders",c:"#7C3AED"},
+      {icon:"📝",name:"CMS Service",desc:"Contentful / Sanity — content management",c:"#7C3AED"},
+      {icon:"💳",name:"Payment Service",desc:"Stripe — checkout, subscriptions",c:"#7C3AED"},
+      {icon:"🔐",name:"Auth Service",desc:"Auth0 / Clerk — identity",c:"#7C3AED"},
+    ],
+    qaStrong:["Best-of-breed","No Custom Build","Fast Time to Market","Vendor Innovation"],
+    qaWeak:["Vendor Lock-in","Customization Limits","Cost at Scale","Integration Complexity"],
+    examples:["MACH Alliance members","Headless Shopify","Contentful + Next.js","Stripe + Vercel","Clerk + Supabase"],
+    obsoleteNote:null,
+    whyNote:"MACH is the logical endpoint of microservices thinking applied to product architecture — outsource the undifferentiated components, build only what is unique to your business.",
+  },
+  {
+    era:"modern", year:"2023", side:"right",
+    icon:"🤖", title:"AI-Native Architecture",
+    subtitle:"LLM as a component · RAG · Agentic workflows · Non-deterministic tier",
+    status:[{t:"Emerging",c:"s-emerging"}],
+    born:"2023 (mainstream)", obsolete:null,
+    desc:"LLMs introduce a fundamentally new kind of architectural component: one that is non-deterministic, black-box, compute-intensive, expensive per call, and capable of understanding natural language. Architecture patterns emerging around this include RAG (Retrieval-Augmented Generation), LLM Orchestration (LangChain, LlamaIndex), and Agentic Loops (autonomous multi-step reasoning). These require new architectural thinking about cost, latency, reliability, and prompt versioning.",
+    layers:[
+      {icon:"🌐",name:"User Interface",desc:"Chat, voice, or any interface",c:"#F472B6"},
+      {icon:"🔧",name:"Orchestration Layer",desc:"LangChain / LlamaIndex / custom agents",c:"#F472B6"},
+      {icon:"🤖",name:"LLM Inference",desc:"GPT-4 / Claude / Llama — non-deterministic",c:"#F472B6"},
+      {icon:"🔍",name:"Vector Store",desc:"Pinecone / pgvector — semantic retrieval (RAG)",c:"#F472B6"},
+      {icon:"🗄️",name:"Data Store",desc:"Primary database + document store",c:"#F472B6"},
+    ],
+    qaStrong:["Natural Language Interface","Reasoning Capability","Flexible Task Handling","Rapid Prototyping"],
+    qaWeak:["Non-determinism","Cost","Latency","Hallucination","Prompt Injection Risk","Compliance"],
+    examples:["ChatGPT","GitHub Copilot","Perplexity","Cursor","Notion AI","Any RAG system"],
+    obsoleteNote:null,
+    whyNote:"AI components require new QA thinking: 'correctness' is probabilistic. Testing strategy, latency budgets, and cost models all change. A new category of architecture smell: 'prompt as business logic'.",
+  },
+];
+
+function renderTimeline(filter){
+  const container = document.getElementById("timeline-content");
+  container.innerHTML = "";
+  let lastEra = null;
+  let itemIdx = 0;
+
+  HISTORY.forEach((item) => {
+    const visible = filter==="all" || item.era===filter;
+
+    if(item.era !== lastEra){
+      const eraDiv = document.createElement("div");
+      eraDiv.className = "era-header" + (visible?"":" hidden");
+      eraDiv.dataset.era = item.era;
+      eraDiv.innerHTML = `<div class="era-header-inner">${ERA_NAMES[item.era]||item.era}</div>`;
+      container.appendChild(eraDiv);
+      lastEra = item.era;
+    }
+
+    const ym = document.createElement("div");
+    ym.className = "year-marker" + (visible?"":" hidden");
+    ym.dataset.era = item.era;
+    ym.innerHTML = `<div class="year-label">${item.year}</div>`;
+    container.appendChild(ym);
+
+    const div = document.createElement("div");
+    div.className = `tl-item${item.side==="right"?" right":""}${visible?"":" hidden"}`;
+    div.dataset.era = item.era;
+    div.style.animationDelay = (itemIdx*0.04)+"s";
+
+    const statusHTML = item.status.map(s=>`<span class="s-badge ${s.c}">${s.t}</span>`).join("");
+
+    const layersHTML = item.layers.map((l,li)=>`
+      ${li>0?`<div class="mini-arrow">↕</div>`:""}
+      <div class="mini-layer" style="background:${l.c}10;border:1px solid ${l.c}28">
+        <span class="mini-layer-icon">${l.icon}</span>
+        <span class="mini-layer-name" style="color:${l.c}">${l.name}</span>
+        <span class="mini-layer-desc">${l.desc}</span>
+      </div>`).join("");
+
+    const qaHTML = [
+      ...item.qaStrong.map(q=>`<span class="qa-chip strong">✓ ${q}</span>`),
+      ...item.qaWeak.map(q=>`<span class="qa-chip weak">✗ ${q}</span>`)
+    ].join("");
+
+    const exHTML = item.examples.map(e=>`<span class="ex-pill">${e}</span>`).join("");
+
+    const extraNotes = [
+      item.obsoleteNote ? `<div class="obsolete-note">⚰ Why it declined: ${item.obsoleteNote}</div>` : "",
+      item.whyNote ? `<div class="why-note">💡 Why it still matters: ${item.whyNote}</div>` : "",
+      item.antipatternNote ? `<div class="antipattern-note">☠ Anti-Pattern Warning: ${item.antipatternNote}</div>` : "",
+    ].join("");
+
+    div.innerHTML = `<div class="tl-card${item.style?" "+item.style:""}" onclick="toggleExpand(this)">
+      <div class="card-head">
+        <div class="card-icon">${item.icon}</div>
+        <div class="card-meta">
+          <span class="card-year-badge" style="background:rgba(37,99,235,.1);color:var(--blue)">Born: ${item.born}${item.obsolete?` · Obsolete: ~${item.obsolete}`:""}</span>
+          <div class="card-title">${item.title}</div>
+          <div class="card-subtitle">${item.subtitle}</div>
+          <div class="status-bar">${statusHTML}</div>
+        </div>
+      </div>
+      <div class="card-expand">
+        <hr class="expand-divider">
+        <div class="card-desc">${item.desc}</div>
+        <div class="sec-mini">Structural Pattern</div>
+        <div class="mini-stack">${layersHTML}</div>
+        <div class="sec-mini" style="margin-top:8px">QA Characteristics</div>
+        <div class="qa-chips">${qaHTML}</div>
+        <div class="sec-mini">Notable Examples</div>
+        <div class="examples-row">${exHTML}</div>
+        ${extraNotes}
+      </div>
+    </div>`;
+
+    container.appendChild(div);
+    if(visible) itemIdx++;
+  });
+}
+
+function toggleExpand(card){ card.classList.toggle("expanded"); }
+
+function filterEra(era, btn){
+  document.querySelectorAll(".era-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  renderTimeline(era);
+}
+
+renderTimeline("all");
+</script>
+</body>
+</html>
