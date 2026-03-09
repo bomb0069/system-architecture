@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Database Hosting Comparison · QA Decision Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0A0E1A;--bg2:#0D1220;--bg3:#111827;
+    --border:#1E293B;--border2:#2D3F5E;
+    --text:#E2E8F0;--muted:#94A3B8;--dim:#64748B;
+    --c1:#60A5FA;--c2:#F472B6;--c3:#34D399;--c4:#FBBF24;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding:16px 20px;display:flex;flex-direction:column;align-items:center}
+
+  /* ── Header ── */
+  .header{text-align:center;margin-bottom:14px;max-width:700px}
+  .header-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.35em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+  .header h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;color:#F1F5F9;margin-bottom:5px}
+  .header p{font-size:11px;color:var(--muted);line-height:1.65}
+
+  /* ── Tab Nav ── */
+  .tab-nav{display:flex;gap:4px;margin-bottom:14px;background:var(--bg3);padding:4px;border-radius:8px;border:1px solid var(--border)}
+  .tab-btn{font-family:'JetBrains Mono',monospace;font-size:9px;padding:6px 16px;border-radius:6px;border:none;background:transparent;color:var(--dim);cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{background:#1E293B;color:#F1F5F9}
+
+  /* ── Layout ── */
+  .layout{display:flex;gap:14px;width:100%;max-width:1060px;align-items:flex-start}
+  .chart-wrap{flex:1;min-width:0}
+
+  /* ── Axis labels ── */
+  .axis-top{text-align:center;margin-bottom:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase}
+  .axis-sub{font-size:8px;color:#475569;letter-spacing:0;font-family:'Inter',sans-serif}
+  .axis-row{display:flex;align-items:center;gap:5px}
+  .axis-side{min-width:50px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;text-transform:uppercase;line-height:1.5}
+  .axis-bot{text-align:center;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.18em;text-transform:uppercase}
+  #map-svg{width:100%;display:block;border:1px solid var(--border);border-radius:8px}
+
+  /* ── Detail Panel ── */
+  .detail-panel{width:292px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+  .placeholder{background:var(--bg3);border:1px dashed var(--border2);border-radius:8px;padding:22px;text-align:center;color:var(--dim);font-size:11px;line-height:1.8}
+  .placeholder .big{font-size:24px;margin-bottom:6px}
+
+  .detail-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .detail-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+  .d-icon{font-size:22px}
+  .d-name{font-size:15px;font-weight:600}
+  .d-type{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);margin-top:1px}
+  .d-badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 8px;border-radius:10px;margin-top:3px;display:inline-block}
+  .detail-body{padding:12px 14px;display:flex;flex-direction:column;gap:9px;max-height:70vh;overflow-y:auto}
+  .sec-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:4px}
+  .sec-text{font-size:11px;color:var(--muted);line-height:1.65}
+
+  .qa-row{display:flex;align-items:center;gap:7px;margin-bottom:4px}
+  .qa-name{font-size:10px;color:var(--muted);width:140px;flex-shrink:0}
+  .dots{display:flex;gap:2px}
+  .dot{width:8px;height:8px;border-radius:50%;border:1px solid;display:inline-block}
+
+  .service-grid{display:flex;flex-direction:column;gap:4px}
+  .service-item{background:var(--bg2);border-radius:4px;padding:7px 9px}
+  .s-header{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+  .s-icon{font-size:13px}
+  .s-name{font-size:11px;font-weight:600}
+  .s-provider{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim)}
+  .s-desc{font-size:9px;color:var(--dim);line-height:1.4}
+  .s-price{font-family:'JetBrains Mono',monospace;font-size:8px;margin-top:3px;padding:2px 6px;border-radius:3px;display:inline-block}
+
+  .tradeoffs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .tf-col{background:var(--bg2);border-radius:4px;padding:8px}
+  .tf-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.12em;margin-bottom:3px}
+  .tf-text{font-size:10px;color:var(--muted);line-height:1.5}
+  .position-tag{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--bg2);border-radius:4px;padding:5px 9px;color:var(--dim);line-height:1.5}
+
+  /* ── Comparison Table ── */
+  .table-wrap{width:100%;max-width:1060px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:14px}
+  .table-head-label{padding:10px 16px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em}
+  table{width:100%;border-collapse:collapse}
+  th{padding:8px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.1em;background:var(--bg2);border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap}
+  td{padding:9px 12px;border-bottom:1px solid #151E2E;font-size:11px;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#0F172A}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;border-radius:10px;display:inline-block}
+
+  /* ── Bottom axis note ── */
+  .axis-note{width:100%;max-width:1060px;margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 16px;display:grid;grid-template-columns:1fr 1px 1fr;gap:14px;align-items:start}
+  .an-divider{background:var(--border)}
+  .an-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--dim);margin-bottom:4px;text-transform:uppercase}
+  .an-text{font-size:10px;color:var(--muted);line-height:1.6}
+
+  /* Tab panels */
+  .tab-panel{display:none;width:100%;max-width:1060px;flex-direction:column;align-items:center}
+  .tab-panel.active{display:flex}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">System Analysis · Data Storage · Hosting Decision Framework</div>
+  <h1>Database Hosting Comparison</h1>
+  <p>After choosing the right DB type, the next decision is <em>where and how</em> to run it. Two axes that reveal the hosting trade-off — click any bubble to explore.</p>
+</div>
+
+<!-- Tab Navigation -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('quadrant')">📍 Hosting Quadrant</button>
+  <button class="tab-btn" onclick="showTab('compare')">📊 Full Comparison Table</button>
+  <button class="tab-btn" onclick="showTab('decision')">🧭 Decision Guide</button>
+</div>
+
+<!-- ══════════════ TAB 1: QUADRANT ══════════════ -->
+<div class="tab-panel active" id="tab-quadrant">
+  <div class="layout">
+    <div class="chart-wrap">
+      <div class="axis-top" style="color:#A78BFA">▲ HIGH CONTROL <span class="axis-sub">&nbsp;·&nbsp; Full access · Custom config · Own infrastructure</span></div>
+      <div class="axis-row">
+        <div class="axis-side" style="color:#34D399">◄ LOW COST<br><span style="font-size:7px;color:#475569;font-family:Inter,sans-serif;letter-spacing:0">at scale</span></div>
+
+        <svg id="map-svg" viewBox="0 0 600 520">
+          <!-- Background -->
+          <rect width="600" height="520" fill="#0D1220" rx="7"/>
+          <!-- Grid -->
+          <line x1="150" y1="0"   x2="150" y2="520" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="300" y1="0"   x2="300" y2="520" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="450" y1="0"   x2="450" y2="520" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="0"   y1="130" x2="600" y2="130" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="0"   y1="260" x2="600" y2="260" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="0"   y1="390" x2="600" y2="390" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+
+          <!-- Zone fills -->
+          <rect x="2"   y="2"   width="296" height="256" rx="5" fill="#A78BFA" fill-opacity="0.04" stroke="#A78BFA" stroke-opacity="0.1" stroke-width="1" pointer-events="none"/>
+          <rect x="302" y="2"   width="296" height="256" rx="5" fill="#F87171" fill-opacity="0.04" stroke="#F87171" stroke-opacity="0.1" stroke-width="1" pointer-events="none"/>
+          <rect x="2"   y="262" width="296" height="256" rx="5" fill="#34D399" fill-opacity="0.04" stroke="#34D399" stroke-opacity="0.1" stroke-width="1" pointer-events="none"/>
+          <rect x="302" y="262" width="296" height="256" rx="5" fill="#FBBF24" fill-opacity="0.04" stroke="#FBBF24" stroke-opacity="0.1" stroke-width="1" pointer-events="none"/>
+
+          <!-- Zone labels -->
+          <text x="150" y="248" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#A78BFA" opacity="0.25" letter-spacing="1.5" pointer-events="none">SELF-HOSTED OPEN SOURCE</text>
+          <text x="450" y="248" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#F87171" opacity="0.25" letter-spacing="1.5" pointer-events="none">ON-PREMISE ENTERPRISE</text>
+          <text x="150" y="510" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34D399" opacity="0.25" letter-spacing="1.5" pointer-events="none">MANAGED CLOUD</text>
+          <text x="450" y="510" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#FBBF24" opacity="0.25" letter-spacing="1.5" pointer-events="none">SERVERLESS / PAAS</text>
+
+          <!-- Zone corner labels -->
+          <text x="14" y="22"  font-family="'Playfair Display',serif" font-size="11" fill="#A78BFA" opacity="0.6" pointer-events="none">Self-Hosted</text>
+          <text x="14" y="35"  font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#A78BFA" opacity="0.4" pointer-events="none">Open Source</text>
+          <text x="316" y="22" font-family="'Playfair Display',serif" font-size="11" fill="#F87171" opacity="0.6" pointer-events="none">On-Premise</text>
+          <text x="316" y="35" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#F87171" opacity="0.4" pointer-events="none">Enterprise</text>
+          <text x="14" y="280"  font-family="'Playfair Display',serif" font-size="11" fill="#34D399" opacity="0.6" pointer-events="none">Managed Cloud</text>
+          <text x="14" y="293"  font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#34D399" opacity="0.4" pointer-events="none">DBaaS</text>
+          <text x="316" y="280" font-family="'Playfair Display',serif" font-size="11" fill="#FBBF24" opacity="0.6" pointer-events="none">Serverless</text>
+          <text x="316" y="293" font-family="'JetBrains Mono',monospace" font-size="7.5" fill="#FBBF24" opacity="0.4" pointer-events="none">PaaS / Autoscale</text>
+
+          <!-- Center axes -->
+          <line x1="300" y1="0"   x2="300" y2="520" stroke="#2D3F5E" stroke-width="1.5" pointer-events="none"/>
+          <line x1="0"   y1="260" x2="600" y2="260" stroke="#2D3F5E" stroke-width="1.5" pointer-events="none"/>
+          <circle cx="300" cy="260" r="4" fill="#334155" pointer-events="none"/>
+          <circle cx="300" cy="260" r="2" fill="#475569" pointer-events="none"/>
+          <text x="295" y="16"  font-family="monospace" font-size="12" fill="#A78BFA" opacity="0.5" pointer-events="none">▲</text>
+          <text x="295" y="518" font-family="monospace" font-size="12" fill="#60A5FA" opacity="0.5" pointer-events="none">▼</text>
+          <text x="580" y="265" font-family="monospace" font-size="12" fill="#F87171" opacity="0.5" pointer-events="none">►</text>
+          <text x="8"   y="265" font-family="monospace" font-size="12" fill="#34D399" opacity="0.5" pointer-events="none">◄</text>
+
+          <!-- Layers -->
+          <g id="glow-layer"   pointer-events="none"></g>
+          <circle id="active-ring" cx="-200" cy="-200" r="0" fill="none" stroke="white" stroke-width="2" stroke-dasharray="5,3" opacity="0.7" pointer-events="none"/>
+          <g id="bubble-layer"></g>
+          <g id="label-layer"  pointer-events="none"></g>
+        </svg>
+
+        <div class="axis-side" style="color:#F87171">HIGH COST ►<br><span style="font-size:7px;color:#475569;font-family:Inter,sans-serif;letter-spacing:0">at scale</span></div>
+      </div>
+      <div class="axis-bot" style="color:#60A5FA">▼ LOW CONTROL <span class="axis-sub">&nbsp;·&nbsp; Fully managed · Vendor handles ops · Black-box</span></div>
+    </div>
+
+    <div class="detail-panel" id="detail-panel">
+      <div class="placeholder">
+        <div class="big">🖥️</div>
+        Click any bubble to explore the hosting model — cost structure, control level, QA fit, and real service examples.
+      </div>
+    </div>
+  </div>
+
+  <div class="axis-note">
+    <div>
+      <div class="an-label">Y-Axis — Operational Control (High ↔ Low)</div>
+      <div class="an-text">
+        <strong style="color:#A78BFA">High Control (top):</strong> You own the infrastructure. You configure everything — replication, tuning, security, networking. You also own every failure.<br>
+        <strong style="color:#60A5FA">Low Control (bottom):</strong> Vendor manages patching, backups, failover, and scaling. You configure only what the vendor exposes. Faster to start, harder to customize.
+      </div>
+    </div>
+    <div class="an-divider"></div>
+    <div>
+      <div class="an-label">X-Axis — Cost at Scale (Low ↔ High)</div>
+      <div class="an-text">
+        <strong style="color:#34D399">Low Cost (left):</strong> Open-source software or pay-only-for-compute models. Scales cheaply if you manage it yourself or choose usage-based pricing wisely.<br>
+        <strong style="color:#F87171">High Cost (right):</strong> Enterprise licensing, per-seat fees, or premium managed services. Cost grows faster than workload — but so does support and compliance coverage.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 2: COMPARISON TABLE ══════════════ -->
+<div class="tab-panel" id="tab-compare" style="align-items:stretch">
+  <div class="table-wrap" style="margin-top:0">
+    <div class="table-head-label">All Hosting Models — Full Comparison Matrix</div>
+    <div style="overflow-x:auto">
+    <table>
+      <thead>
+        <tr>
+          <th>Hosting Model</th>
+          <th>Control</th>
+          <th>Cost Model</th>
+          <th>Scale Effort</th>
+          <th>Security Ownership</th>
+          <th>Compliance</th>
+          <th>Best For</th>
+          <th>Avoid When</th>
+        </tr>
+      </thead>
+      <tbody id="compare-tbody"></tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ TAB 3: DECISION GUIDE ══════════════ -->
+<div class="tab-panel" id="tab-decision" style="align-items:stretch">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%;max-width:1060px">
+    <div id="decision-cards"></div>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <div id="decision-table-wrap"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const HOSTING_MODELS = [
+  {
+    id:"selfhosted_oss",
+    name:"Self-Hosted OSS",
+    full:"Self-Hosted Open Source",
+    icon:"🐧",
+    category:"Self-Hosted",
+    catColor:"#A78BFA",
+    cx:115, cy:105, r:24, color:"#A78BFA",
+    quadrant:"High Control · Low Cost",
+    why:"You run open-source software on your own servers (VMs, bare metal, containers). You control every config file, every network rule, every backup strategy. Zero licensing cost — but high operational burden.",
+    qas:[
+      {name:"Operational Control",score:5},
+      {name:"Cost at Scale",score:5},
+      {name:"Customizability",score:5},
+      {name:"Operational Complexity",score:2},
+      {name:"Time to Production",score:2},
+      {name:"Built-in Compliance",score:2},
+    ],
+    services:[
+      {icon:"🐘",name:"PostgreSQL on VM",provider:"Any Cloud / On-prem",desc:"Full control. You manage HA, backups, tuning, upgrades.",price:"~$0 license + compute"},
+      {icon:"🔴",name:"Redis OSS",provider:"Self-deployed",desc:"In-memory store you run and monitor yourself.",price:"~$0 license + compute"},
+      {icon:"💿",name:"Cassandra Cluster",provider:"Self-deployed",desc:"Multi-node wide-column store on your own infra.",price:"~$0 license + compute"},
+      {icon:"🐳",name:"Docker / K8s",provider:"Any",desc:"Containerized DB deployments with Helm charts.",price:"Container orchestration cost only"},
+    ],
+    goodFor:"Cost-sensitive startups · Teams with strong DBA skills · Full data sovereignty",
+    tradeoffGood:"No licensing fees. Deep customization. Complete data sovereignty.",
+    tradeoffBad:"You own every failure. Requires DevOps/DBA team. Slow to scale under pressure.",
+  },
+  {
+    id:"onprem_enterprise",
+    name:"On-Premise Enterprise",
+    full:"On-Premise Enterprise Licensing",
+    icon:"🏛️",
+    category:"On-Premise",
+    catColor:"#F87171",
+    cx:445, cy:95, r:24, color:"#F87171",
+    quadrant:"High Control · High Cost",
+    why:"Enterprise-licensed software running on hardware you own or lease. You have full control AND vendor support, compliance certifications, and SLAs. The most expensive model — justified by strict regulatory requirements.",
+    qas:[
+      {name:"Operational Control",score:5},
+      {name:"Compliance Coverage",score:5},
+      {name:"Vendor Support",score:5},
+      {name:"Cost at Scale",score:1},
+      {name:"Scalability Speed",score:2},
+      {name:"Time to Production",score:2},
+    ],
+    services:[
+      {icon:"🏛️",name:"Oracle Database EE",provider:"Oracle",desc:"Full enterprise licensing. Row-level security, Audit Vault, Data Masking.",price:"~$25K–$50K per core"},
+      {icon:"🪟",name:"SQL Server Enterprise",provider:"Microsoft",desc:"On-prem license. AlwaysOn AG, TDE, advanced analytics.",price:"~$14K per core"},
+      {icon:"💼",name:"IBM Db2",provider:"IBM",desc:"Mainframe + distributed. High-compliance environments.",price:"Enterprise licensing"},
+      {icon:"📦",name:"SAP HANA On-Prem",provider:"SAP",desc:"In-memory ERP-grade DB. SAP ecosystem requirement.",price:"Very high — custom"},
+    ],
+    goodFor:"Government · Defense · Hospitals · Banks with strict data residency laws",
+    tradeoffGood:"Maximum control + vendor SLA + compliance certs + 24/7 enterprise support.",
+    tradeoffBad:"Extreme cost. Long procurement cycles. Hard to scale capacity quickly.",
+  },
+  {
+    id:"managed_dbaas",
+    name:"Managed DBaaS",
+    full:"Managed Database as a Service",
+    icon:"☁️",
+    category:"Managed Cloud",
+    catColor:"#34D399",
+    cx:130, cy:380, r:26, color:"#34D399",
+    quadrant:"Low Control · Low-Medium Cost",
+    why:"Cloud provider handles patching, backups, failover, monitoring, and hardware. You choose instance size and configure DB-level settings. The most popular model for modern applications — balances convenience and control.",
+    qas:[
+      {name:"Ease of Operations",score:5},
+      {name:"Availability (HA)",score:5},
+      {name:"Cost at Scale",score:3},
+      {name:"Scalability Speed",score:4},
+      {name:"Operational Control",score:3},
+      {name:"Compliance Coverage",score:4},
+    ],
+    services:[
+      {icon:"🔶",name:"Amazon RDS",provider:"AWS",desc:"Managed MySQL, PostgreSQL, Oracle, SQL Server. Multi-AZ HA.",price:"~$0.02–$0.50/hr per instance"},
+      {icon:"🔵",name:"Cloud SQL",provider:"Google Cloud",desc:"Managed MySQL & PostgreSQL. Automatic failover.",price:"~$0.025–$0.40/hr"},
+      {icon:"🔷",name:"Azure Database",provider:"Microsoft",desc:"Managed PostgreSQL, MySQL, MariaDB. Flexible server.",price:"~$0.02–$0.45/hr"},
+      {icon:"🍃",name:"MongoDB Atlas",provider:"MongoDB Inc.",desc:"Managed MongoDB. Global clusters, search, analytics.",price:"~$0.08/hr (M10 cluster)"},
+    ],
+    goodFor:"Most production apps · Teams without DBA · Startups scaling fast",
+    tradeoffGood:"Zero infrastructure management. Automatic backups and failover. Fast provisioning.",
+    tradeoffBad:"Vendor lock-in risk. Limited config access. Costs grow with compute size.",
+  },
+  {
+    id:"serverless",
+    name:"Serverless / PaaS",
+    full:"Serverless & Auto-Scaling PaaS",
+    icon:"⚡",
+    category:"Serverless",
+    catColor:"#FBBF24",
+    cx:445, cy:390, r:26, color:"#FBBF24",
+    quadrant:"Low Control · Variable Cost",
+    why:"No servers to provision. Database scales to zero when idle and auto-scales under load. You pay per request or per second of compute. Revolutionary for variable/unpredictable workloads — dangerous for predictable high-traffic.",
+    qas:[
+      {name:"Ease of Operations",score:5},
+      {name:"Scalability (burst)",score:5},
+      {name:"Cost at Low Traffic",score:5},
+      {name:"Cost at High Traffic",score:2},
+      {name:"Operational Control",score:1},
+      {name:"Cold Start Latency",score:2},
+    ],
+    services:[
+      {icon:"⚡",name:"DynamoDB",provider:"AWS",desc:"Pay-per-request. Auto-scales. Global tables. No servers.",price:"~$1.25/M writes, $0.25/M reads"},
+      {icon:"🔥",name:"Firestore",provider:"Google",desc:"Real-time document DB. Pay per read/write/delete.",price:"~$0.06/100K reads"},
+      {icon:"🌙",name:"PlanetScale",provider:"PlanetScale",desc:"Serverless MySQL. Branching like Git. Zero downtime schema.",price:"Free tier + usage-based"},
+      {icon:"❄️",name:"Snowflake",provider:"Snowflake",desc:"Serverless analytics warehouse. Pay per compute second.",price:"~$2–$4 per credit"},
+      {icon:"🟢",name:"Supabase",provider:"Supabase",desc:"Serverless PostgreSQL + auth + storage. Firebase alternative.",price:"Free tier + $25/mo Pro"},
+      {icon:"🐊",name:"CockroachDB Serverless",provider:"Cockroach Labs",desc:"Serverless distributed SQL. Free tier available.",price:"$0 first 5GB storage"},
+    ],
+    goodFor:"MVPs · Variable traffic apps · Event-driven · Dev/test environments",
+    tradeoffGood:"Zero infrastructure. Free tier available. Perfect for unpredictable traffic.",
+    tradeoffBad:"Cost explodes at high sustained load. Vendor lock-in is severe. Cold start latency.",
+  },
+  {
+    id:"hybrid",
+    name:"Hybrid / Multi-Cloud",
+    full:"Hybrid & Multi-Cloud Strategy",
+    icon:"🔀",
+    category:"Hybrid",
+    catColor:"#60A5FA",
+    cx:295, cy:168, r:20, color:"#60A5FA",
+    quadrant:"Medium Control · Variable Cost",
+    why:"Mix of on-premise and cloud, or multiple cloud providers. Usually driven by compliance (sensitive data on-prem, analytics in cloud) or resilience (no single-vendor dependency). The most complex to manage — and the most powerful when done right.",
+    qas:[
+      {name:"Resilience",score:5},
+      {name:"Flexibility",score:5},
+      {name:"Compliance Options",score:5},
+      {name:"Operational Complexity",score:1},
+      {name:"Cost Predictability",score:2},
+      {name:"Data Consistency",score:3},
+    ],
+    services:[
+      {icon:"🔶",name:"AWS Outposts",provider:"AWS",desc:"AWS infrastructure running in your own data center.",price:"Hardware lease + AWS pricing"},
+      {icon:"🔵",name:"Anthos / GDC",provider:"Google",desc:"Google Cloud services running on-prem or other clouds.",price:"Per-vCPU/month"},
+      {icon:"🔷",name:"Azure Arc",provider:"Microsoft",desc:"Manage on-prem, multi-cloud, edge from Azure portal.",price:"Varies by service"},
+      {icon:"🟠",name:"Cloudflare D1",provider:"Cloudflare",desc:"SQLite at the edge. Globally distributed DB near users.",price:"Free tier + $0.001/M rows"},
+    ],
+    goodFor:"Enterprise · Regulated industries · Global apps · Multi-region resilience",
+    tradeoffGood:"Best of both worlds. Compliance + cloud agility. No single vendor lock-in.",
+    tradeoffBad:"Most complex to build and maintain. Requires expert multi-cloud team.",
+  },
+  {
+    id:"edge",
+    name:"Edge / Distributed",
+    full:"Edge-Native & Globally Distributed DB",
+    icon:"🌏",
+    category:"Edge",
+    catColor:"#F472B6",
+    cx:440, cy:225, r:20, color:"#F472B6",
+    quadrant:"Low-Medium Control · Medium Cost",
+    why:"Database replicas run at edge nodes worldwide — within milliseconds of every user. Eliminates latency for global applications. New category driven by edge computing platforms (Cloudflare, Deno, Fastly).",
+    qas:[
+      {name:"Global Latency",score:5},
+      {name:"Read Performance",score:5},
+      {name:"Ease of Setup",score:4},
+      {name:"Consistency (writes)",score:2},
+      {name:"Operational Control",score:2},
+      {name:"Cost Predictability",score:3},
+    ],
+    services:[
+      {icon:"🟠",name:"Cloudflare D1",provider:"Cloudflare",desc:"SQLite replicated to 300+ edge locations.",price:"Free + $0.001/M rows read"},
+      {icon:"🔴",name:"Turso",provider:"Turso",desc:"LibSQL (SQLite fork) at the edge. Per-database model.",price:"Free tier + $29/mo"},
+      {icon:"⚡",name:"Deno KV",provider:"Deno Deploy",desc:"Key-value at edge. Strongly consistent writes.",price:"Free + pay per ops"},
+      {icon:"🌊",name:"Fauna",provider:"Fauna",desc:"Globally distributed document DB. ACID across regions.",price:"Usage-based"},
+    ],
+    goodFor:"Global apps requiring <50ms reads · Edge compute · CDN-collocated data",
+    tradeoffGood:"Sub-10ms reads for global users. No regional latency. Auto-distributed.",
+    tradeoffBad:"Limited write consistency guarantees. New ecosystem — limited tooling.",
+  },
+  {
+    id:"container_k8s",
+    name:"Container / K8s",
+    full:"Containerized (Docker / Kubernetes)",
+    icon:"🐳",
+    category:"Self-Hosted",
+    catColor:"#A78BFA",
+    cx:155, cy:188, r:20, color:"#818CF8",
+    quadrant:"High Control · Low Cost",
+    why:"Run database containers on Kubernetes using operators (e.g. CloudNativePG, Vitess, Strimzi). Combines infrastructure control with cloud-native automation for failover, scaling, and upgrades.",
+    qas:[
+      {name:"Operational Control",score:4},
+      {name:"Portability",score:5},
+      {name:"Cost at Scale",score:4},
+      {name:"Operational Complexity",score:2},
+      {name:"Scalability (auto)",score:4},
+      {name:"Time to Production",score:3},
+    ],
+    services:[
+      {icon:"🐘",name:"CloudNativePG",provider:"CNPG / K8s",desc:"PostgreSQL operator for Kubernetes. HA, backups, streaming replication.",price:"Open source + K8s infra cost"},
+      {icon:"🍃",name:"MongoDB Operator",provider:"MongoDB",desc:"Official K8s operator for self-managed MongoDB clusters.",price:"Open source + compute"},
+      {icon:"💿",name:"Cassandra K8ssandra",provider:"DataStax",desc:"Cassandra on K8s with automated ops tooling.",price:"Open source + compute"},
+      {icon:"🌊",name:"Vitess / PlanetScale",provider:"CNCF",desc:"MySQL horizontal sharding layer. Powers YouTube.",price:"Open source"},
+    ],
+    goodFor:"Cloud-native teams · Kubernetes-first orgs · Multi-cloud portability",
+    tradeoffGood:"Portable across clouds. GitOps-friendly. Automated DB ops via operators.",
+    tradeoffBad:"Kubernetes expertise required. Stateful workloads on K8s are complex.",
+  },
+];
+
+const COMPARE_DATA = [
+  {model:"Self-Hosted OSS",   control:"Full",    cost:"Low",       scale:"Manual",      security:"You own all",      compliance:"DIY",         bestFor:"Cost-sensitive, strong ops team",         avoid:"Small team, no DevOps"},
+  {model:"On-Prem Enterprise",control:"Full",    cost:"Very High", scale:"Manual",      security:"You + vendor SLA",  compliance:"Certified",   bestFor:"Government, defense, strict residency",   avoid:"Startups, cloud-native apps"},
+  {model:"Managed DBaaS",     control:"Medium",  cost:"Medium",    scale:"Instance resize", security:"Shared model", compliance:"Cloud certs",  bestFor:"Most production apps",                    avoid:"Need full config access"},
+  {model:"Serverless PaaS",   control:"Low",     cost:"Variable",  scale:"Automatic",   security:"Vendor managed",   compliance:"Basic",       bestFor:"MVPs, variable/unpredictable traffic",    avoid:"High sustained traffic"},
+  {model:"Hybrid/Multi-Cloud",control:"Mixed",   cost:"Variable",  scale:"Flexible",    security:"Complex layered",  compliance:"Full options", bestFor:"Enterprise, regulated industries",        avoid:"Small teams, simple apps"},
+  {model:"Edge / Distributed",control:"Low",     cost:"Low-Med",   scale:"Automatic",   security:"Vendor managed",   compliance:"Limited",     bestFor:"Global low-latency reads",                avoid:"Write-heavy or consistent writes"},
+  {model:"Container / K8s",   control:"High",    cost:"Low-Med",   scale:"Pod autoscale","security":"You + K8s RBAC",compliance:"DIY + tooling","bestFor":"Cloud-native, multi-cloud portability", avoid:"No Kubernetes expertise"},
+];
+
+const DECISION_QS = [
+  {q:"Do you have a dedicated DBA or DevOps team?",         yes:"Self-Hosted OSS or K8s",         no:"Managed DBaaS or Serverless"},
+  {q:"Is data sovereignty / residency required by law?",    yes:"On-Premise Enterprise or Hybrid", no:"Managed Cloud is fine"},
+  {q:"Is traffic unpredictable or bursty?",                 yes:"Serverless PaaS",                 no:"Managed DBaaS or Self-Hosted"},
+  {q:"Do you need sub-50ms reads for global users?",        yes:"Edge / Distributed DB",            no:"Single-region Managed Cloud"},
+  {q:"Is compliance certification required (HIPAA, PCI)?",  yes:"On-Prem Enterprise or Managed DBaaS (with certs)", no:"Serverless or OSS may be fine"},
+  {q:"Is cost minimization the top priority?",              yes:"Self-Hosted OSS or Serverless free tier",no:"Managed DBaaS is worth the cost"},
+  {q:"Do you need to avoid vendor lock-in?",                yes:"Self-Hosted OSS or Multi-Cloud",   no:"Serverless / Managed Cloud is convenient"},
+];
+
+// ── State ──
+let activeDB = null;
+const SVG_NS = "http://www.w3.org/2000/svg";
+
+// ── Tab switching ──
+function showTab(tabId) {
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("tab-"+tabId).classList.add("active");
+  event.target.classList.add("active");
+}
+
+// ── Render bubbles ──
+function renderAll() {
+  ["glow-layer","bubble-layer","label-layer"].forEach(id => document.getElementById(id).innerHTML = "");
+
+  HOSTING_MODELS.forEach(db => {
+    const isActive = activeDB === db.id;
+
+    // Glow
+    const glow = document.createElementNS(SVG_NS,"circle");
+    glow.setAttribute("cx",db.cx); glow.setAttribute("cy",db.cy);
+    glow.setAttribute("r",db.r+10);
+    glow.setAttribute("fill",db.color);
+    glow.setAttribute("fill-opacity", isActive ? 0.25 : 0.08);
+    document.getElementById("glow-layer").appendChild(glow);
+
+    // Bubble — only clickable element
+    const circle = document.createElementNS(SVG_NS,"circle");
+    circle.setAttribute("cx",db.cx); circle.setAttribute("cy",db.cy);
+    circle.setAttribute("r",db.r);
+    circle.setAttribute("fill",db.color);
+    circle.setAttribute("fill-opacity", isActive ? 0.88 : 0.22);
+    circle.setAttribute("stroke",db.color);
+    circle.setAttribute("stroke-width", isActive ? 2.5 : 1.5);
+    circle.setAttribute("stroke-opacity","0.85");
+    circle.setAttribute("data-dbid",db.id);
+    circle.style.cursor = "pointer";
+    document.getElementById("bubble-layer").appendChild(circle);
+
+    // Icon
+    const icon = document.createElementNS(SVG_NS,"text");
+    icon.setAttribute("x",db.cx); icon.setAttribute("y",db.cy);
+    icon.setAttribute("text-anchor","middle");
+    icon.setAttribute("dominant-baseline","central");
+    icon.setAttribute("font-size",Math.round(db.r*0.76));
+    icon.textContent = db.icon;
+    document.getElementById("label-layer").appendChild(icon);
+
+    // Label
+    const lbl = document.createElementNS(SVG_NS,"text");
+    lbl.setAttribute("x",db.cx); lbl.setAttribute("y",db.cy+db.r+12);
+    lbl.setAttribute("text-anchor","middle");
+    lbl.setAttribute("font-family","'JetBrains Mono',monospace");
+    lbl.setAttribute("font-size","8");
+    lbl.setAttribute("fill",db.color);
+    lbl.setAttribute("opacity","0.85");
+    lbl.textContent = db.name;
+    document.getElementById("label-layer").appendChild(lbl);
+  });
+
+  // Active ring
+  const ring = document.getElementById("active-ring");
+  if (activeDB) {
+    const db = HOSTING_MODELS.find(d => d.id === activeDB);
+    ring.setAttribute("cx",db.cx); ring.setAttribute("cy",db.cy);
+    ring.setAttribute("r",db.r+16);
+    ring.setAttribute("stroke",db.color);
+    ring.setAttribute("stroke-width","2");
+  } else {
+    ring.setAttribute("cx",-200); ring.setAttribute("cy",-200); ring.setAttribute("r",0);
+  }
+}
+
+// ── Click handler ──
+document.getElementById("map-svg").addEventListener("click", function(e) {
+  let target = e.target;
+  while (target && target !== this) {
+    if (target.dataset && target.dataset.dbid) break;
+    target = target.parentElement;
+  }
+  const dbId = target && target.dataset ? target.dataset.dbid : null;
+  if (!dbId) return;
+  activeDB = activeDB === dbId ? null : dbId;
+  renderAll();
+  activeDB ? renderDetail(activeDB) : showPlaceholder();
+});
+
+function showPlaceholder() {
+  document.getElementById("detail-panel").innerHTML = `
+    <div class="placeholder">
+      <div class="big">🖥️</div>
+      Click any bubble to explore the hosting model — cost structure, control level, QA fit, and real service examples.
+    </div>`;
+}
+
+function makeDots(score, color) {
+  let h = '<div class="dots">';
+  for (let i = 1; i <= 5; i++)
+    h += `<span class="dot" style="background:${i<=score?color:'#1E293B'};border-color:${i<=score?color:'#2D3F5E'}"></span>`;
+  return h + "</div>";
+}
+
+function renderDetail(dbId) {
+  const db = HOSTING_MODELS.find(d => d.id === dbId);
+  const qaRows = db.qas.map(qa => `
+    <div class="qa-row">
+      <div class="qa-name">${qa.name}</div>
+      ${makeDots(qa.score, db.color)}
+    </div>`).join("");
+
+  const serviceItems = db.services.map(s => `
+    <div class="service-item">
+      <div class="s-header">
+        <span class="s-icon">${s.icon}</span>
+        <div>
+          <div class="s-name" style="color:${db.color}">${s.name}</div>
+          <div class="s-provider">${s.provider}</div>
+        </div>
+      </div>
+      <div class="s-desc">${s.desc}</div>
+      <div class="s-price" style="background:${db.color}15;color:${db.color}">${s.price}</div>
+    </div>`).join("");
+
+  document.getElementById("detail-panel").innerHTML = `
+    <div class="detail-card" style="border-color:${db.color}50">
+      <div class="detail-head" style="background:${db.color}12;border-bottom-color:${db.color}25">
+        <div class="d-icon">${db.icon}</div>
+        <div>
+          <div class="d-name" style="color:${db.color}">${db.name}</div>
+          <div class="d-type">${db.full}</div>
+          <span class="d-badge" style="background:${db.catColor}20;color:${db.catColor}">${db.category}</span>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div>
+          <div class="sec-label" style="color:${db.color}">Quadrant Position</div>
+          <div class="position-tag">${db.quadrant}</div>
+        </div>
+        <div>
+          <div class="sec-label" style="color:${db.color}">Why Choose This Model</div>
+          <div class="sec-text">${db.why}</div>
+        </div>
+        <div>
+          <div class="sec-label" style="color:${db.color}">QA Fit Scores</div>
+          ${qaRows}
+          <div style="font-size:8px;color:#475569;margin-top:4px;font-style:italic">Scores = how well this model satisfies each QA.</div>
+        </div>
+        <div>
+          <div class="sec-label" style="color:${db.color}">Real Services</div>
+          <div class="service-grid">${serviceItems}</div>
+        </div>
+        <div>
+          <div class="sec-label" style="color:${db.color}">Trade-offs</div>
+          <div class="tradeoffs">
+            <div class="tf-col">
+              <div class="tf-label" style="color:#4ADE80">✓ Strengths</div>
+              <div class="tf-text">${db.tradeoffGood}</div>
+            </div>
+            <div class="tf-col">
+              <div class="tf-label" style="color:#F87171">✗ Weaknesses</div>
+              <div class="tf-text">${db.tradeoffBad}</div>
+            </div>
+          </div>
+        </div>
+        <div>
+          <div class="sec-label" style="color:${db.color}">Best Used For</div>
+          <div style="font-size:10px;color:#64748B;line-height:1.6">${db.goodFor}</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ── Build Compare Table ──
+const controlColors = {Full:"#A78BFA","Medium":"#60A5FA","Low":"#34D399","Mixed":"#FBBF24","High":"#A78BFA","Low-Med":"#34D399"};
+const costColors = {"Low":"#34D399","Low-Med":"#34D399","Medium":"#FBBF24","High":"#F87171","Very High":"#F87171","Variable":"#60A5FA"};
+
+document.getElementById("compare-tbody").innerHTML = COMPARE_DATA.map((r,i) => {
+  const cc = controlColors[r.control] || "#94A3B8";
+  const costc = costColors[r.cost] || "#94A3B8";
+  return `<tr>
+    <td style="font-weight:600;color:#F1F5F9">${r.model}</td>
+    <td><span class="badge" style="background:${cc}20;color:${cc}">${r.control}</span></td>
+    <td><span class="badge" style="background:${costc}20;color:${costc}">${r.cost}</span></td>
+    <td style="color:#94A3B8;font-size:10px">${r.scale}</td>
+    <td style="color:#94A3B8;font-size:10px">${r.security}</td>
+    <td style="color:#94A3B8;font-size:10px">${r.compliance}</td>
+    <td style="color:#60A5FA;font-size:10px">${r.bestFor}</td>
+    <td style="color:#64748B;font-size:10px">${r.avoid}</td>
+  </tr>`;
+}).join("");
+
+// ── Build Decision Guide ──
+document.getElementById("decision-cards").innerHTML = `
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#64748B;letter-spacing:.2em;margin-bottom:4px">DECISION QUESTIONS</div>
+    ${DECISION_QS.map((item,i) => `
+      <div style="background:#111827;border:1px solid #1E293B;border-radius:6px;padding:12px 14px">
+        <div style="font-size:12px;color:#F1F5F9;font-weight:500;margin-bottom:7px">❓ ${item.q}</div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 9px;border-radius:10px;background:rgba(74,222,128,0.12);color:#4ADE80">YES → ${item.yes}</span>
+          <span style="font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 9px;border-radius:10px;background:rgba(148,163,184,0.1);color:#94A3B8">NO → ${item.no}</span>
+        </div>
+      </div>`).join("")}
+  </div>`;
+
+document.getElementById("decision-table-wrap").innerHTML = `
+  <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#64748B;letter-spacing:.2em;margin-bottom:8px">TEAM PROFILE → RECOMMENDED MODEL</div>
+  ${[
+    {profile:"🧑‍💻 Solo Developer / Indie Hacker",  rec:"Serverless (Supabase, PlanetScale, Firestore)", why:"Zero ops burden. Free tiers. Ships fast."},
+    {profile:"🚀 Early Startup (3–10 devs)",         rec:"Managed DBaaS (RDS, Atlas, Cloud SQL)",         why:"Low ops overhead. Affordable. Scales without DBA."},
+    {profile:"🏢 Scale-up (50–200 devs)",            rec:"Managed DBaaS + Container/K8s for flexibility", why:"More control needed but still want managed services."},
+    {profile:"🏦 Enterprise (regulated industry)",   rec:"On-Prem Enterprise or Hybrid Cloud",            why:"Compliance, auditing, data residency requirements."},
+    {profile:"🌍 Global Product (multi-region)",     rec:"Managed DBaaS multi-region or Edge DB",         why:"Latency requirements push data closer to users."},
+    {profile:"🔬 Data/ML Team",                      rec:"Serverless OLAP (Snowflake, BigQuery)",         why:"Pay-per-query. Infinite scale. No infrastructure."},
+    {profile:"🛡️ Security-First Team",               rec:"Self-Hosted OSS with encryption layer",         why:"Full data sovereignty. No third-party access."},
+  ].map(r => `
+    <div style="background:#111827;border:1px solid #1E293B;border-radius:6px;padding:11px 13px;margin-bottom:7px">
+      <div style="font-size:11px;color:#F1F5F9;font-weight:500;margin-bottom:4px">${r.profile}</div>
+      <div style="font-size:11px;color:#60A5FA;margin-bottom:3px">→ ${r.rec}</div>
+      <div style="font-size:10px;color:#64748B">${r.why}</div>
+    </div>`).join("")}`;
+
+// ── Init ──
+renderAll();
+</script>
+</body>
+</html>

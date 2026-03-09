@@ -1,0 +1,888 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Architecture Styles Comparison · System Design Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#080C18;--bg2:#0C1121;--bg3:#101726;--bg4:#141E30;
+    --border:#1A2540;--border2:#243455;
+    --text:#E4EAF4;--muted:#8A9BC0;--dim:#4A5A7A;
+    --danger:#FF6B6B;--warn:#FBBF24;--good:#34D399;--info:#60A5FA;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:16px 20px;display:flex;flex-direction:column;align-items:center}
+
+  /* Grain overlay */
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");pointer-events:none;z-index:0}
+  body>*{position:relative;z-index:1}
+
+  /* Header */
+  .header{text-align:center;margin-bottom:16px;max-width:740px}
+  .header-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+  .header h1{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#F1F5F9;margin-bottom:6px;letter-spacing:-.02em}
+  .header p{font-size:11.5px;color:var(--muted);line-height:1.7}
+  .header .danger-note{display:inline-block;margin-top:6px;font-family:'JetBrains Mono',monospace;font-size:9px;padding:3px 10px;border-radius:4px;background:rgba(255,107,107,.1);border:1px solid rgba(255,107,107,.25);color:#FF8E8E;letter-spacing:.05em}
+
+  /* Tab nav */
+  .tab-nav{display:flex;gap:3px;margin-bottom:14px;background:var(--bg3);padding:3px;border-radius:8px;border:1px solid var(--border)}
+  .tab-btn{font-family:'JetBrains Mono',monospace;font-size:9px;padding:6px 14px;border-radius:5px;border:none;background:transparent;color:var(--dim);cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{background:var(--bg4);color:#F1F5F9;box-shadow:0 1px 3px rgba(0,0,0,.4)}
+
+  /* Tab panels */
+  .tab-panel{display:none;width:100%;max-width:1100px;flex-direction:column;align-items:center}
+  .tab-panel.active{display:flex}
+
+  /* Category filters */
+  .cat-filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;width:100%}
+  .cat-btn{font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 11px;border-radius:14px;border:1px solid var(--border);background:transparent;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;color:var(--dim)}
+  .cat-btn:hover{border-color:var(--border2);color:var(--muted)}
+
+  /* Layout */
+  .layout{display:flex;gap:14px;width:100%;align-items:flex-start}
+  .chart-wrap{flex:1;min-width:0}
+  .axis-top{text-align:center;margin-bottom:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+  .axis-sub{font-size:8px;color:#3A4A6A;letter-spacing:0;font-family:'DM Sans',sans-serif}
+  .axis-row{display:flex;align-items:center;gap:5px}
+  .axis-side{min-width:52px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;line-height:1.6}
+  .axis-bot{text-align:center;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+  #map-svg{width:100%;display:block;border:1px solid var(--border);border-radius:8px}
+
+  /* Detail panel */
+  .detail-panel{width:306px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+  .placeholder{background:var(--bg3);border:1px dashed var(--border2);border-radius:8px;padding:22px;text-align:center;color:var(--dim);font-size:11px;line-height:1.8}
+  .placeholder .big{font-size:26px;margin-bottom:7px}
+  .placeholder .hint{font-family:'JetBrains Mono',monospace;font-size:8px;color:#2A3A5A;margin-top:8px}
+
+  .detail-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .detail-head{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:11px}
+  .d-icon{font-size:26px;flex-shrink:0;margin-top:1px}
+  .d-name{font-size:15px;font-weight:600;margin-bottom:1px;font-family:'Playfair Display',serif;letter-spacing:-.01em}
+  .d-sub{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);margin-top:1px}
+  .d-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;border-radius:6px;display:inline-block}
+
+  .detail-body{padding:13px 15px;display:flex;flex-direction:column;gap:10px;max-height:67vh;overflow-y:auto}
+  .sec-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px}
+  .sec-text{font-size:11px;color:var(--muted);line-height:1.7}
+
+  .qa-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+  .qa-name{font-size:10px;color:var(--muted);width:142px;flex-shrink:0}
+  .dots{display:flex;gap:2px}
+  .dot{width:8px;height:8px;border-radius:50%;border:1px solid;display:inline-block}
+
+  .example-grid{display:flex;flex-direction:column;gap:4px}
+  .ex-item{background:var(--bg2);border-radius:4px;padding:8px 10px;display:flex;gap:8px;align-items:flex-start}
+  .ex-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+  .ex-name{font-size:11px;font-weight:600;margin-bottom:1px}
+  .ex-desc{font-size:9px;color:var(--dim);line-height:1.4}
+
+  .tradeoffs{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .tf-col{background:var(--bg2);border-radius:4px;padding:8px}
+  .tf-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;margin-bottom:3px}
+  .tf-text{font-size:10px;color:var(--muted);line-height:1.55}
+
+  .pos-tag{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--bg2);border-radius:4px;padding:5px 9px;color:var(--dim);line-height:1.55}
+
+  .when-to-use{background:var(--bg2);border-radius:4px;padding:9px 10px}
+  .when-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.12em;margin-bottom:4px}
+  .when-text{font-size:10px;color:var(--muted);line-height:1.6}
+
+  /* Anti-pattern warning */
+  .antipattern-warn{background:rgba(255,107,107,.06);border:1px solid rgba(255,107,107,.2);border-radius:4px;padding:8px 10px}
+  .ap-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:#FF8E8E;letter-spacing:.12em;margin-bottom:4px}
+  .ap-text{font-size:10px;color:#C0837A;line-height:1.55}
+
+  /* Axis note */
+  .axis-note{width:100%;margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 16px;display:grid;grid-template-columns:1fr 1px 1fr;gap:14px}
+  .an-div{background:var(--border)}
+  .an-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--dim);margin-bottom:4px;text-transform:uppercase}
+  .an-text{font-size:10px;color:var(--muted);line-height:1.65}
+
+  /* Table tab */
+  .tbl-wrap{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .tbl-lbl{padding:10px 16px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em}
+  table{width:100%;border-collapse:collapse}
+  th{padding:8px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.1em;background:var(--bg2);border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap}
+  td{padding:8px 12px;border-bottom:1px solid #0E1524;font-size:10px;vertical-align:top;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#0A1020}
+  .tbl-badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 6px;border-radius:6px;white-space:nowrap}
+
+  /* Decision guide */
+  .guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%}
+  .guide-card{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+  .guide-q{font-size:12px;color:#F1F5F9;font-weight:500;margin-bottom:8px;line-height:1.5}
+  .guide-opts{display:flex;gap:6px;flex-wrap:wrap}
+  .g-yes{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:3px 9px;border-radius:8px;background:rgba(74,222,128,.1);color:#4ADE80;line-height:1.5}
+  .g-no{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:3px 9px;border-radius:8px;background:rgba(148,163,184,.08);color:#94A3B8;line-height:1.5}
+
+  .evolution-track{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:16px 20px}
+  .evo-title{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em;text-transform:uppercase;margin-bottom:14px}
+  .evo-steps{display:flex;align-items:flex-start;gap:0;position:relative}
+  .evo-step{flex:1;position:relative;padding:0 6px}
+  .evo-step::after{content:'→';position:absolute;right:-8px;top:26px;font-size:14px;color:#2D3F5E}
+  .evo-step:last-child::after{display:none}
+  .evo-dot{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 8px;border:2px solid}
+  .evo-name{font-family:'JetBrains Mono',monospace;font-size:8px;text-align:center;margin-bottom:3px;letter-spacing:.05em}
+  .evo-desc{font-size:9px;text-align:center;color:var(--dim);line-height:1.5}
+  .evo-when{font-family:'JetBrains Mono',monospace;font-size:7.5px;text-align:center;margin-top:4px;padding:2px 4px;border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">System Analysis · Architecture Design · Structural Patterns</div>
+  <h1>Application Architecture Styles</h1>
+  <p>From a single deployable unit to hundreds of independently deployed services — each architecture style is a deliberate trade-off between team autonomy, operational complexity, and deployment flexibility.</p>
+  <span class="danger-note">⚠ The bottom-right quadrant is the danger zone — distributed but still tightly coupled</span>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('quadrant',this)">📍 Architecture Map</button>
+  <button class="tab-btn" onclick="showTab('compare',this)">📊 Comparison Table</button>
+  <button class="tab-btn" onclick="showTab('evolution',this)">📈 Evolution Path</button>
+  <button class="tab-btn" onclick="showTab('decision',this)">🧭 Decision Guide</button>
+</div>
+
+<!-- ════════ TAB 1: QUADRANT ════════ -->
+<div class="tab-panel active" id="tab-quadrant">
+  <div class="cat-filters" id="cat-filters"></div>
+  <div class="layout">
+    <div class="chart-wrap">
+      <div class="axis-top" style="color:#A78BFA">▲ LOOSELY COUPLED &nbsp;<span class="axis-sub">· Clean boundaries · Independent modules · Low change blast radius</span></div>
+      <div class="axis-row">
+        <div class="axis-side" style="color:#60A5FA">◄ MONOLITHIC<br><span style="font-size:7px;color:#2A3A5A;font-family:'DM Sans';letter-spacing:0">Single deploy unit</span></div>
+
+        <svg id="map-svg" viewBox="0 0 640 530">
+          <defs>
+            <radialGradient id="dangerGlow" cx="75%" cy="80%" r="40%">
+              <stop offset="0%" stop-color="#FF3333" stop-opacity="0.15"/>
+              <stop offset="100%" stop-color="#FF3333" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="goodGlow" cx="25%" cy="20%" r="40%">
+              <stop offset="0%" stop-color="#6366F1" stop-opacity="0.08"/>
+              <stop offset="100%" stop-color="#6366F1" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <rect width="640" height="530" fill="#0C1121" rx="7"/>
+
+          <!-- Atmosphere glow -->
+          <rect width="640" height="530" rx="7" fill="url(#dangerGlow)" pointer-events="none"/>
+          <rect width="640" height="530" rx="7" fill="url(#goodGlow)" pointer-events="none"/>
+
+          <!-- Grid lines -->
+          <line x1="160" y1="0" x2="160" y2="530" stroke="#111827" stroke-width="1" pointer-events="none"/>
+          <line x1="320" y1="0" x2="320" y2="530" stroke="#111827" stroke-width="1" pointer-events="none"/>
+          <line x1="480" y1="0" x2="480" y2="530" stroke="#111827" stroke-width="1" pointer-events="none"/>
+          <line x1="0" y1="132" x2="640" y2="132" stroke="#111827" stroke-width="1" pointer-events="none"/>
+          <line x1="0" y1="265" x2="640" y2="265" stroke="#111827" stroke-width="1" pointer-events="none"/>
+          <line x1="0" y1="397" x2="640" y2="397" stroke="#111827" stroke-width="1" pointer-events="none"/>
+
+          <!-- Zone fills -->
+          <rect x="2" y="2" width="317" height="261" rx="5" fill="#A78BFA" fill-opacity="0.03" stroke="#A78BFA" stroke-opacity="0.08" stroke-width="1" pointer-events="none"/>
+          <rect x="321" y="2" width="317" height="261" rx="5" fill="#34D399" fill-opacity="0.035" stroke="#34D399" stroke-opacity="0.1" stroke-width="1" pointer-events="none"/>
+          <rect x="2" y="267" width="317" height="261" rx="5" fill="#F97316" fill-opacity="0.03" stroke="#F97316" stroke-opacity="0.08" stroke-width="1" pointer-events="none"/>
+          <!-- Danger zone has special treatment -->
+          <rect x="321" y="267" width="317" height="261" rx="5" fill="#FF3333" fill-opacity="0.06" stroke="#FF3333" stroke-opacity="0.2" stroke-width="1.5" stroke-dasharray="6,3" pointer-events="none"/>
+
+          <!-- Zone corner labels -->
+          <text x="18" y="22" font-family="'Playfair Display',serif" font-size="12" fill="#A78BFA" opacity="0.55" pointer-events="none">Well-Structured Monolith</text>
+          <text x="18" y="36" font-family="'JetBrains Mono',monospace" font-size="7" fill="#A78BFA" opacity="0.3" pointer-events="none">Modular · Clean boundaries · Easy to refactor</text>
+
+          <text x="329" y="22" font-family="'Playfair Display',serif" font-size="12" fill="#34D399" opacity="0.55" pointer-events="none">True Microservices</text>
+          <text x="329" y="36" font-family="'JetBrains Mono',monospace" font-size="7" fill="#34D399" opacity="0.3" pointer-events="none">Independent deploy · Loose coupling · Team autonomy</text>
+
+          <text x="18" y="285" font-family="'Playfair Display',serif" font-size="12" fill="#F97316" opacity="0.55" pointer-events="none">Legacy Monolith</text>
+          <text x="18" y="299" font-family="'JetBrains Mono',monospace" font-size="7" fill="#F97316" opacity="0.3" pointer-events="none">Everything entangled · Riskiest to change</text>
+
+          <text x="329" y="285" font-family="'Playfair Display',serif" font-size="12" fill="#FF6B6B" opacity="0.7" pointer-events="none">⚠ Distributed Monolith</text>
+          <text x="329" y="299" font-family="'JetBrains Mono',monospace" font-size="7" fill="#FF6B6B" opacity="0.45" pointer-events="none">Split physically · Still coupled logically · Worst of both</text>
+
+          <!-- Danger zone skull -->
+          <text x="590" y="510" font-size="22" opacity="0.12" pointer-events="none">☠</text>
+
+          <!-- Center axes -->
+          <line x1="320" y1="0" x2="320" y2="530" stroke="#1E2E48" stroke-width="1.5" pointer-events="none"/>
+          <line x1="0" y1="265" x2="640" y2="265" stroke="#1E2E48" stroke-width="1.5" pointer-events="none"/>
+          <circle cx="320" cy="265" r="4" fill="#253550" pointer-events="none"/>
+          <circle cx="320" cy="265" r="2" fill="#3A4E6E" pointer-events="none"/>
+          <text x="315" y="16"  font-size="12" fill="#A78BFA" opacity="0.5" pointer-events="none">▲</text>
+          <text x="315" y="528" font-size="12" fill="#F97316" opacity="0.5" pointer-events="none">▼</text>
+          <text x="620" y="270" font-size="12" fill="#34D399" opacity="0.5" pointer-events="none">►</text>
+          <text x="8"   y="270" font-size="12" fill="#60A5FA" opacity="0.5" pointer-events="none">◄</text>
+
+          <g id="glow-layer"   pointer-events="none"></g>
+          <circle id="active-ring" cx="-400" cy="-400" r="0" fill="none" stroke="white" stroke-width="2" stroke-dasharray="5,3" opacity="0.7" pointer-events="none"/>
+          <g id="bubble-layer"></g>
+          <g id="label-layer"  pointer-events="none"></g>
+        </svg>
+
+        <div class="axis-side" style="color:#34D399">DISTRIBUTED ►<br><span style="font-size:7px;color:#2A3A5A;font-family:'DM Sans';letter-spacing:0">Multiple deploy units</span></div>
+      </div>
+      <div class="axis-bot" style="color:#F97316">▼ TIGHTLY COUPLED &nbsp;<span class="axis-sub">· Shared state · Cross-cutting dependencies · High change blast radius</span></div>
+    </div>
+
+    <div class="detail-panel" id="detail-panel">
+      <div class="placeholder">
+        <div class="big">🏗️</div>
+        Click any bubble to explore the architecture style — QA fit, team implications, real-world examples, and trade-offs.
+        <div class="hint">⚠ RED ZONE = Distributed Monolith (anti-pattern)</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="axis-note">
+    <div>
+      <div class="an-label">Y-Axis — Internal Coupling (Loosely ↔ Tightly Coupled)</div>
+      <div class="an-text">
+        <strong style="color:#A78BFA">Loosely Coupled (top):</strong> Modules or services have clear contracts and minimal shared state. A change in one unit does not force changes elsewhere. High cohesion, low coupling.<br>
+        <strong style="color:#F97316">Tightly Coupled (bottom):</strong> Components share databases, call each other directly, or have implicit dependencies. Changing one thing requires changing many others.
+      </div>
+    </div>
+    <div class="an-div"></div>
+    <div>
+      <div class="an-label">X-Axis — Deployment Granularity (Monolith ↔ Distributed)</div>
+      <div class="an-text">
+        <strong style="color:#60A5FA">Monolithic (left):</strong> All code ships as a single deployable artifact. One CI/CD pipeline. Simple to reason about, but scales as a unit.<br>
+        <strong style="color:#34D399">Distributed (right):</strong> Services deploy independently. Different teams own different pipelines. Enables independent scaling — but introduces network, latency, and consistency complexity.<br>
+        <strong style="color:#FF8E8E">⚠ Danger Zone (bottom-right):</strong> Distributed but tightly coupled = "Distributed Monolith." Worst of both worlds.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ TAB 2: COMPARISON TABLE ════════ -->
+<div class="tab-panel" id="tab-compare" style="align-items:stretch">
+  <div class="tbl-wrap">
+    <div class="tbl-lbl">All Architecture Styles — Full Comparison Matrix</div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th>Architecture</th><th>Deploy Unit</th><th>Team Size Fit</th><th>Ops Complexity</th>
+        <th>Dev Velocity (early)</th><th>Dev Velocity (at scale)</th>
+        <th>Data Isolation</th><th>Fault Isolation</th><th>Best For</th><th>Avoid When</th>
+      </tr></thead>
+      <tbody id="cmp-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ════════ TAB 3: EVOLUTION PATH ════════ -->
+<div class="tab-panel" id="tab-evolution" style="align-items:stretch">
+  <div class="evolution-track" style="margin-bottom:12px">
+    <div class="evo-title">Typical Evolution Path — Start Monolith, Split When You Must</div>
+    <div class="evo-steps" id="evo-steps"></div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%">
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em;margin-bottom:12px">SIGNALS TO SPLIT (add services)</div>
+      <div id="split-signals" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px">
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em;margin-bottom:12px">SIGNALS TO STAY MONOLITH</div>
+      <div id="stay-signals" style="display:flex;flex-direction:column;gap:7px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ TAB 4: DECISION GUIDE ════════ -->
+<div class="tab-panel" id="tab-decision" style="align-items:stretch">
+  <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+    <div class="guide-grid" id="guide-cards"></div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em">TEAM / CONTEXT PROFILE → RECOMMENDED ARCHITECTURE</div>
+      <div id="profile-rows" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ARCH = [
+  // ── Loose + Monolithic (top-left) ──
+  {
+    id:"modular_monolith", name:"Modular Monolith", icon:"📦",
+    category:"Monolith", catColor:"#60A5FA", cx:145, cy:105, r:26, color:"#60A5FA",
+    quadrant:"Loosely Coupled · Single Deploy Unit",
+    antipattern:false,
+    why:"A single deployable artifact — but internally divided into strict modules with defined boundaries. Modules cannot access each other's internals — only through public APIs. This gives team independence without the operational overhead of microservices.",
+    qas:[
+      {name:"Dev Velocity (startup)",score:5},{name:"Refactorability",score:5},
+      {name:"Operational Simplicity",score:5},{name:"Test Isolation",score:4},
+      {name:"Independent Scaling",score:2},{name:"Team Autonomy",score:3}
+    ],
+    examples:[
+      {icon:"💎",name:"Ruby on Rails (Packwerk)",desc:"GitHub uses Modular Monolith — strict module boundaries via Packwerk."},
+      {icon:"🐘",name:"Laravel Modules",desc:"PHP ecosystem has strong modular patterns within a single app."},
+      {icon:"🟦",name:"NX Monorepo",desc:"Frontend modular mono — shared codebase, strict module graphs."},
+    ],
+    goodFor:"Teams < 50 devs · Products that need speed · Clear domain boundaries",
+    tradeoffGood:"Best of both worlds. Single deploy. Clean boundaries. Easy to later extract services.",
+    tradeoffBad:"Requires discipline. Easy to let boundaries erode over time. Still scales as a unit.",
+    whenToUse:"Start here. When you know your domains but don't need independent deployment yet.",
+  },
+  {
+    id:"hexagonal", name:"Hexagonal / Clean", icon:"⬡",
+    category:"Monolith", catColor:"#60A5FA", cx:68, cy:155, r:22, color:"#818CF8",
+    quadrant:"Loosely Coupled · Monolithic — Internal Structure Pattern",
+    antipattern:false,
+    why:"Not a deployment strategy — an internal code structure pattern. Core business logic is isolated from frameworks, databases, and UIs via 'ports and adapters'. Can be combined with any architecture style.",
+    qas:[
+      {name:"Testability",score:5},{name:"Framework Independence",score:5},
+      {name:"Domain Isolation",score:5},{name:"Learning Curve",score:2},
+      {name:"Team Adoption",score:3},{name:"Boilerplate",score:2}
+    ],
+    examples:[
+      {icon:"☕",name:"Java / Spring (DDD)",desc:"Ports & Adapters in Java — domain core, infrastructure adapters."},
+      {icon:"🐍",name:"Python (FastAPI + Clean)",desc:"Clean architecture in Python — separating use cases from HTTP layer."},
+      {icon:"🟦",name:"TypeScript + NestJS",desc:"NestJS modules map well to hexagonal layers."},
+    ],
+    goodFor:"Complex domain logic · Teams practicing DDD · Long-lived systems",
+    tradeoffGood:"Highly testable. Domain logic is pure — no framework or DB coupling.",
+    tradeoffBad:"More files and indirection. Slower to get started. Overkill for simple CRUD.",
+    whenToUse:"When your domain logic is complex and needs to outlive its infrastructure.",
+  },
+  {
+    id:"layered", name:"Layered Architecture", icon:"🗂️",
+    category:"Monolith", catColor:"#60A5FA", cx:110, cy:220, r:20, color:"#7DD3FC",
+    quadrant:"Medium Coupling · Monolithic — Traditional N-Tier",
+    antipattern:false,
+    why:"The classic Web → Service → Repository stack. Each layer only calls the layer below it. Simple to teach and understand. Most MVC frameworks implement this pattern implicitly.",
+    qas:[
+      {name:"Simplicity",score:5},{name:"Learnability",score:5},
+      {name:"Dev Velocity (startup)",score:4},{name:"Testability",score:3},
+      {name:"Scalability",score:3},{name:"Long-term Maintainability",score:3}
+    ],
+    examples:[
+      {icon:"🌐",name:"MVC Frameworks",desc:"Rails, Laravel, Django, Spring MVC — all layered by default."},
+      {icon:"🔷",name:".NET N-Tier",desc:"Classic Web → Business Logic → Data Access pattern."},
+      {icon:"📱",name:"Android MVVM",desc:"View → ViewModel → Repository — layered mobile pattern."},
+    ],
+    goodFor:"Standard CRUD apps · Small teams · Learning environments",
+    tradeoffGood:"Everyone understands it. Fast to build. Great for standard web apps.",
+    tradeoffBad:"Layers tend to leak. Business logic ends up in controllers. Hard to test in isolation.",
+    whenToUse:"For standard web apps and teams new to architecture patterns.",
+  },
+
+  // ── Tight + Monolithic (bottom-left) ──
+  {
+    id:"monolith", name:"Traditional Monolith", icon:"🧱",
+    category:"Monolith", catColor:"#60A5FA", cx:80, cy:345, r:24, color:"#F97316",
+    quadrant:"Medium-High Coupling · Single Deploy Unit",
+    antipattern:false,
+    why:"All application logic in one codebase, deployed as one unit. This is where every system starts. Completely valid for most products at early/mid scale. The problem only appears when the team grows or deployment frequency becomes a bottleneck.",
+    qas:[
+      {name:"Dev Velocity (startup)",score:5},{name:"Operational Simplicity",score:5},
+      {name:"Debug/Observability",score:5},{name:"Refactorability",score:2},
+      {name:"Independent Scaling",score:1},{name:"Team Autonomy",score:2}
+    ],
+    examples:[
+      {icon:"🛒",name:"Shopify (pre-2016)",desc:"Ran as a Rails monolith for years. Monolith was not the bottleneck."},
+      {icon:"📸",name:"Instagram",desc:"Python monolith serving 1B+ users — monolith lasted many years."},
+      {icon:"🔗",name:"Stack Overflow",desc:"Runs on a small cluster of servers as a monolith. Handles massive traffic."},
+    ],
+    goodFor:"New products · Teams < 20 devs · Products with unclear domain boundaries",
+    tradeoffGood:"Simple deployment. No network overhead. Easy to refactor within one codebase.",
+    tradeoffBad:"Scales as a whole unit. One slow part slows everything. Deployments affect everything.",
+    whenToUse:"Start here. Almost every successful company started with a monolith.",
+  },
+  {
+    id:"big_ball", name:"Big Ball of Mud", icon:"🪨",
+    category:"Anti-Pattern", catColor:"#F87171", cx:58, cy:458, r:20, color:"#6B7280",
+    quadrant:"Tightly Coupled · Monolithic — Anti-Pattern",
+    antipattern:true,
+    why:"A system with no recognizable structure. Classes call each other freely, shared global state is everywhere, no boundaries exist. Every change is dangerous. This is what a monolith becomes without intentional design.",
+    qas:[
+      {name:"Operational Simplicity",score:3},{name:"Dev Velocity (startup)",score:3},
+      {name:"Testability",score:1},{name:"Refactorability",score:1},
+      {name:"New Dev Onboarding",score:1},{name:"Feature Confidence",score:1}
+    ],
+    examples:[
+      {icon:"💀",name:"Every Legacy System",desc:"Any system that grew without architecture governance."},
+      {icon:"⚠️",name:"PHP Spaghetti",desc:"Classic example — global variables, mixed SQL + HTML, no layers."},
+    ],
+    goodFor:"Nobody intends this. It's an outcome, not a choice.",
+    tradeoffGood:"No overhead — code is written fast without constraints.",
+    tradeoffBad:"Everything. This is the failure mode all architectures exist to prevent.",
+    whenToUse:"Never. Recognize the warning signs before you arrive here.",
+  },
+
+  // ── Loose + Distributed (top-right — good zone) ──
+  {
+    id:"microservices", name:"Microservices", icon:"🔬",
+    category:"Distributed", catColor:"#34D399", cx:490, cy:108, r:28, color:"#34D399",
+    quadrant:"Loosely Coupled · Independently Deployed Services",
+    antipattern:false,
+    why:"Each business capability is a separate, independently deployable service with its own database. Services communicate via APIs or events. Enables true team autonomy — teams own their entire stack and can deploy on their own schedule.",
+    qas:[
+      {name:"Team Autonomy",score:5},{name:"Independent Scaling",score:5},
+      {name:"Fault Isolation",score:5},{name:"Technology Choice",score:5},
+      {name:"Operational Complexity",score:1},{name:"Dev Velocity (startup)",score:2}
+    ],
+    examples:[
+      {icon:"🎬",name:"Netflix",desc:"~700 microservices. Each team deploys independently thousands of times/day."},
+      {icon:"🛒",name:"Amazon",desc:"Invented the model. 'Two-pizza team' = one service."},
+      {icon:"🚗",name:"Uber",desc:"Started monolith, migrated to microservices as team scaled to 1000s of engineers."},
+    ],
+    goodFor:"Large orgs (100+ devs) · Multiple independent teams · Different scaling needs per domain",
+    tradeoffGood:"True team independence. Deploy anything without affecting others. Each service scales independently.",
+    tradeoffBad:"Enormous operational overhead. Distributed tracing, service mesh, complex testing.",
+    whenToUse:"When your team is the bottleneck, not your technology. Usually 50+ engineers minimum.",
+  },
+  {
+    id:"event_driven", name:"Event-Driven", icon:"⚡",
+    category:"Distributed", catColor:"#34D399", cx:570, cy:165, r:24, color:"#FBBF24",
+    quadrant:"Loosely Coupled · Distributed — Async Communication",
+    antipattern:false,
+    why:"Services communicate via events (published to a message broker like Kafka or RabbitMQ) rather than direct API calls. Producers don't know who consumes their events. The ultimate loose coupling — services are completely unaware of each other.",
+    qas:[
+      {name:"Decoupling",score:5},{name:"Scalability (async)",score:5},
+      {name:"Resilience",score:5},{name:"Eventual Consistency",score:4},
+      {name:"Debugging Complexity",score:1},{name:"Data Consistency",score:2}
+    ],
+    examples:[
+      {icon:"🟠",name:"Apache Kafka",desc:"Event streaming at scale. LinkedIn, Uber, Netflix event backbone."},
+      {icon:"🐰",name:"RabbitMQ",desc:"AMQP message broker. Work queues, pub/sub, routing."},
+      {icon:"🔶",name:"AWS EventBridge",desc:"Serverless event bus. Decouples AWS services and SaaS integrations."},
+    ],
+    goodFor:"High-throughput pipelines · Audit logs · Async workflows · Notification systems",
+    tradeoffGood:"Services never know about each other. Infinite buffer during traffic spikes.",
+    tradeoffBad:"Eventual consistency only. Extremely hard to debug and trace. Message ordering issues.",
+    whenToUse:"For async workflows and pipelines. Use alongside microservices — not instead of them.",
+  },
+  {
+    id:"serverless_arch", name:"Serverless / FaaS", icon:"☁️",
+    category:"Distributed", catColor:"#34D399", cx:565, cy:68, r:22, color:"#E879F9",
+    quadrant:"Loosely Coupled · Most Granular — Function per Business Action",
+    antipattern:false,
+    why:"Each business operation is a separate function (Lambda, Azure Function, Cloud Function). No servers to manage. Pay per execution. The most granular form of microservices — but with vendor-managed infrastructure.",
+    qas:[
+      {name:"Operational Simplicity",score:5},{name:"Cost at Low Traffic",score:5},
+      {name:"Auto-scaling",score:5},{name:"Vendor Lock-in",score:1},
+      {name:"Cold Start Latency",score:2},{name:"Local Dev Experience",score:2}
+    ],
+    examples:[
+      {icon:"⚡",name:"AWS Lambda",desc:"Trigger-based functions. S3 events, API Gateway, SQS."},
+      {icon:"🔵",name:"Google Cloud Functions",desc:"HTTP + event-triggered functions. Firebase integration."},
+      {icon:"🔷",name:"Azure Functions",desc:"Durable Functions for stateful workflows."},
+    ],
+    goodFor:"Event handlers · Scheduled jobs · Webhooks · Variable/bursty traffic",
+    tradeoffGood:"Zero infrastructure. Scales to zero. Pay only when running.",
+    tradeoffBad:"Cold starts. 15min max runtime. Vendor lock-in. Hard to test locally.",
+    whenToUse:"For event-triggered tasks and async jobs. Avoid for latency-sensitive APIs.",
+  },
+  {
+    id:"microfrontend", name:"Micro-Frontend", icon:"🖼️",
+    category:"Distributed", catColor:"#34D399", cx:420, cy:155, r:22, color:"#F472B6",
+    quadrant:"Loosely Coupled · Distributed — Frontend Decomposition",
+    antipattern:false,
+    why:"Apply microservices principles to the frontend. Each team owns their UI slice — from backend to browser. Teams deploy their frontend independently. Shell app composes the pages from separately deployed frontend modules.",
+    qas:[
+      {name:"Team Autonomy (frontend)",score:5},{name:"Independent Deploy",score:5},
+      {name:"Technology Flexibility",score:4},{name:"User Experience Consistency",score:2},
+      {name:"Bundle Size",score:2},{name:"Complexity",score:2}
+    ],
+    examples:[
+      {icon:"🛒",name:"IKEA / Zalando",desc:"E-commerce sites with teams owning full product page slices."},
+      {icon:"⬛",name:"Module Federation",desc:"Webpack/Vite Module Federation — share components between deployed apps."},
+      {icon:"🔧",name:"Single-SPA",desc:"Framework for composing multiple SPAs into one app."},
+    ],
+    goodFor:"Large frontend teams · E-commerce with independent team per product section",
+    tradeoffGood:"Frontend teams as autonomous as backend teams. Independent deployments.",
+    tradeoffBad:"Complex routing. Shared design system required. CSS isolation issues. Larger bundles.",
+    whenToUse:"Only when multiple teams own the same frontend and have deployment conflicts.",
+  },
+  {
+    id:"bff", name:"BFF Pattern", icon:"🔀",
+    category:"Distributed", catColor:"#34D399", cx:345, cy:115, r:19, color:"#6EE7B7",
+    quadrant:"Loosely Coupled · Distributed — API Layer per Client",
+    antipattern:false,
+    why:"Backend for Frontend — a dedicated API layer for each client type (mobile app, web app, third-party). Each BFF aggregates from backend services and shapes the response for exactly one client's needs. Avoids over-fetching/under-fetching.",
+    qas:[
+      {name:"Client Experience",score:5},{name:"API Flexibility",score:5},
+      {name:"Backend Decoupling",score:4},{name:"Duplication Risk",score:2},
+      {name:"Maintenance Overhead",score:3},{name:"Team Clarity",score:4}
+    ],
+    examples:[
+      {icon:"🎬",name:"SoundCloud",desc:"Originated the BFF pattern — mobile BFF vs web BFF."},
+      {icon:"🔶",name:"AWS AppSync",desc:"GraphQL BFF — different queries per client, one endpoint."},
+      {icon:"📱",name:"Netflix Falcor",desc:"Netflix's data access layer between clients and microservices."},
+    ],
+    goodFor:"Multiple client types (mobile + web) · Teams with separate mobile/web squads",
+    tradeoffGood:"Each client gets exactly the API shape it needs. No over-fetching.",
+    tradeoffBad:"Duplicates orchestration logic. N BFFs = N more services to maintain.",
+    whenToUse:"When mobile and web apps have very different data requirements from the same backend.",
+  },
+  {
+    id:"cqrs", name:"CQRS / Event Sourcing", icon:"↕️",
+    category:"Pattern", catColor:"#A78BFA", cx:290, cy:198, r:19, color:"#C4B5FD",
+    quadrant:"Loosely Coupled · Can be Monolithic or Distributed",
+    antipattern:false,
+    why:"Command Query Responsibility Segregation — separate the write model (Commands) from the read model (Queries). Event Sourcing stores every state change as an immutable event log. Powerful for audit, replay, and complex domain logic.",
+    qas:[
+      {name:"Audit Trail",score:5},{name:"Read Performance",score:5},
+      {name:"Event Replay",score:5},{name:"Implementation Complexity",score:1},
+      {name:"Learning Curve",score:1},{name:"Simplicity",score:1}
+    ],
+    examples:[
+      {icon:"🏦",name:"Banking / FinTech",desc:"Every transaction is an event. Audit trail is the source of truth."},
+      {icon:"🔷",name:"Azure Cosmos DB",desc:"Change feed enables CQRS patterns on top of document store."},
+      {icon:"☕",name:"Axon Framework",desc:"Java framework for CQRS + Event Sourcing patterns."},
+    ],
+    goodFor:"Financial systems · Audit-required domains · Complex domain events · Undo/redo systems",
+    tradeoffGood:"Complete audit history. Time-travel debugging. Separate read/write optimization.",
+    tradeoffBad:"Extreme complexity. Eventual consistency between read and write models.",
+    whenToUse:"Only for domains where audit trail is a core business requirement, not a nice-to-have.",
+  },
+  {
+    id:"soa", name:"SOA", icon:"🏗️",
+    category:"Distributed", catColor:"#34D399", cx:390, cy:310, r:22, color:"#94A3B8",
+    quadrant:"Medium Coupling · Distributed — Enterprise Service Bus Era",
+    antipattern:false,
+    why:"Service-Oriented Architecture — the 2000s enterprise predecessor to microservices. Services communicate via an ESB (Enterprise Service Bus). Often produced large, coarse-grained services and complex XML-based contracts (SOAP/WSDL).",
+    qas:[
+      {name:"Reusability (theoretical)",score:4},{name:"Enterprise Integration",score:4},
+      {name:"Loose Coupling (actual)",score:3},{name:"Operational Complexity",score:2},
+      {name:"Dev Velocity",score:2},{name:"Modern Tooling Fit",score:1}
+    ],
+    examples:[
+      {icon:"🏢",name:"Oracle SOA Suite",desc:"Enterprise ESB and service orchestration platform."},
+      {icon:"🔵",name:"IBM WebSphere",desc:"Classic enterprise service bus. Still in many large corporations."},
+      {icon:"🔷",name:"MuleSoft",desc:"Modern API integration platform evolved from SOA principles."},
+    ],
+    goodFor:"Large enterprise integration · Legacy system integration · B2B data exchange",
+    tradeoffGood:"Good for integrating heterogeneous enterprise systems. Standard contracts.",
+    tradeoffBad:"ESB becomes a bottleneck. SOAP/WSDL complexity. Often produces distributed monolith.",
+    whenToUse:"For enterprise integration between existing large systems. New systems should use REST/event APIs instead.",
+  },
+
+  // ── DANGER ZONE (bottom-right) ──
+  {
+    id:"distributed_monolith", name:"Distributed Monolith", icon:"☠️",
+    category:"Anti-Pattern", catColor:"#F87171", cx:510, cy:432, r:24, color:"#FF6B6B",
+    quadrant:"⚠ ANTI-PATTERN — Tightly Coupled + Distributed",
+    antipattern:true,
+    why:"Split into separate services but everything is still tightly coupled — shared databases, synchronous calls everywhere, services that can only deploy together. This combines ALL the downsides of microservices (network overhead, distributed debugging) with ALL the downsides of monoliths (tight coupling, no independent deploy). The most dangerous architecture to be in.",
+    qas:[
+      {name:"Independent Deploy",score:1},{name:"Fault Isolation",score:1},
+      {name:"Debug Complexity",score:1},{name:"Operational Overhead",score:1},
+      {name:"Data Consistency",score:2},{name:"Team Autonomy",score:1}
+    ],
+    examples:[
+      {icon:"💀",name:"Most Failed Microservice Migrations",desc:"Team split code into services before splitting the database or team."},
+      {icon:"⚠️",name:"Synchronous Service Chains",desc:"Service A → B → C → D synchronously. One failure cascades all."},
+      {icon:"🔗",name:"Shared Database Microservices",desc:"Services deployed separately but all reading/writing the same DB."},
+    ],
+    goodFor:"Nobody chooses this. It happens by accident.",
+    tradeoffGood:"(There are no genuine advantages to this pattern.)",
+    tradeoffBad:"Network latency of microservices + coupling of monolith. Deployments still coordinated. Cascading failures. Hardest architecture to debug.",
+    whenToUse:"Never. If you recognize yourself here, the fix is to decouple first — not split more.",
+  },
+  {
+    id:"mini_services", name:"Mini-Services", icon:"🔩",
+    category:"Anti-Pattern", catColor:"#F87171", cx:600, cy:385, r:18, color:"#FB923C",
+    quadrant:"Tightly Coupled · Distributed — Too-Fine Microservices",
+    antipattern:true,
+    why:"Microservices split so small they can't stand alone — each function or class became a service. Services call each other for trivial operations. The deployment overhead is massive, the coupling is high, and teams spend more time managing infra than building features.",
+    qas:[
+      {name:"Deploy Granularity",score:5},{name:"Operational Overhead",score:1},
+      {name:"Feature Velocity",score:1},{name:"Network Overhead",score:1},
+      {name:"Team Productivity",score:1},{name:"Testability",score:1}
+    ],
+    examples:[
+      {icon:"💀",name:"Nanoservices",desc:"A service for each database table or function. Extreme anti-pattern."},
+      {icon:"⚠️",name:"Chatty Services",desc:"Hundreds of synchronous inter-service calls per user request."},
+    ],
+    goodFor:"Nobody intends this. Happens when teams misapply the 'microservices = small' principle.",
+    tradeoffGood:"None. This is a failure mode.",
+    tradeoffBad:"Every feature requires coordinating 5+ service deployments. Network is on the critical path everywhere.",
+    whenToUse:"Never. Rule of thumb: one service per bounded context (domain), not per function.",
+  },
+];
+
+const CATEGORIES = ["All", ...new Set(ARCH.map(a => a.category))];
+let activeCategory = "All";
+let activeID = null;
+const NS = "http://www.w3.org/2000/svg";
+
+// ── Category filters ──
+const catFiltersEl = document.getElementById("cat-filters");
+CATEGORIES.forEach(cat => {
+  const btn = document.createElement("button");
+  btn.className = "cat-btn";
+  btn.dataset.cat = cat;
+  const p = ARCH.find(a=>a.category===cat);
+  const c = cat==="All" ? "#60A5FA" : (p?.catColor||"#64748B");
+  btn.textContent = cat;
+  if (cat==="All") { btn.style.background="#60A5FA18"; btn.style.color="#60A5FA"; btn.style.borderColor="#60A5FA45"; }
+  else { btn.style.color = c; }
+  btn.addEventListener("click", () => {
+    activeCategory = cat;
+    document.querySelectorAll(".cat-btn").forEach(b => {
+      const bc = ARCH.find(a=>a.category===b.dataset.cat)?.catColor || (b.dataset.cat==="All"?"#60A5FA":"#64748B");
+      if (b.dataset.cat===cat) { b.style.background=bc+"22"; b.style.color=bc; b.style.borderColor=bc+"55"; }
+      else { b.style.background=""; b.style.borderColor=""; b.style.color=bc; }
+    });
+    renderAll();
+  });
+  catFiltersEl.appendChild(btn);
+});
+
+// ── Render ──
+function renderAll() {
+  ["glow-layer","bubble-layer","label-layer"].forEach(id=>document.getElementById(id).innerHTML="");
+  ARCH.forEach(a => {
+    const dim = activeCategory!=="All" && a.category!==activeCategory;
+    const active = activeID===a.id;
+    // Glow
+    const g = document.createElementNS(NS,"circle");
+    g.setAttribute("cx",a.cx); g.setAttribute("cy",a.cy); g.setAttribute("r",a.r+12);
+    g.setAttribute("fill",a.color); g.setAttribute("fill-opacity", dim?0:active?0.28:0.08);
+    document.getElementById("glow-layer").appendChild(g);
+    // Bubble
+    const c = document.createElementNS(NS,"circle");
+    c.setAttribute("cx",a.cx); c.setAttribute("cy",a.cy); c.setAttribute("r",a.r);
+    c.setAttribute("fill",a.color); c.setAttribute("fill-opacity", dim?0.05:active?0.88:0.2);
+    c.setAttribute("stroke",a.color); c.setAttribute("stroke-width",active?2.5:a.antipattern?1.5:1.5);
+    c.setAttribute("stroke-opacity",dim?0.1:0.85);
+    if (a.antipattern && !dim) { c.setAttribute("stroke-dasharray","4,2"); }
+    c.setAttribute("data-aid",a.id); c.style.cursor=dim?"default":"pointer";
+    document.getElementById("bubble-layer").appendChild(c);
+    // Icon
+    const icon = document.createElementNS(NS,"text");
+    icon.setAttribute("x",a.cx); icon.setAttribute("y",a.cy);
+    icon.setAttribute("text-anchor","middle"); icon.setAttribute("dominant-baseline","central");
+    icon.setAttribute("font-size",Math.round(a.r*0.74)); icon.setAttribute("opacity",dim?0.08:1);
+    icon.textContent = a.icon;
+    document.getElementById("label-layer").appendChild(icon);
+    // Label
+    const lbl = document.createElementNS(NS,"text");
+    lbl.setAttribute("x",a.cx); lbl.setAttribute("y",a.cy+a.r+11);
+    lbl.setAttribute("text-anchor","middle"); lbl.setAttribute("font-family","'JetBrains Mono',monospace");
+    lbl.setAttribute("font-size","7.5"); lbl.setAttribute("fill",a.color); lbl.setAttribute("opacity",dim?0.08:0.85);
+    lbl.textContent = a.name;
+    document.getElementById("label-layer").appendChild(lbl);
+  });
+  const ring = document.getElementById("active-ring");
+  if (activeID) {
+    const a = ARCH.find(x=>x.id===activeID);
+    ring.setAttribute("cx",a.cx); ring.setAttribute("cy",a.cy);
+    ring.setAttribute("r",a.r+17); ring.setAttribute("stroke",a.color); ring.setAttribute("stroke-width","2");
+  } else { ring.setAttribute("cx",-400); ring.setAttribute("cy",-400); ring.setAttribute("r",0); }
+}
+
+// ── Click ──
+document.getElementById("map-svg").addEventListener("click", e => {
+  let t = e.target;
+  while (t && t!==e.currentTarget) { if (t.dataset?.aid) break; t=t.parentElement; }
+  const aid = t?.dataset?.aid;
+  if (!aid) return;
+  const a = ARCH.find(x=>x.id===aid);
+  if (!a) return;
+  if (activeCategory!=="All" && a.category!==activeCategory) return;
+  activeID = activeID===aid ? null : aid;
+  renderAll();
+  activeID ? renderDetail(activeID) : showPlaceholder();
+});
+
+function showPlaceholder() {
+  document.getElementById("detail-panel").innerHTML=`<div class="placeholder"><div class="big">🏗️</div>Click any bubble to explore the architecture style — QA fit, team implications, real-world examples, and trade-offs.<div class="hint">⚠ RED ZONE = Anti-patterns (dashed border)</div></div>`;
+}
+
+function makeDots(score,color) {
+  let h='<div class="dots">';
+  for(let i=1;i<=5;i++) h+=`<span class="dot" style="background:${i<=score?color:'#1A2540'};border-color:${i<=score?color:'#243455'}"></span>`;
+  return h+"</div>";
+}
+
+function renderDetail(aid) {
+  const a = ARCH.find(x=>x.id===aid);
+  const qaRows = a.qas.map(q=>`<div class="qa-row"><div class="qa-name">${q.name}</div>${makeDots(q.score,a.color)}</div>`).join("");
+  const exItems = a.examples.map(e=>`
+    <div class="ex-item">
+      <div class="ex-icon">${e.icon}</div>
+      <div><div class="ex-name" style="color:${a.color}">${e.name}</div><div class="ex-desc">${e.desc}</div></div>
+    </div>`).join("");
+
+  const apBlock = a.antipattern ? `
+    <div class="antipattern-warn">
+      <div class="ap-label">⚠ ANTI-PATTERN — Do Not Replicate</div>
+      <div class="ap-text">This is a known failure mode, not a recommended pattern. Understanding it helps you recognize when a project is heading here.</div>
+    </div>` : "";
+
+  document.getElementById("detail-panel").innerHTML=`
+    <div class="detail-card" style="border-color:${a.color}45">
+      <div class="detail-head" style="background:${a.color}0c;border-bottom-color:${a.color}22">
+        <div class="d-icon">${a.icon}</div>
+        <div>
+          <div class="d-name" style="color:${a.color}">${a.name}</div>
+          <div class="d-badges">
+            <span class="badge" style="background:${a.catColor}1A;color:${a.catColor}">${a.category}</span>
+            ${a.antipattern?'<span class="badge" style="background:rgba(255,107,107,.15);color:#FF8E8E">⚠ Anti-Pattern</span>':''}
+          </div>
+        </div>
+      </div>
+      <div class="detail-body">
+        ${apBlock}
+        <div><div class="sec-label" style="color:${a.color}">Map Position</div><div class="pos-tag">${a.quadrant}</div></div>
+        <div><div class="sec-label" style="color:${a.color}">Why This Pattern Exists</div><div class="sec-text">${a.why}</div></div>
+        <div><div class="sec-label" style="color:${a.color}">QA Fit Scores</div>${qaRows}</div>
+        <div><div class="sec-label" style="color:${a.color}">Real-World Examples</div><div class="example-grid">${exItems}</div></div>
+        <div>
+          <div class="sec-label" style="color:${a.color}">Trade-offs</div>
+          <div class="tradeoffs">
+            <div class="tf-col"><div class="tf-label" style="color:#4ADE80">✓ Strengths</div><div class="tf-text">${a.tradeoffGood}</div></div>
+            <div class="tf-col"><div class="tf-label" style="color:#F87171">✗ Weaknesses</div><div class="tf-text">${a.tradeoffBad}</div></div>
+          </div>
+        </div>
+        <div class="when-to-use"><div class="when-label">WHEN TO USE</div><div class="when-text">${a.whenToUse}</div></div>
+        <div><div class="sec-label" style="color:${a.color}">Best Used For</div><div style="font-size:10px;color:#4A5A7A;line-height:1.6">${a.goodFor}</div></div>
+      </div>
+    </div>`;
+}
+
+// ── Tab switching ──
+function showTab(tabId, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+tabId).classList.add("active");
+  btn.classList.add("active");
+}
+
+// ── Comparison Table ──
+const CMP = [
+  {name:"Big Ball of Mud",         cat:"Anti-Pattern",  deploy:"Single",    team:"Any (warning)",  ops:"Low",    devEarly:"Fast",     devScale:"Terrible",  data:"Shared chaos",    fault:"None",      best:"Accidentally",               avoid:"Always"},
+  {name:"Traditional Monolith",    cat:"Monolith",      deploy:"Single",    team:"1–20",           ops:"Low",    devEarly:"Fast",     devScale:"Slows",     data:"Single DB",       fault:"Low",       best:"New products, small teams",   avoid:"100+ devs, diff scaling needs"},
+  {name:"Layered Architecture",    cat:"Monolith",      deploy:"Single",    team:"1–30",           ops:"Low",    devEarly:"Fast",     devScale:"Medium",    data:"Single DB",       fault:"Low",       best:"Standard CRUD web apps",      avoid:"Complex domain logic"},
+  {name:"Modular Monolith",        cat:"Monolith",      deploy:"Single",    team:"5–50",           ops:"Low",    devEarly:"Fast",     devScale:"Good",      data:"Shared+modules",  fault:"Medium",    best:"Growing teams, clear domains", avoid:"Need true independent deploy"},
+  {name:"Hexagonal / Clean Arch",  cat:"Monolith",      deploy:"Single",    team:"5–50",           ops:"Low",    devEarly:"Slower",   devScale:"Good",      data:"Any",             fault:"Medium",    best:"Complex domain logic",        avoid:"Simple CRUD apps"},
+  {name:"SOA",                     cat:"Distributed",   deploy:"Multiple",  team:"50–500",         ops:"High",   devEarly:"Slow",     devScale:"Medium",    data:"Per service",     fault:"Medium",    best:"Enterprise integration",      avoid:"New cloud-native systems"},
+  {name:"BFF Pattern",             cat:"Distributed",   deploy:"Multiple",  team:"10–100",         ops:"Medium", devEarly:"Medium",   devScale:"Good",      data:"Via backends",    fault:"Medium",    best:"Multiple client types",       avoid:"Single client only"},
+  {name:"CQRS / Event Sourcing",   cat:"Pattern",       deploy:"Any",       team:"10–100",         ops:"High",   devEarly:"Slow",     devScale:"Very Good", data:"Read+Write split",fault:"High",      best:"Financial, audit-critical",   avoid:"Simple CRUD, small teams"},
+  {name:"Microservices",           cat:"Distributed",   deploy:"Per Service",team:"50–1000+",      ops:"Very High",devEarly:"Slow",  devScale:"Excellent", data:"Per service DB",  fault:"Excellent", best:"Large orgs, team autonomy",   avoid:"Small teams, unclear domains"},
+  {name:"Event-Driven",            cat:"Distributed",   deploy:"Per Service",team:"20–500",        ops:"High",   devEarly:"Slow",     devScale:"Excellent", data:"Event log",       fault:"Excellent", best:"Async pipelines, high scale",  avoid:"Strong consistency required"},
+  {name:"Serverless / FaaS",       cat:"Distributed",   deploy:"Per Function",team:"1–100",        ops:"Low",    devEarly:"Fast",     devScale:"Good",      data:"External store",  fault:"Excellent", best:"Event handlers, jobs",        avoid:"Long-running, latency-critical"},
+  {name:"Micro-Frontend",          cat:"Distributed",   deploy:"Per Team",  team:"20–200",         ops:"High",   devEarly:"Slow",     devScale:"Good",      data:"Via APIs",        fault:"Medium",    best:"Large frontend org",          avoid:"Single frontend team"},
+  {name:"Distributed Monolith",    cat:"Anti-Pattern",  deploy:"Multiple",  team:"N/A (accident)", ops:"Very High",devEarly:"—",    devScale:"Terrible",  data:"Shared (bad)",    fault:"None",      best:"Nobody. Avoid.",              avoid:"Always — refactor to decouple first"},
+  {name:"Mini-Services",           cat:"Anti-Pattern",  deploy:"Many tiny", team:"N/A (accident)", ops:"Extreme",devEarly:"—",       devScale:"Terrible",  data:"Fragmented",      fault:"None",      best:"Nobody. Avoid.",              avoid:"Always — merge or coarsen services"},
+];
+
+const catClr = {"Monolith":"#60A5FA","Distributed":"#34D399","Pattern":"#A78BFA","Anti-Pattern":"#F87171"};
+const opsClr = {"Low":"#34D399","Medium":"#FBBF24","High":"#F97316","Very High":"#F87171","Extreme":"#FF3333"};
+const devClr = {"Fast":"#34D399","Medium":"#FBBF24","Slower":"#FBBF24","Good":"#34D399","Very Good":"#34D399","Excellent":"#34D399","Slow":"#F97316","Slows":"#F97316","Terrible":"#F87171","—":"#475569"};
+
+function badge(val, clrMap, fallback="#94A3B8") {
+  const c = clrMap[val]||fallback;
+  return `<span class="tbl-badge" style="background:${c}1A;color:${c}">${val}</span>`;
+}
+
+document.getElementById("cmp-tbody").innerHTML = CMP.map(r=>`
+  <tr>
+    <td style="font-weight:600;color:#D1D5DB;white-space:nowrap">${r.name}</td>
+    <td>${badge(r.cat,catClr)}</td>
+    <td style="color:#64748B;font-size:9px">${r.deploy}</td>
+    <td style="color:#64748B;font-size:9px">${r.team}</td>
+    <td>${badge(r.ops,opsClr)}</td>
+    <td>${badge(r.devEarly,devClr)}</td>
+    <td>${badge(r.devScale,devClr)}</td>
+    <td style="color:#64748B;font-size:9px">${r.data}</td>
+    <td style="color:#64748B;font-size:9px">${r.fault}</td>
+    <td style="color:#60A5FA;font-size:9px">${r.best}</td>
+    <td style="color:#475569;font-size:9px">${r.avoid}</td>
+  </tr>`).join("");
+
+// ── Evolution Track ──
+const EVO = [
+  {icon:"🧱",name:"Monolith",    color:"#F97316",when:"Day 1 → 10K users",   desc:"Ship fast. Validate the idea."},
+  {icon:"📦",name:"Modular\nMonolith",color:"#60A5FA",when:"10K → 200K users",  desc:"Add domain boundaries without splitting."},
+  {icon:"✂️",name:"Extract\n1st Service",color:"#FBBF24",when:"Team > 20 devs",   desc:"Split the first bottleneck service only."},
+  {icon:"🔬",name:"Microservices\n(selective)",color:"#34D399",when:"Team > 50 devs",   desc:"Services per autonomous team boundary."},
+  {icon:"⚡",name:"Event-Driven\nPipelines",color:"#E879F9",when:"High async load",   desc:"Decouple async flows via events."},
+];
+document.getElementById("evo-steps").innerHTML = EVO.map((e,i)=>`
+  <div class="evo-step">
+    <div class="evo-dot" style="background:${e.color}18;border-color:${e.color}55">${e.icon}</div>
+    <div class="evo-name" style="color:${e.color}">${e.name.replace('\n','<br>')}</div>
+    <div class="evo-desc">${e.desc}</div>
+    <div class="evo-when" style="background:${e.color}14;color:${e.color}99">${e.when}</div>
+  </div>`).join("");
+
+const SPLIT_SIGNALS = [
+  {icon:"🚀",text:"A specific feature needs to scale 10x faster than the rest of the app"},
+  {icon:"👥",text:"Two teams are stepping on each other's code — deployment conflicts every sprint"},
+  {icon:"🔒",text:"One module has strict compliance needs (PCI, HIPAA) that require isolation"},
+  {icon:"⏱️",text:"One module's deployment cycle is blocking unrelated feature releases"},
+  {icon:"🌍",text:"A feature needs to be deployed in a different region or cloud for data residency"},
+  {icon:"🧪",text:"One team wants to use a completely different technology stack for a justified reason"},
+];
+const STAY_SIGNALS = [
+  {icon:"🚀",text:"Your team is under 15 engineers — monolith ops is much simpler"},
+  {icon:"🗺️",text:"Domain boundaries are still unclear — splitting now means splitting wrong"},
+  {icon:"⚡",text:"You're still finding product-market fit — you need iteration speed over scale"},
+  {icon:"💰",text:"You don't have a dedicated DevOps/SRE team to manage distributed infrastructure"},
+  {icon:"📊",text:"Your current architecture handles current load fine — premature optimization"},
+  {icon:"🔗",text:"Your services are so interconnected that a split would just create a distributed monolith"},
+];
+
+document.getElementById("split-signals").innerHTML = SPLIT_SIGNALS.map(s=>`
+  <div style="display:flex;gap:9px;align-items:flex-start;padding:8px 10px;background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.12);border-radius:5px">
+    <div style="font-size:14px;flex-shrink:0">${s.icon}</div>
+    <div style="font-size:11px;color:#8A9BC0;line-height:1.55">${s.text}</div>
+  </div>`).join("");
+
+document.getElementById("stay-signals").innerHTML = STAY_SIGNALS.map(s=>`
+  <div style="display:flex;gap:9px;align-items:flex-start;padding:8px 10px;background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.12);border-radius:5px">
+    <div style="font-size:14px;flex-shrink:0">${s.icon}</div>
+    <div style="font-size:11px;color:#8A9BC0;line-height:1.55">${s.text}</div>
+  </div>`).join("");
+
+// ── Decision Guide ──
+const DECISION_QS = [
+  {q:"Is this a new product or less than 2 years old?",          yes:"Start with a Monolith",                    no:"Evaluate splitting signals"},
+  {q:"Do you have more than 50 engineers?",                      yes:"Microservices may be justified",            no:"Modular Monolith is probably better"},
+  {q:"Do separate teams need to deploy independently?",           yes:"Microservices or Micro-Frontend",          no:"Modular Monolith is sufficient"},
+  {q:"Is your domain logic complex with many business rules?",    yes:"Hexagonal / Clean Architecture + DDD",    no:"Layered Architecture is fine"},
+  {q:"Do you need an immutable audit trail of all changes?",      yes:"CQRS + Event Sourcing",                   no:"Standard DB with event log"},
+  {q:"Does one part need to scale 10x more than the rest?",      yes:"Extract that one service only",            no:"Scale the whole monolith"},
+  {q:"Are you dealing with heavy async processing?",              yes:"Event-Driven Architecture",                no:"Synchronous services or functions"},
+  {q:"Do you have different client types (mobile + web + API)?",  yes:"Consider BFF per client type",            no:"One API layer is fine"},
+];
+
+document.getElementById("guide-cards").innerHTML = DECISION_QS.map(q=>`
+  <div class="guide-card">
+    <div class="guide-q">❓ ${q.q}</div>
+    <div class="guide-opts">
+      <span class="g-yes">YES → ${q.yes}</span>
+      <span class="g-no">NO → ${q.no}</span>
+    </div>
+  </div>`).join("");
+
+const PROFILES = [
+  {icon:"🧑‍💻",profile:"Solo / 2-person team",         rec:"Traditional Monolith",                    why:"Speed matters. Infrastructure overhead kills small teams."},
+  {icon:"🚀",profile:"Startup (3–15 devs)",            rec:"Modular Monolith",                        why:"Ship fast but maintain clean boundaries for future extraction."},
+  {icon:"📈",profile:"Growth stage (15–50 devs)",      rec:"Modular Monolith → Extract key services",  why:"Extract only where team ownership conflicts arise."},
+  {icon:"🏢",profile:"Scale-up (50–150 devs)",         rec:"Selective Microservices",                  why:"Split by team boundaries — not by function size."},
+  {icon:"🏦",profile:"Large Enterprise (150+ devs)",   rec:"Microservices + Event-Driven",             why:"Full team autonomy at scale. Domain-driven service ownership."},
+  {icon:"🎓",profile:"Teaching / Learning Project",    rec:"Layered Architecture",                    why:"Clean N-tier teaches fundamentals before complexity."},
+  {icon:"💰",profile:"FinTech / Banking System",       rec:"Modular Monolith + CQRS/ES",              why:"Audit trail is core requirement. Complex domain logic."},
+  {icon:"🌍",profile:"Global Consumer App (web+mobile)",rec:"Monolith + BFF Pattern",                 why:"BFF shapes API for each client without splitting business logic."},
+  {icon:"⚡",profile:"Data Pipeline / ETL System",     rec:"Event-Driven + Serverless FaaS",           why:"Async, decoupled stages with independent scaling."},
+];
+
+document.getElementById("profile-rows").innerHTML = PROFILES.map(r=>`
+  <div style="display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid #0E1524">
+    <div style="font-size:20px;flex-shrink:0;margin-top:1px">${r.icon}</div>
+    <div>
+      <div style="font-size:12px;color:#D1D5DB;font-weight:500;margin-bottom:2px">${r.profile}</div>
+      <div style="font-size:11px;color:#60A5FA;margin-bottom:2px">→ ${r.rec}</div>
+      <div style="font-size:10px;color:#4A5A7A">${r.why}</div>
+    </div>
+  </div>`).join("");
+
+renderAll();
+</script>
+</body>
+</html>

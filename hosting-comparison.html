@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hosting Platform Comparison · Technology Decision Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0A0E1A;--bg2:#0D1220;--bg3:#111827;
+    --border:#1E293B;--border2:#2D3F5E;
+    --text:#E2E8F0;--muted:#94A3B8;--dim:#64748B;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;min-height:100vh;padding:16px 20px;display:flex;flex-direction:column;align-items:center}
+
+  .header{text-align:center;margin-bottom:14px;max-width:720px}
+  .header-label{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.35em;color:var(--dim);text-transform:uppercase;margin-bottom:6px}
+  .header h1{font-family:'Playfair Display',serif;font-size:22px;font-weight:400;color:#F1F5F9;margin-bottom:5px}
+  .header p{font-size:11px;color:var(--muted);line-height:1.65}
+
+  /* Tab nav */
+  .tab-nav{display:flex;gap:4px;margin-bottom:14px;background:var(--bg3);padding:4px;border-radius:8px;border:1px solid var(--border)}
+  .tab-btn{font-family:'JetBrains Mono',monospace;font-size:9px;padding:6px 14px;border-radius:5px;border:none;background:transparent;color:var(--dim);cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{background:#1E293B;color:#F1F5F9}
+
+  /* Tab panels */
+  .tab-panel{display:none;width:100%;max-width:1060px;flex-direction:column;align-items:center}
+  .tab-panel.active{display:flex}
+
+  /* Layout */
+  .layout{display:flex;gap:14px;width:100%;align-items:flex-start}
+  .chart-wrap{flex:1;min-width:0}
+
+  /* Axis */
+  .axis-top{text-align:center;margin-bottom:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+  .axis-sub{font-size:8px;color:#475569;letter-spacing:0;font-family:'Inter',sans-serif}
+  .axis-row{display:flex;align-items:center;gap:5px}
+  .axis-side{min-width:52px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;line-height:1.6}
+  .axis-bot{text-align:center;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+  #map-svg{width:100%;display:block;border:1px solid var(--border);border-radius:8px}
+
+  /* Category filters */
+  .cat-filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;width:100%}
+  .cat-btn{font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 10px;border-radius:14px;border:1px solid var(--border);background:transparent;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s}
+  .cat-btn:hover{border-color:var(--border2)}
+
+  /* Detail panel */
+  .detail-panel{width:300px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+  .placeholder{background:var(--bg3);border:1px dashed var(--border2);border-radius:8px;padding:22px;text-align:center;color:var(--dim);font-size:11px;line-height:1.8}
+  .placeholder .big{font-size:24px;margin-bottom:6px}
+
+  .detail-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .detail-head{padding:12px 14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:10px}
+  .d-icon{font-size:24px;flex-shrink:0}
+  .d-name{font-size:15px;font-weight:600;margin-bottom:1px}
+  .d-sub{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim)}
+  .d-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:4px}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;border-radius:8px;display:inline-block}
+
+  .detail-body{padding:12px 14px;display:flex;flex-direction:column;gap:10px;max-height:68vh;overflow-y:auto}
+  .sec-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:3px}
+  .sec-text{font-size:11px;color:var(--muted);line-height:1.65}
+
+  .qa-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+  .qa-name{font-size:10px;color:var(--muted);width:136px;flex-shrink:0}
+  .dots{display:flex;gap:2px}
+  .dot{width:8px;height:8px;border-radius:50%;border:1px solid;display:inline-block}
+
+  .service-grid{display:flex;flex-direction:column;gap:4px}
+  .service-item{background:var(--bg2);border-radius:4px;padding:8px 10px}
+  .si-top{display:flex;align-items:center;gap:7px;margin-bottom:3px}
+  .si-icon{font-size:14px}
+  .si-name{font-size:11px;font-weight:600}
+  .si-price{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 6px;border-radius:3px;margin-left:auto;flex-shrink:0}
+  .si-desc{font-size:9px;color:var(--dim);line-height:1.4}
+
+  .tradeoffs{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .tf-col{background:var(--bg2);border-radius:4px;padding:8px}
+  .tf-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;margin-bottom:3px}
+  .tf-text{font-size:10px;color:var(--muted);line-height:1.5}
+
+  .pos-tag{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--bg2);border-radius:4px;padding:5px 9px;color:var(--dim);line-height:1.5}
+
+  /* Compare table tab */
+  .tbl-wrap{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .tbl-head-lbl{padding:10px 16px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em}
+  table{width:100%;border-collapse:collapse}
+  th{padding:8px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.1em;background:var(--bg2);border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap}
+  td{padding:8px 12px;border-bottom:1px solid #141E2E;font-size:10px;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#0F172A40}
+  .tbl-badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 6px;border-radius:8px;white-space:nowrap}
+
+  /* Decision guide */
+  .guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+  .guide-card{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+  .guide-q{font-size:12px;color:#F1F5F9;font-weight:500;margin-bottom:7px}
+  .guide-opts{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}
+  .guide-yes{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:3px 9px;border-radius:10px;background:rgba(74,222,128,.12);color:#4ADE80}
+  .guide-no{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:3px 9px;border-radius:10px;background:rgba(148,163,184,.1);color:#94A3B8}
+  .guide-hint{font-size:9px;color:var(--dim);line-height:1.5;font-style:italic}
+
+  /* Axis note */
+  .axis-note{width:100%;margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 16px;display:grid;grid-template-columns:1fr 1px 1fr;gap:14px;align-items:start}
+  .an-div{background:var(--border)}
+  .an-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--dim);margin-bottom:4px;text-transform:uppercase}
+  .an-text{font-size:10px;color:var(--muted);line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">System Analysis · Infrastructure Design · Hosting Decision Framework</div>
+  <h1>Hosting Platform Comparison</h1>
+  <p>Independent of database type — where and how you host determines cost, control, compliance, and team overhead. Two axes that reveal why each hosting model exists.</p>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('quadrant',this)">📍 Hosting Quadrant</button>
+  <button class="tab-btn" onclick="showTab('compare',this)">📊 Comparison Table</button>
+  <button class="tab-btn" onclick="showTab('decision',this)">🧭 Decision Guide</button>
+</div>
+
+<!-- ═══════════ TAB 1: QUADRANT ═══════════ -->
+<div class="tab-panel active" id="tab-quadrant">
+  <div class="cat-filters" id="cat-filters"></div>
+  <div class="layout">
+    <div class="chart-wrap">
+      <div class="axis-top" style="color:#A78BFA">▲ HIGH CONTROL &nbsp;<span class="axis-sub">· Full infra access · Own configuration · You manage everything</span></div>
+      <div class="axis-row">
+        <div class="axis-side" style="color:#34D399">◄ LOW COST<br><span style="font-size:7px;color:#475569;font-family:Inter;letter-spacing:0">at scale</span></div>
+        <svg id="map-svg" viewBox="0 0 620 520">
+          <rect width="620" height="520" fill="#0D1220" rx="7"/>
+          <!-- grid -->
+          <line x1="155" y1="0"   x2="155" y2="520" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="310" y1="0"   x2="310" y2="520" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="465" y1="0"   x2="465" y2="520" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="0"   y1="130" x2="620" y2="130" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="0"   y1="260" x2="620" y2="260" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <line x1="0"   y1="390" x2="620" y2="390" stroke="#141E2E" stroke-width="1" pointer-events="none"/>
+          <!-- zone fills -->
+          <rect x="2"   y="2"   width="306" height="256" rx="5" fill="#A78BFA" fill-opacity="0.04" stroke="#A78BFA" stroke-opacity="0.09" stroke-width="1" pointer-events="none"/>
+          <rect x="312" y="2"   width="306" height="256" rx="5" fill="#F87171" fill-opacity="0.04" stroke="#F87171" stroke-opacity="0.09" stroke-width="1" pointer-events="none"/>
+          <rect x="2"   y="262" width="306" height="256" rx="5" fill="#34D399" fill-opacity="0.04" stroke="#34D399" stroke-opacity="0.09" stroke-width="1" pointer-events="none"/>
+          <rect x="312" y="262" width="306" height="256" rx="5" fill="#FBBF24" fill-opacity="0.04" stroke="#FBBF24" stroke-opacity="0.09" stroke-width="1" pointer-events="none"/>
+          <!-- zone corner labels -->
+          <text x="16" y="22"  font-family="'Playfair Display',serif" font-size="12" fill="#A78BFA" opacity="0.55" pointer-events="none">DIY Infrastructure</text>
+          <text x="16" y="36"  font-family="'JetBrains Mono',monospace" font-size="7" fill="#A78BFA" opacity="0.35" pointer-events="none">Self-hosted · Bare metal · K8s</text>
+          <text x="320" y="22" font-family="'Playfair Display',serif" font-size="12" fill="#F87171" opacity="0.55" pointer-events="none">Hyperscaler IaaS</text>
+          <text x="320" y="36" font-family="'JetBrains Mono',monospace" font-size="7" fill="#F87171" opacity="0.35" pointer-events="none">AWS · GCP · Azure full stack</text>
+          <text x="16" y="278" font-family="'Playfair Display',serif" font-size="12" fill="#34D399" opacity="0.55" pointer-events="none">Developer Cloud</text>
+          <text x="16" y="292" font-family="'JetBrains Mono',monospace" font-size="7" fill="#34D399" opacity="0.35" pointer-events="none">DigitalOcean · Hetzner · Vultr</text>
+          <text x="320" y="278" font-family="'Playfair Display',serif" font-size="12" fill="#FBBF24" opacity="0.55" pointer-events="none">PaaS / Serverless</text>
+          <text x="320" y="292" font-family="'JetBrains Mono',monospace" font-size="7" fill="#FBBF24" opacity="0.35" pointer-events="none">Railway · Render · Vercel</text>
+          <!-- center axes -->
+          <line x1="310" y1="0"   x2="310" y2="520" stroke="#2D3F5E" stroke-width="1.5" pointer-events="none"/>
+          <line x1="0"   y1="260" x2="620" y2="260" stroke="#2D3F5E" stroke-width="1.5" pointer-events="none"/>
+          <circle cx="310" cy="260" r="4" fill="#334155" pointer-events="none"/>
+          <circle cx="310" cy="260" r="2" fill="#475569" pointer-events="none"/>
+          <text x="305" y="16"  font-family="monospace" font-size="12" fill="#A78BFA" opacity="0.5" pointer-events="none">▲</text>
+          <text x="305" y="518" font-family="monospace" font-size="12" fill="#60A5FA" opacity="0.5" pointer-events="none">▼</text>
+          <text x="600" y="265" font-family="monospace" font-size="12" fill="#F87171" opacity="0.5" pointer-events="none">►</text>
+          <text x="8"   y="265" font-family="monospace" font-size="12" fill="#34D399" opacity="0.5" pointer-events="none">◄</text>
+          <!-- layers -->
+          <g id="glow-layer"   pointer-events="none"></g>
+          <circle id="active-ring" cx="-300" cy="-300" r="0" fill="none" stroke="white" stroke-width="2" stroke-dasharray="5,3" opacity="0.7" pointer-events="none"/>
+          <g id="bubble-layer"></g>
+          <g id="label-layer"  pointer-events="none"></g>
+        </svg>
+        <div class="axis-side" style="color:#F87171">HIGH COST ►<br><span style="font-size:7px;color:#475569;font-family:Inter;letter-spacing:0">at scale</span></div>
+      </div>
+      <div class="axis-bot" style="color:#60A5FA">▼ LOW CONTROL &nbsp;<span class="axis-sub">· Fully managed · Vendor handles ops · Black-box convenience</span></div>
+    </div>
+    <div class="detail-panel" id="detail-panel">
+      <div class="placeholder"><div class="big">🖥️</div>Click any bubble to explore the hosting platform — cost model, control level, QA fit, and real examples.</div>
+    </div>
+  </div>
+  <div class="axis-note">
+    <div>
+      <div class="an-label">Y-Axis — Control (High ↔ Low)</div>
+      <div class="an-text"><strong style="color:#A78BFA">High Control (top):</strong> You configure OS, network, storage, replication — everything. You also own every failure and patch cycle.<br><strong style="color:#60A5FA">Low Control (bottom):</strong> Vendor abstracts all infrastructure. Faster to deploy, harder to customize deeply.</div>
+    </div>
+    <div class="an-div"></div>
+    <div>
+      <div class="an-label">X-Axis — Cost at Scale (Low ↔ High)</div>
+      <div class="an-text"><strong style="color:#34D399">Low Cost (left):</strong> Open-source tooling or simple compute pricing. Scales cheaply if your team can manage the ops burden.<br><strong style="color:#F87171">High Cost (right):</strong> Premium managed services, enterprise licensing, or hyperscaler pricing that compounds with every feature you add.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB 2: COMPARE ═══════════ -->
+<div class="tab-panel" id="tab-compare" style="align-items:stretch">
+  <div class="tbl-wrap">
+    <div class="tbl-head-lbl">All Hosting Platforms — Full Comparison Matrix</div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th>Platform / Model</th><th>Category</th><th>Control</th><th>Cost Model</th>
+        <th>Ops Burden</th><th>Scale Speed</th><th>Compliance</th>
+        <th>Lock-in Risk</th><th>Best For</th><th>Avoid When</th>
+      </tr></thead>
+      <tbody id="cmp-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ═══════════ TAB 3: DECISION ═══════════ -->
+<div class="tab-panel" id="tab-decision" style="align-items:stretch">
+  <div style="width:100%;display:flex;flex-direction:column;gap:10px">
+    <div class="guide-grid" id="guide-cards"></div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em">TEAM PROFILE → RECOMMENDED HOSTING</div>
+      <div id="profile-rows" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PLATFORMS = [
+  // ── DIY / High Control + Low Cost ──
+  { id:"bare_metal", name:"Bare Metal", full:"Dedicated / Bare Metal Server", icon:"🖥️",
+    category:"Self-Hosted", catColor:"#A78BFA", cx:72, cy:92, r:22, color:"#A78BFA",
+    quadrant:"Max Control · Lowest Cost at Scale",
+    why:"You lease or own physical servers. No virtualization overhead. Full hardware access. The cheapest per-compute-unit at scale — if your team can manage it. Used by companies that hit cloud cost ceilings.",
+    qas:[{name:"Control",score:5},{name:"Cost at Scale",score:5},{name:"Raw Performance",score:5},{name:"Ops Burden",score:1},{name:"Provisioning Speed",score:1},{name:"Geo Distribution",score:2}],
+    services:[
+      {icon:"🇩🇪",name:"Hetzner Dedicated",desc:"Cheapest bare metal in EU. AX101: 128GB RAM, 24-core AMD.",price:"~€50–€200/mo"},
+      {icon:"🔶",name:"AWS Bare Metal (i3)",desc:"EC2 bare metal instances — no hypervisor. Full hardware.",price:"~$4–$14/hr"},
+      {icon:"🏢",name:"OVHcloud",desc:"Global bare metal. Good EU pricing. DDoS protection.",price:"~€40–€400/mo"},
+      {icon:"🔵",name:"Equinix Metal",desc:"Enterprise colocation + bare metal. Multi-cloud interconnect.",price:"~$1–$10/hr"},
+    ],
+    goodFor:"High-traffic fintech · Game servers · ML training · Cost-optimized scale",
+    tradeoffGood:"Maximum raw performance. No cloud markup. Full hardware access. Cheapest at scale.",
+    tradeoffBad:"You manage everything. Provisioning takes days. Hard to scale quickly.", },
+
+  { id:"colocation", name:"Colocation", full:"Colocation Data Center", icon:"🏢",
+    category:"Self-Hosted", catColor:"#A78BFA", cx:155, cy:138, r:18, color:"#9F7AEA",
+    quadrant:"Max Control · Medium-Low Cost",
+    why:"You own the hardware, they own the building, power, and cooling. Physical security and uptime SLAs without cloud pricing. Common for regulated industries that must own their hardware.",
+    qas:[{name:"Control",score:5},{name:"Physical Security",score:5},{name:"Cost at Scale",score:4},{name:"Ops Burden",score:2},{name:"Provisioning Speed",score:1},{name:"Managed Services",score:1}],
+    services:[
+      {icon:"🏢",name:"Equinix",desc:"Premium colocation. Direct cloud interconnects. Global IBX data centers.",price:"~$500–$5K/mo/rack"},
+      {icon:"🔵",name:"Digital Realty",desc:"Tier III/IV data centers. Strong compliance. Global footprint.",price:"Custom pricing"},
+      {icon:"🏗️",name:"CyrusOne",desc:"Hyperscale colocation. Enterprise SLAs.",price:"Custom pricing"},
+    ],
+    goodFor:"Banks · Government · Healthcare · Companies owning hardware for compliance",
+    tradeoffGood:"Own your hardware. Compliance-certifiable. Physical access. No cloud cost inflation.",
+    tradeoffBad:"Capital expenditure (CapEx) for hardware. Slow to provision new capacity.", },
+
+  { id:"k8s_selfhosted", name:"K8s / Containers", full:"Self-Hosted Kubernetes / Docker", icon:"🐳",
+    category:"Self-Hosted", catColor:"#A78BFA", cx:90, cy:188, r:20, color:"#818CF8",
+    quadrant:"High Control · Low Cost",
+    why:"Run containerized workloads on your own VMs or bare metal using Kubernetes. Portable across any cloud. GitOps-friendly. The standard for cloud-native teams who want control without hyperscaler pricing.",
+    qas:[{name:"Control",score:4},{name:"Portability",score:5},{name:"Cost at Scale",score:4},{name:"Ops Complexity",score:2},{name:"Provisioning Speed",score:3},{name:"Ecosystem",score:5}],
+    services:[
+      {icon:"🐳",name:"K3s / RKE2",desc:"Lightweight Kubernetes. Perfect for edge and self-hosted infra.",price:"~$0 license + VM cost"},
+      {icon:"🔁",name:"OpenShift",desc:"Red Hat enterprise K8s. Full stack with security, CI/CD, registry.",price:"~$10K+/yr enterprise"},
+      {icon:"📦",name:"Docker Swarm",desc:"Simpler container orchestration. Good for small teams.",price:"~$0 license"},
+      {icon:"🌊",name:"Nomad",desc:"HashiCorp workload orchestrator. Simpler than K8s.",price:"~$0 open source"},
+    ],
+    goodFor:"Cloud-native teams · Multi-cloud portability · GitOps workflows",
+    tradeoffGood:"Portable across any infrastructure. Full GitOps. No vendor lock-in.",
+    tradeoffBad:"Kubernetes expertise required. Complex stateful workloads. High maintenance.", },
+
+  // ── Hyperscaler IaaS — High Control + High Cost ──
+  { id:"aws", name:"AWS", full:"Amazon Web Services", icon:"🔶",
+    category:"Hyperscaler", catColor:"#F97316", cx:420, cy:88, r:28, color:"#F97316",
+    quadrant:"High Control + High Cost — Full Stack Cloud",
+    why:"The largest cloud provider. 200+ services covering compute, storage, networking, AI, databases, IoT, and more. Market leader with the deepest ecosystem. Default choice for most enterprise workloads.",
+    qas:[{name:"Service Breadth",score:5},{name:"Global Regions",score:5},{name:"Compliance Coverage",score:5},{name:"Ecosystem",score:5},{name:"Cost at Scale",score:2},{name:"Complexity",score:2}],
+    services:[
+      {icon:"💻",name:"EC2",desc:"Virtual machines. 700+ instance types. Spot instances for 90% savings.",price:"~$0.01–$32/hr"},
+      {icon:"📦",name:"ECS / EKS",desc:"Container orchestration. ECS is simpler, EKS is K8s-compatible.",price:"~$0.10/hr (EKS cluster)"},
+      {icon:"⚡",name:"Lambda",desc:"Serverless functions. Pay per 100ms. 15min max runtime.",price:"~$0.20/M requests"},
+      {icon:"🗄️",name:"RDS / Aurora",desc:"Managed relational DB. Aurora Serverless scales to zero.",price:"~$0.02–$1.50/hr"},
+      {icon:"📊",name:"Redshift",desc:"Columnar data warehouse. RA3 nodes with managed storage.",price:"~$0.25–$14/hr"},
+    ],
+    goodFor:"Enterprise · Complex multi-service architectures · Compliance-heavy industries",
+    tradeoffGood:"Unmatched breadth. Every compliance cert. 33 global regions. Deepest ecosystem.",
+    tradeoffBad:"Extremely complex pricing. Easy to over-provision. Costs compound fast.", },
+
+  { id:"gcp", name:"GCP", full:"Google Cloud Platform", icon:"🔵",
+    category:"Hyperscaler", catColor:"#F97316", cx:500, cy:132, r:24, color:"#4285F4",
+    quadrant:"High Control + High Cost — AI/Data Strength",
+    why:"Google's cloud. Strongest in data analytics (BigQuery), AI/ML (Vertex AI), and Kubernetes (invented K8s). Network infrastructure is world-class. Often cheaper than AWS for data-heavy workloads.",
+    qas:[{name:"AI/ML Services",score:5},{name:"Data Analytics",score:5},{name:"Network Performance",score:5},{name:"Service Breadth",score:4},{name:"Cost vs AWS",score:3},{name:"Enterprise Adoption",score:3}],
+    services:[
+      {icon:"💻",name:"Compute Engine",desc:"VMs on Google's infrastructure. Sustained use discounts automatic.",price:"~$0.01–$5/hr"},
+      {icon:"📊",name:"BigQuery",desc:"Serverless analytics. Query TB in seconds. Pay-per-query.",price:"~$5/TB queried"},
+      {icon:"🤖",name:"Vertex AI",desc:"Unified ML platform. Training + serving + MLOps.",price:"Usage-based"},
+      {icon:"☸️",name:"GKE",desc:"Google Kubernetes Engine. Autopilot mode is fully managed.",price:"~$0.10/hr (cluster)"},
+    ],
+    goodFor:"Data/ML-heavy workloads · Analytics · Companies with BigQuery or Vertex AI",
+    tradeoffGood:"Best analytics + AI/ML stack. Superb network. Sustained use discounts.",
+    tradeoffBad:"Smaller enterprise ecosystem than AWS. Less compliance coverage in some regions.", },
+
+  { id:"azure", name:"Azure", full:"Microsoft Azure", icon:"🔷",
+    category:"Hyperscaler", catColor:"#F97316", cx:540, cy:195, r:24, color:"#0089D6",
+    quadrant:"High Control + High Cost — Enterprise & Microsoft Stack",
+    why:"Microsoft's cloud. Dominant in enterprise Microsoft workloads (SQL Server, Active Directory, Office 365, .NET). Best choice for organizations already on Microsoft licensing. Strong hybrid with Azure Arc.",
+    qas:[{name:"Microsoft Integration",score:5},{name:"Enterprise Features",score:5},{name:"Hybrid Cloud",score:5},{name:"Compliance Coverage",score:5},{name:"Cost vs AWS",score:2},{name:"Developer Ergonomics",score:3}],
+    services:[
+      {icon:"💻",name:"Azure VMs",desc:"Virtual machines. Spot VMs for 90% discount on interruptible workloads.",price:"~$0.01–$6/hr"},
+      {icon:"🪟",name:"Azure SQL",desc:"Managed SQL Server. Hyperscale for unlimited storage.",price:"~$0.02–$2/hr"},
+      {icon:"🤖",name:"Azure OpenAI",desc:"GPT-4, DALL-E, Whisper via enterprise API with compliance.",price:"Usage-based"},
+      {icon:"🔷",name:"AKS",desc:"Azure Kubernetes Service. Deep AD + RBAC integration.",price:"~$0.10/hr"},
+    ],
+    goodFor:"Microsoft-stack enterprises · .NET applications · Government (Azure Gov Cloud)",
+    tradeoffGood:"Unmatched Microsoft integration. US Gov compliance. Azure Hybrid Benefit.",
+    tradeoffBad:"Complex licensing. Can be more expensive without Microsoft agreements.", },
+
+  // ── Developer Cloud — Low Cost + Medium Control ──
+  { id:"digitalocean", name:"DigitalOcean", full:"DigitalOcean / App Platform", icon:"🌊",
+    category:"Developer Cloud", catColor:"#34D399", cx:88, cy:340, r:22, color:"#0080FF",
+    quadrant:"Medium Control · Low-Medium Cost — Developer-First",
+    why:"Built for developers, not enterprises. Simple flat pricing. Good managed DB options. Predictable bills. The go-to for startups and side projects who want cloud without AWS complexity.",
+    qas:[{name:"Developer Experience",score:5},{name:"Cost Predictability",score:5},{name:"Simplicity",score:5},{name:"Managed Services",score:3},{name:"Enterprise Features",score:2},{name:"Global Regions",score:3}],
+    services:[
+      {icon:"💧",name:"Droplets",desc:"VMs from $6/mo. Consistent performance. Backups included.",price:"$6–$960/mo"},
+      {icon:"📱",name:"App Platform",desc:"PaaS for containers + static sites. Heroku alternative.",price:"$5–$150/mo"},
+      {icon:"🗄️",name:"Managed DBs",desc:"Managed PostgreSQL, MySQL, Redis, MongoDB, Kafka.",price:"$15–$400/mo"},
+      {icon:"☸️",name:"DOKS",desc:"Managed Kubernetes. Auto-scaling worker nodes.",price:"$12/mo + nodes"},
+    ],
+    goodFor:"Startups · Developer tools · Side projects · Teams leaving Heroku",
+    tradeoffGood:"Transparent flat pricing. Excellent docs. No surprise bills. Great DX.",
+    tradeoffBad:"Limited enterprise compliance. Fewer regions. Smaller managed service catalog.", },
+
+  { id:"hetzner", name:"Hetzner", full:"Hetzner Cloud", icon:"🇩🇪",
+    category:"Developer Cloud", catColor:"#34D399", cx:165, cy:378, r:20, color:"#D50000",
+    quadrant:"Medium Control · Very Low Cost",
+    why:"European cloud provider with the best price-to-performance ratio in the industry. A VPS with 8 vCPU and 16GB RAM costs ~€4/month. Popular for cost-conscious teams with EU data residency needs.",
+    qas:[{name:"Cost per Compute",score:5},{name:"EU Data Residency",score:5},{name:"Simplicity",score:4},{name:"Enterprise Features",score:2},{name:"Global Coverage",score:2},{name:"Managed Services",score:2}],
+    services:[
+      {icon:"☁️",name:"Cloud Servers",desc:"CX22: 2 vCPU / 4GB RAM — €4.15/mo. Incredible value.",price:"€3.79–€61/mo"},
+      {icon:"🗄️",name:"Storage Box",desc:"SFTP/WebDAV/Samba storage. Backup destination.",price:"€1–€50/mo"},
+      {icon:"🌐",name:"Load Balancer",desc:"Managed LB. Health checks, SSL termination.",price:"€5.39/mo"},
+    ],
+    goodFor:"EU-based teams · Cost-sensitive projects · GDPR-first workloads",
+    tradeoffGood:"Best price-performance on the market. Simple flat pricing. EU data residency.",
+    tradeoffBad:"Limited to EU/US regions. No enterprise compliance certs. Limited managed services.", },
+
+  { id:"fly", name:"Fly.io", full:"Fly.io — Edge Compute", icon:"🪰",
+    category:"Developer Cloud", catColor:"#34D399", cx:230, cy:320, r:18, color:"#7C3AED",
+    quadrant:"Medium Control · Low Cost — Edge-Native",
+    why:"Runs your containers close to users in 30+ cities globally. Apps auto-sleep when idle. Persistent volumes attached to VMs. Unique hybrid: container-level DX with VM-level isolation.",
+    qas:[{name:"Edge Latency",score:5},{name:"Developer Experience",score:5},{name:"Cost (low traffic)",score:5},{name:"Persistent Storage",score:3},{name:"Enterprise Features",score:2},{name:"Cost (high traffic)",score:3}],
+    services:[
+      {icon:"🪰",name:"Fly Machines",desc:"VMs on demand. Start in 300ms. Stop when idle to save cost.",price:"~$0.0000022/sec compute"},
+      {icon:"💾",name:"Fly Volumes",desc:"Persistent NVMe volumes attached to Machines.",price:"~$0.15/GB/mo"},
+      {icon:"🗄️",name:"Fly Postgres",desc:"Managed Postgres on Fly infra. HA with replication.",price:"$0 for dev + usage"},
+    ],
+    goodFor:"Global apps · Side projects · Container-first teams · Low-latency reads worldwide",
+    tradeoffGood:"Global by default. Cheap for idle apps. VMs not containers (better isolation).",
+    tradeoffBad:"Limited to Fly's ecosystem. Less predictable for sustained high-traffic apps.", },
+
+  // ── PaaS / Serverless — Low Control + Variable Cost ──
+  { id:"railway", name:"Railway", full:"Railway — Infrastructure as Code", icon:"🚂",
+    category:"PaaS", catColor:"#FBBF24", cx:355, cy:355, r:20, color:"#DD0031",
+    quadrant:"Low Control · Low-Medium Cost — Developer PaaS",
+    why:"Deploy anything from a Git repo or Docker image in 30 seconds. No YAML, no Kubernetes, no infrastructure thinking. Railway handles networking, scaling, and deployments automatically.",
+    qas:[{name:"Deploy Speed",score:5},{name:"Developer Experience",score:5},{name:"Simplicity",score:5},{name:"Cost at Scale",score:3},{name:"Control",score:2},{name:"Enterprise Features",score:1}],
+    services:[
+      {icon:"🚂",name:"Railway Services",desc:"Deploy from Git or Docker. Auto-deploys on push.",price:"$5/mo + usage"},
+      {icon:"🗄️",name:"Railway Postgres",desc:"Managed Postgres + Redis + MySQL. One click.",price:"Usage-based"},
+      {icon:"🌐",name:"Railway Networking",desc:"Auto-generated domains. Private networking between services.",price:"Included"},
+    ],
+    goodFor:"MVPs · Hackathons · Internal tools · Replacing Heroku",
+    tradeoffGood:"Ship in minutes. No infra config. Auto-SSL, auto-domains, auto-scaling.",
+    tradeoffBad:"Expensive at scale vs bare metal. Limited config. Vendor lock-in.", },
+
+  { id:"render", name:"Render", full:"Render — Unified Cloud", icon:"⬛",
+    category:"PaaS", catColor:"#FBBF24", cx:420, cy:390, r:18, color:"#46E3B7",
+    quadrant:"Low Control · Low-Medium Cost",
+    why:"PaaS that covers web services, workers, cron jobs, static sites, and managed databases in one unified dashboard. Heroku replacement with better pricing and no dynos.",
+    qas:[{name:"Ease of Use",score:5},{name:"Developer Experience",score:4},{name:"Cost at Low Scale",score:4},{name:"Control",score:2},{name:"Enterprise Features",score:2},{name:"Cost at High Scale",score:2}],
+    services:[
+      {icon:"🌐",name:"Web Services",desc:"Deploys from Git. Auto-deploy on push. Zero config HTTPS.",price:"$7–$85/mo"},
+      {icon:"⚙️",name:"Background Workers",desc:"Long-running async workers. Same code, different process type.",price:"$7–$85/mo"},
+      {icon:"🗄️",name:"Managed DBs",desc:"PostgreSQL, Redis managed. Daily backups included.",price:"$7–$140/mo"},
+    ],
+    goodFor:"Startups · Simple web apps · Teams migrating from Heroku",
+    tradeoffGood:"Beautiful DX. Unified platform. Good free tier. Auto-scaling.",
+    tradeoffBad:"Less flexible than full cloud. Cold starts on free tier. Pricey at scale.", },
+
+  { id:"vercel", name:"Vercel", full:"Vercel — Frontend & Serverless", icon:"▲",
+    category:"PaaS", catColor:"#FBBF24", cx:490, cy:420, r:18, color:"#E2E8F0",
+    quadrant:"Low Control · Medium Cost — Frontend-First",
+    why:"Best-in-class for frontend deployment (Next.js, Nuxt, SvelteKit). Global CDN, edge functions, and instant rollbacks. The gold standard for frontend teams — but not for backend-heavy workloads.",
+    qas:[{name:"Frontend DX",score:5},{name:"Edge Network",score:5},{name:"Deploy Speed",score:5},{name:"Backend Suitability",score:2},{name:"Cost at Scale",score:2},{name:"Control",score:2}],
+    services:[
+      {icon:"▲",name:"Vercel Deploy",desc:"Git-integrated CI/CD. Preview deployments per branch.",price:"Free + $20/mo Pro"},
+      {icon:"⚡",name:"Edge Functions",desc:"JavaScript at the edge. 70+ global PoPs.",price:"~$0.65/M invocations"},
+      {icon:"📊",name:"Vercel Analytics",desc:"Real user monitoring. Web vitals tracking.",price:"$4/mo"},
+      {icon:"🗄️",name:"Vercel Postgres",desc:"Serverless Postgres powered by Neon.",price:"$0 + usage"},
+    ],
+    goodFor:"Next.js apps · Frontend teams · Marketing sites · JAMstack",
+    tradeoffGood:"Unmatched frontend DX. Instant global deploys. Preview URLs per PR.",
+    tradeoffBad:"Very expensive for API-heavy apps. Function duration limits. High egress cost.", },
+
+  { id:"supabase", name:"Supabase", full:"Supabase — Open Source Firebase", icon:"🟢",
+    category:"PaaS", catColor:"#FBBF24", cx:360, cy:435, r:18, color:"#3ECF8E",
+    quadrant:"Low Control · Low Cost — Full-Stack BaaS",
+    why:"Open-source Firebase alternative. PostgreSQL + Auth + Storage + Realtime + Edge Functions in one platform. Scales to zero on free tier. The fastest way to build a full-stack app without a backend team.",
+    qas:[{name:"Full-Stack Speed",score:5},{name:"Cost at Low Scale",score:5},{name:"PostgreSQL Access",score:5},{name:"Control",score:3},{name:"Cost at Scale",score:3},{name:"Enterprise Features",score:3}],
+    services:[
+      {icon:"🐘",name:"Supabase DB",desc:"Full PostgreSQL — not a proprietary DB. Row-Level Security built in.",price:"Free / $25 Pro / $599 Team"},
+      {icon:"🔐",name:"Supabase Auth",desc:"Email, OAuth, magic link, phone auth. JWT-based.",price:"Included"},
+      {icon:"📁",name:"Storage",desc:"S3-compatible object storage. Image transformations.",price:"$0.021/GB"},
+      {icon:"⚡",name:"Edge Functions",desc:"Deno-based serverless functions at the edge.",price:"$2/M invocations"},
+    ],
+    goodFor:"Solo devs · Startups · Apps needing auth + DB + storage together",
+    tradeoffGood:"Full stack in one platform. Real PostgreSQL. Great free tier. Open-source.",
+    tradeoffBad:"Limited compute customization. Vendor lock-in despite open-source claim.", },
+
+  { id:"cloudflare", name:"Cloudflare", full:"Cloudflare Workers & Pages", icon:"🟠",
+    category:"PaaS", catColor:"#FBBF24", cx:555, cy:360, r:18, color:"#F6821F",
+    quadrant:"Low Control · Low Cost — Edge-First Serverless",
+    why:"Run JavaScript/TypeScript at 300+ global edge locations within milliseconds of every user. Zero cold starts (workers stay warm globally). Cheapest serverless execution — free tier is very generous.",
+    qas:[{name:"Edge Latency",score:5},{name:"Cost (serverless)",score:5},{name:"Global Coverage",score:5},{name:"Cold Starts",score:5},{name:"Control",score:2},{name:"Stateful Workloads",score:2}],
+    services:[
+      {icon:"⚡",name:"Workers",desc:"JS/TS at 300+ edge PoPs. 0ms cold starts. 10ms CPU limit.",price:"Free 100K req/day + $5/10M"},
+      {icon:"📄",name:"Pages",desc:"Git-deployed static sites + Functions. Competing with Vercel.",price:"Free + $20 Pro"},
+      {icon:"🗄️",name:"D1 Database",desc:"SQLite at the edge. Globally replicated reads.",price:"Free 5M rows + $0.001/M"},
+      {icon:"📦",name:"R2 Storage",desc:"S3-compatible storage. Zero egress fees — huge saving vs AWS.",price:"$0.015/GB + ops"},
+    ],
+    goodFor:"API endpoints · Global low-latency apps · CDN + compute combined · Replacing S3 egress",
+    tradeoffGood:"Zero cold starts. 300+ edge locations. R2 eliminates egress fees. Generous free tier.",
+    tradeoffBad:"10ms CPU limit per request. Limited to JS/TS/Wasm. Not for long-running tasks.", },
+];
+
+const CATEGORIES = ["All", ...new Set(PLATFORMS.map(p => p.category))];
+let activeCategory = "All";
+let activeID = null;
+const NS = "http://www.w3.org/2000/svg";
+
+// ── Category filter buttons ──
+const catFilters = document.getElementById("cat-filters");
+CATEGORIES.forEach(cat => {
+  const btn = document.createElement("button");
+  btn.className = "cat-btn";
+  btn.dataset.cat = cat;
+  btn.textContent = cat;
+  const c = cat === "All" ? "#60A5FA" : (PLATFORMS.find(p=>p.category===cat)?.catColor||"#64748B");
+  if (cat === "All") { btn.style.background="#60A5FA20"; btn.style.color="#60A5FA"; btn.style.borderColor="#60A5FA50"; }
+  else { btn.style.color = c; }
+  btn.addEventListener("click", () => setCategory(cat, btn));
+  catFilters.appendChild(btn);
+});
+
+function setCategory(cat, clickedBtn) {
+  activeCategory = cat;
+  document.querySelectorAll(".cat-btn").forEach(b => {
+    const isCat = b.dataset.cat === cat;
+    const db = PLATFORMS.find(p=>p.category===b.dataset.cat);
+    const c = b.dataset.cat==="All" ? "#60A5FA" : (db?.catColor||"#64748B");
+    if (isCat) { b.style.background=c+"25"; b.style.color=c; b.style.borderColor=c+"60"; }
+    else { b.style.background=""; b.style.borderColor=""; b.style.color=c; }
+  });
+  renderAll();
+}
+
+// ── Render SVG ──
+function renderAll() {
+  ["glow-layer","bubble-layer","label-layer"].forEach(id=>document.getElementById(id).innerHTML="");
+  PLATFORMS.forEach(p => {
+    const dim   = activeCategory!=="All" && p.category!==activeCategory;
+    const active = activeID===p.id;
+    // Glow
+    const g = document.createElementNS(NS,"circle");
+    g.setAttribute("cx",p.cx); g.setAttribute("cy",p.cy);
+    g.setAttribute("r",p.r+11);
+    g.setAttribute("fill",p.color);
+    g.setAttribute("fill-opacity", dim?0 : active?0.25:0.08);
+    document.getElementById("glow-layer").appendChild(g);
+    // Bubble
+    const c = document.createElementNS(NS,"circle");
+    c.setAttribute("cx",p.cx); c.setAttribute("cy",p.cy); c.setAttribute("r",p.r);
+    c.setAttribute("fill",p.color);
+    c.setAttribute("fill-opacity", dim?0.06 : active?0.88:0.22);
+    c.setAttribute("stroke",p.color);
+    c.setAttribute("stroke-width", active?2.5:1.5);
+    c.setAttribute("stroke-opacity", dim?0.12:0.85);
+    c.setAttribute("data-pid",p.id);
+    c.style.cursor = dim?"default":"pointer";
+    document.getElementById("bubble-layer").appendChild(c);
+    // Icon
+    const icon = document.createElementNS(NS,"text");
+    icon.setAttribute("x",p.cx); icon.setAttribute("y",p.cy);
+    icon.setAttribute("text-anchor","middle"); icon.setAttribute("dominant-baseline","central");
+    icon.setAttribute("font-size", Math.round(p.r*0.72));
+    icon.setAttribute("opacity", dim?0.1:1);
+    icon.textContent = p.icon;
+    document.getElementById("label-layer").appendChild(icon);
+    // Label
+    const lbl = document.createElementNS(NS,"text");
+    lbl.setAttribute("x",p.cx); lbl.setAttribute("y",p.cy+p.r+11);
+    lbl.setAttribute("text-anchor","middle");
+    lbl.setAttribute("font-family","'JetBrains Mono',monospace");
+    lbl.setAttribute("font-size","7.5");
+    lbl.setAttribute("fill",p.color);
+    lbl.setAttribute("opacity", dim?0.1:0.85);
+    lbl.textContent = p.name;
+    document.getElementById("label-layer").appendChild(lbl);
+  });
+  const ring = document.getElementById("active-ring");
+  if (activeID) {
+    const p = PLATFORMS.find(x=>x.id===activeID);
+    ring.setAttribute("cx",p.cx); ring.setAttribute("cy",p.cy);
+    ring.setAttribute("r",p.r+16); ring.setAttribute("stroke",p.color); ring.setAttribute("stroke-width","2");
+  } else { ring.setAttribute("cx",-300); ring.setAttribute("cy",-300); ring.setAttribute("r",0); }
+}
+
+// ── Click on SVG ──
+document.getElementById("map-svg").addEventListener("click", e => {
+  let t = e.target;
+  while (t && t !== e.currentTarget) { if (t.dataset?.pid) break; t=t.parentElement; }
+  const pid = t?.dataset?.pid;
+  if (!pid) return;
+  const p = PLATFORMS.find(x=>x.id===pid);
+  if (!p) return;
+  if (activeCategory!=="All" && p.category!==activeCategory) return;
+  activeID = activeID===pid ? null : pid;
+  renderAll();
+  activeID ? renderDetail(activeID) : showPlaceholder();
+});
+
+function showPlaceholder() {
+  document.getElementById("detail-panel").innerHTML=`<div class="placeholder"><div class="big">🖥️</div>Click any bubble to explore the hosting platform — cost model, control level, QA fit, and real examples.</div>`;
+}
+
+function makeDots(score,color) {
+  let h='<div class="dots">';
+  for(let i=1;i<=5;i++) h+=`<span class="dot" style="background:${i<=score?color:'#1E293B'};border-color:${i<=score?color:'#2D3F5E'}"></span>`;
+  return h+"</div>";
+}
+
+function renderDetail(pid) {
+  const p = PLATFORMS.find(x=>x.id===pid);
+  const qaRows = p.qas.map(q=>`<div class="qa-row"><div class="qa-name">${q.name}</div>${makeDots(q.score,p.color)}</div>`).join("");
+  const svcItems = p.services.map(s=>`
+    <div class="service-item">
+      <div class="si-top">
+        <span class="si-icon">${s.icon}</span>
+        <span class="si-name" style="color:${p.color}">${s.name}</span>
+        <span class="si-price" style="background:${p.color}18;color:${p.color}">${s.price}</span>
+      </div>
+      <div class="si-desc">${s.desc}</div>
+    </div>`).join("");
+  document.getElementById("detail-panel").innerHTML=`
+    <div class="detail-card" style="border-color:${p.color}45">
+      <div class="detail-head" style="background:${p.color}0e;border-bottom-color:${p.color}22">
+        <div class="d-icon">${p.icon}</div>
+        <div>
+          <div class="d-name" style="color:${p.color}">${p.name}</div>
+          <div class="d-sub">${p.full}</div>
+          <div class="d-badges">
+            <span class="badge" style="background:${p.catColor}20;color:${p.catColor}">${p.category}</span>
+          </div>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div><div class="sec-label" style="color:${p.color}">Quadrant Position</div><div class="pos-tag">${p.quadrant}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">Why Choose This Platform</div><div class="sec-text">${p.why}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">QA Fit Scores</div>${qaRows}</div>
+        <div><div class="sec-label" style="color:${p.color}">Key Services & Pricing</div><div class="service-grid">${svcItems}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">Trade-offs</div>
+          <div class="tradeoffs">
+            <div class="tf-col"><div class="tf-label" style="color:#4ADE80">✓ Strengths</div><div class="tf-text">${p.tradeoffGood}</div></div>
+            <div class="tf-col"><div class="tf-label" style="color:#F87171">✗ Weaknesses</div><div class="tf-text">${p.tradeoffBad}</div></div>
+          </div>
+        </div>
+        <div><div class="sec-label" style="color:${p.color}">Best Used For</div><div style="font-size:10px;color:#64748B;line-height:1.6">${p.goodFor}</div></div>
+      </div>
+    </div>`;
+}
+
+// ── Tab switching ──
+function showTab(tabId, btn) {
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+tabId).classList.add("active");
+  btn.classList.add("active");
+}
+
+// ── Build Compare Table ──
+const CMP = [
+  {name:"Bare Metal",      cat:"Self-Hosted",    ctrl:"Full",    cost:"Lowest",   ops:"High",  scale:"Manual",  compliance:"DIY",       lockIn:"None",    best:"Cost-sensitive at scale", avoid:"No ops team"},
+  {name:"Colocation",      cat:"Self-Hosted",    ctrl:"Full",    cost:"Low-Med",  ops:"High",  scale:"Manual",  compliance:"DIY+certs", lockIn:"Low",     best:"Regulatory hardware ownership", avoid:"CapEx constraints"},
+  {name:"K8s Self-Hosted", cat:"Self-Hosted",    ctrl:"High",    cost:"Low-Med",  ops:"High",  scale:"Auto(K8s)",compliance:"DIY",      lockIn:"Very Low",best:"Cloud-native portability", avoid:"No K8s expertise"},
+  {name:"AWS",             cat:"Hyperscaler",    ctrl:"High",    cost:"High",     ops:"Med",   scale:"Auto",    compliance:"Full certs",lockIn:"High",    best:"Enterprise, complex arch", avoid:"Simple/small workloads"},
+  {name:"GCP",             cat:"Hyperscaler",    ctrl:"High",    cost:"Med-High", ops:"Med",   scale:"Auto",    compliance:"Full certs",lockIn:"High",    best:"Data/ML/analytics", avoid:"Non-Google-stack teams"},
+  {name:"Azure",           cat:"Hyperscaler",    ctrl:"High",    cost:"High",     ops:"Med",   scale:"Auto",    compliance:"Full+Gov",  lockIn:"High",    best:"Microsoft enterprise stack", avoid:"Non-MS stack"},
+  {name:"DigitalOcean",    cat:"Developer Cloud",ctrl:"Med",     cost:"Low",      ops:"Low",   scale:"Semi",    compliance:"Basic",     lockIn:"Med",     best:"Startups, developer tools", avoid:"Enterprise compliance"},
+  {name:"Hetzner",         cat:"Developer Cloud",ctrl:"Med",     cost:"Lowest",   ops:"Low",   scale:"Manual",  compliance:"EU GDPR",   lockIn:"Low",     best:"EU teams, cost savings", avoid:"Outside EU, enterprise"},
+  {name:"Fly.io",          cat:"Developer Cloud",ctrl:"Med",     cost:"Low",      ops:"Low",   scale:"Auto",    compliance:"Basic",     lockIn:"Med",     best:"Global edge apps", avoid:"Sustained high traffic"},
+  {name:"Railway",         cat:"PaaS",           ctrl:"Low",     cost:"Med",      ops:"VLow",  scale:"Auto",    compliance:"Basic",     lockIn:"High",    best:"MVPs, ship fast", avoid:"Scale or compliance needs"},
+  {name:"Render",          cat:"PaaS",           ctrl:"Low",     cost:"Med",      ops:"VLow",  scale:"Auto",    compliance:"SOC2",      lockIn:"High",    best:"Web apps, Heroku migrants", avoid:"High traffic cost"},
+  {name:"Vercel",          cat:"PaaS",           ctrl:"Low",     cost:"Med-High", ops:"VLow",  scale:"Auto",    compliance:"SOC2",      lockIn:"High",    best:"Frontend/Next.js", avoid:"API-heavy backends"},
+  {name:"Supabase",        cat:"PaaS",           ctrl:"Low-Med", cost:"Low",      ops:"VLow",  scale:"Auto",    compliance:"SOC2",      lockIn:"Med",     best:"Full-stack BaaS", avoid:"Heavy custom infra"},
+  {name:"Cloudflare",      cat:"PaaS",           ctrl:"Low",     cost:"Lowest",   ops:"VLow",  scale:"Auto",    compliance:"Basic",     lockIn:"High",    best:"Edge API, global latency", avoid:"Long-running compute"},
+];
+
+const ctrlClr = {Full:"#A78BFA",High:"#A78BFA",Med:"#60A5FA","Low-Med":"#60A5FA",Low:"#34D399"};
+const costClr = {Lowest:"#34D399",Low:"#34D399","Low-Med":"#34D399",Med:"#FBBF24","Med-High":"#FBBF24",High:"#F87171"};
+const opClr = {High:"#F87171",Med:"#FBBF24",Low:"#34D399",VLow:"#34D399"};
+const lockClr = {"Very Low":"#34D399",Low:"#34D399",None:"#34D399",Med:"#FBBF24",High:"#F87171"};
+
+function badge(val, colorMap) {
+  const c = colorMap[val]||"#94A3B8";
+  return `<span class="tbl-badge" style="background:${c}20;color:${c}">${val}</span>`;
+}
+
+document.getElementById("cmp-tbody").innerHTML = CMP.map(r=>`
+  <tr>
+    <td style="font-weight:600;color:#F1F5F9;white-space:nowrap">${r.name}</td>
+    <td style="color:${PLATFORMS.find(p=>p.name===r.name)?.catColor||"#94A3B8"};font-size:9px;font-family:'JetBrains Mono',monospace">${r.cat}</td>
+    <td>${badge(r.ctrl,ctrlClr)}</td>
+    <td>${badge(r.cost,costClr)}</td>
+    <td>${badge(r.ops,opClr)}</td>
+    <td style="color:#94A3B8;font-size:9px">${r.scale}</td>
+    <td style="color:#94A3B8;font-size:9px">${r.compliance}</td>
+    <td>${badge(r.lockIn,lockClr)}</td>
+    <td style="color:#60A5FA;font-size:9px">${r.best}</td>
+    <td style="color:#64748B;font-size:9px">${r.avoid}</td>
+  </tr>`).join("");
+
+// ── Decision Guide ──
+const DECISION_QS = [
+  {q:"Do you have a dedicated DevOps / SRE team?",       yes:"Bare Metal or K8s Self-Hosted",     no:"Managed Cloud (DBaaS) or PaaS"},
+  {q:"Is data sovereignty or residency legally required?",yes:"Colocation or Bare Metal (on-prem)",no:"Any cloud in the right region"},
+  {q:"Is your team primarily frontend / Next.js?",        yes:"Vercel or Cloudflare Pages",         no:"Consider Railway, Render, or full cloud"},
+  {q:"Is your budget under $100/month?",                  yes:"Supabase · Railway · Hetzner · Free tiers",no:"Match budget to scale needs"},
+  {q:"Do you need sub-50ms latency globally?",            yes:"Cloudflare Workers or Fly.io",       no:"Single-region PaaS or managed cloud"},
+  {q:"Is compliance certification required (HIPAA/PCI)?", yes:"AWS · Azure · GCP (certified tiers)",no:"PaaS or developer cloud may work"},
+  {q:"Are you building a data/analytics-heavy product?",  yes:"GCP (BigQuery + Vertex) or AWS",     no:"Simpler PaaS or developer cloud"},
+  {q:"Do you need to avoid vendor lock-in?",              yes:"K8s Self-Hosted or Hetzner + OSS",   no:"PaaS offers faster time-to-market"},
+];
+
+document.getElementById("guide-cards").innerHTML = DECISION_QS.map(q=>`
+  <div class="guide-card">
+    <div class="guide-q">❓ ${q.q}</div>
+    <div class="guide-opts">
+      <span class="guide-yes">YES → ${q.yes}</span>
+      <span class="guide-no">NO → ${q.no}</span>
+    </div>
+  </div>`).join("");
+
+const PROFILES = [
+  {icon:"🧑‍💻",profile:"Solo Developer / Indie Hacker",  rec:"Supabase + Vercel or Railway",            why:"Free tiers. Zero infra. Ship in hours."},
+  {icon:"🚀",profile:"Early Startup (1–10 devs)",        rec:"DigitalOcean / Railway / Render",          why:"Predictable cost. Easy scaling. No DBA needed."},
+  {icon:"📈",profile:"Growth Startup (10–50 devs)",      rec:"AWS or GCP Managed Services",             why:"Time to graduate from PaaS. More control needed."},
+  {icon:"🏢",profile:"Scale-Up (50–200 devs)",           rec:"AWS/GCP + K8s (EKS/GKE)",                why:"Cost optimization. Multi-service architecture."},
+  {icon:"🏦",profile:"Regulated Enterprise",             rec:"On-Prem or Azure (Gov Cloud)",            why:"Compliance certs. Data residency. Audit trails."},
+  {icon:"🌍",profile:"Global Consumer Product",          rec:"Cloudflare + AWS Multi-region",           why:"Edge for latency + cloud for compute."},
+  {icon:"🔬",profile:"Data / ML Team",                   rec:"GCP (BigQuery + Vertex) or AWS SageMaker",why:"Best managed ML/analytics stack."},
+  {icon:"💰",profile:"Cost-Optimized at Scale",          rec:"Hetzner + K8s Self-Hosted",               why:"10x cheaper than AWS at same compute. EU GDPR."},
+  {icon:"🛡️",profile:"Security-First / Air-Gapped",     rec:"Bare Metal + Colocation",                 why:"No third-party cloud access. Full data control."},
+];
+
+document.getElementById("profile-rows").innerHTML = PROFILES.map(r=>`
+  <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid #1E293B">
+    <div style="font-size:20px;flex-shrink:0;margin-top:1px">${r.icon}</div>
+    <div style="flex:1">
+      <div style="font-size:12px;color:#F1F5F9;font-weight:500;margin-bottom:3px">${r.profile}</div>
+      <div style="font-size:11px;color:#60A5FA;margin-bottom:2px">→ ${r.rec}</div>
+      <div style="font-size:10px;color:#64748B">${r.why}</div>
+    </div>
+  </div>`).join("");
+
+renderAll();
+</script>
+</body>
+</html>

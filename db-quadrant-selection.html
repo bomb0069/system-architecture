@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DB Technology Quadrant · Data Storage Design</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;500;600&display=swap');
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:      #0A0E1A;
+    --bg2:     #0D1220;
+    --bg3:     #111827;
+    --border:  #1E293B;
+    --border2: #2D3F5E;
+    --text:    #E2E8F0;
+    --muted:   #94A3B8;
+    --dim:     #64748B;
+    --rdbms:   #60A5FA;
+    --graph:   #F472B6;
+    --ts:      #34D399;
+    --obj:     #FBBF24;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 20px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* ── Header ── */
+  .header { text-align: center; margin-bottom: 18px; max-width: 680px; }
+  .header-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .35em; color: var(--dim); text-transform: uppercase; margin-bottom: 7px; }
+  .header h1  { font-family: 'Playfair Display', serif; font-size: 23px; font-weight: 400; color: #F1F5F9; margin-bottom: 6px; }
+  .header p   { font-size: 11px; color: var(--muted); line-height: 1.7; }
+
+  /* ── Layout ── */
+  .layout { display: flex; gap: 18px; width: 100%; max-width: 1020px; align-items: flex-start; }
+
+  /* ── Quadrant Area ── */
+  .quadrant-wrap { flex: 1; min-width: 0; }
+  .axis-label-top { text-align: center; margin-bottom: 5px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
+  .axis-row { display: flex; align-items: center; gap: 5px; }
+  .axis-side { min-width: 48px; text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .1em; text-transform: uppercase; }
+  .axis-label-bot { text-align: center; margin-top: 5px; font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .2em; text-transform: uppercase; }
+
+  /* SVG quadrant */
+  #quad-svg { width: 100%; display: block; cursor: pointer; border: 1px solid var(--border); border-radius: 8px; }
+
+  /* ── Detail Panel ── */
+  .detail-panel { width: 300px; flex-shrink: 0; display: flex; flex-direction: column; gap: 10px; }
+
+  .detail-card {
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 8px; overflow: hidden;
+    transition: border-color .2s;
+  }
+  .detail-header {
+    padding: 14px 16px; border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .detail-icon { font-size: 24px; }
+  .detail-name { font-size: 16px; font-weight: 600; }
+  .detail-type { font-family: 'JetBrains Mono', monospace; font-size: 9px; color: var(--dim); margin-top: 2px; }
+  .detail-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+
+  .detail-section-label {
+    font-family: 'JetBrains Mono', monospace; font-size: 8px;
+    letter-spacing: .2em; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .detail-text { font-size: 11px; color: var(--muted); line-height: 1.65; }
+
+  .qa-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .qa-row-name { font-size: 10px; color: var(--muted); width: 130px; flex-shrink: 0; }
+  .dots { display: flex; gap: 3px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; border: 1px solid; }
+
+  .tech-list { display: flex; flex-direction: column; gap: 5px; }
+  .tech-item {
+    background: var(--bg2); border-radius: 5px; padding: 8px 10px;
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .tech-logo { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .tech-name  { font-size: 11px; font-weight: 600; margin-bottom: 2px; }
+  .tech-desc  { font-size: 9px; color: var(--dim); line-height: 1.4; }
+
+  .tradeoff-box {
+    background: var(--bg2); border-radius: 5px; padding: 10px 12px;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .tradeoff-col { }
+  .tradeoff-col-label { font-family: 'JetBrains Mono', monospace; font-size: 8px; letter-spacing: .15em; margin-bottom: 4px; }
+  .tradeoff-col-text { font-size: 10px; color: var(--muted); line-height: 1.5; }
+
+  /* Instruction placeholder */
+  .placeholder {
+    background: var(--bg3); border: 1px dashed var(--border2);
+    border-radius: 8px; padding: 24px; text-align: center;
+    color: var(--dim); font-size: 12px; line-height: 1.7;
+  }
+  .placeholder .arrow { font-size: 22px; margin-bottom: 8px; }
+
+  /* Axis note */
+  .axis-note {
+    width: 100%; max-width: 1020px; margin-top: 14px;
+    background: var(--bg3); border: 1px solid var(--border);
+    border-radius: 6px; padding: 12px 18px;
+    display: grid; grid-template-columns: 1fr 1px 1fr; gap: 16px;
+    align-items: start;
+  }
+  .axis-note-divider { background: var(--border); }
+  .axis-note-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: .2em; color: var(--dim); margin-bottom: 5px; }
+  .axis-note-text  { font-size: 11px; color: var(--muted); line-height: 1.6; }
+
+  /* Legend */
+  .legend {
+    display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+    margin-bottom: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--muted); cursor: pointer; }
+  .legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-label">System Analysis · Data Storage Design · Technology Selection</div>
+  <h1>DB Type Quadrant</h1>
+  <p>Two axes that reveal why each database type exists. Click any quadrant zone to explore which technologies fit and why.</p>
+</div>
+
+<!-- Legend -->
+<div class="legend">
+  <div class="legend-item" onclick="clickZone('rdbms')"><div class="legend-dot" style="background:#60A5FA"></div>RDBMS</div>
+  <div class="legend-item" onclick="clickZone('graph')"><div class="legend-dot" style="background:#F472B6"></div>GraphDB</div>
+  <div class="legend-item" onclick="clickZone('ts')"><div class="legend-dot" style="background:#34D399"></div>TimeSeriesDB</div>
+  <div class="legend-item" onclick="clickZone('obj')"><div class="legend-dot" style="background:#FBBF24"></div>ObjectDB</div>
+</div>
+
+<div class="layout">
+  <!-- Quadrant -->
+  <div class="quadrant-wrap">
+    <div class="axis-label-top" style="color:#F472B6">▲ HIGHLY CONNECTED &nbsp;·&nbsp; Deep relationships &amp; traversals</div>
+    <div class="axis-row">
+      <div class="axis-side" style="color:#60A5FA">◄ RIGID<br><span style="font-size:8px;color:#475569;letter-spacing:0">Fixed schema</span></div>
+      <svg id="quad-svg" viewBox="0 0 560 520" onclick="onSvgClick(event)">
+        <defs>
+          <radialGradient id="gRDBMS" cx="35%" cy="30%" r="55%">
+            <stop offset="0%" stop-color="#60A5FA" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#60A5FA" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="gGraph" cx="65%" cy="30%" r="55%">
+            <stop offset="0%" stop-color="#F472B6" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#F472B6" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="gTS" cx="35%" cy="70%" r="55%">
+            <stop offset="0%" stop-color="#34D399" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#34D399" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="gObj" cx="65%" cy="70%" r="55%">
+            <stop offset="0%" stop-color="#FBBF24" stop-opacity="0.18"/>
+            <stop offset="100%" stop-color="#FBBF24" stop-opacity="0"/>
+          </radialGradient>
+        </defs>
+
+        <!-- Background -->
+        <rect width="560" height="520" fill="#0D1220" rx="7"/>
+
+        <!-- Subtle grid -->
+        <line x1="112" y1="0" x2="112" y2="520" stroke="#1A2234" stroke-width="0.6"/>
+        <line x1="224" y1="0" x2="224" y2="520" stroke="#1A2234" stroke-width="0.6"/>
+        <line x1="336" y1="0" x2="336" y2="520" stroke="#1A2234" stroke-width="0.6"/>
+        <line x1="448" y1="0" x2="448" y2="520" stroke="#1A2234" stroke-width="0.6"/>
+        <line x1="0" y1="104" x2="560" y2="104" stroke="#1A2234" stroke-width="0.6"/>
+        <line x1="0" y1="208" x2="560" y2="208" stroke="#1A2234" stroke-width="0.6"/>
+        <line x1="0" y1="312" x2="560" y2="312" stroke="#1A2234" stroke-width="0.6"/>
+        <line x1="0" y1="416" x2="560" y2="416" stroke="#1A2234" stroke-width="0.6"/>
+
+        <!-- Quadrant fills -->
+        <rect x="0"   y="0"   width="280" height="260" fill="url(#gRDBMS)" id="fill-rdbms" rx="6"/>
+        <rect x="280" y="0"   width="280" height="260" fill="url(#gGraph)"  id="fill-graph" rx="6"/>
+        <rect x="0"   y="260" width="280" height="260" fill="url(#gTS)"    id="fill-ts"    rx="6"/>
+        <rect x="280" y="260" width="280" height="260" fill="url(#gObj)"   id="fill-obj"   rx="6"/>
+
+        <!-- Quadrant hover zones (invisible) -->
+        <rect x="0"   y="0"   width="280" height="260" fill="transparent" data-zone="rdbms"/>
+        <rect x="280" y="0"   width="280" height="260" fill="transparent" data-zone="graph"/>
+        <rect x="0"   y="260" width="280" height="260" fill="transparent" data-zone="ts"/>
+        <rect x="280" y="260" width="280" height="260" fill="transparent" data-zone="obj"/>
+
+        <!-- Center axes -->
+        <line x1="280" y1="0" x2="280" y2="520" stroke="#334155" stroke-width="2"/>
+        <line x1="0" y1="260" x2="560" y2="260" stroke="#334155" stroke-width="2"/>
+
+        <!-- RDBMS quadrant content -->
+        <text x="140" y="44" text-anchor="middle" font-family="'Playfair Display',serif" font-size="17" fill="#60A5FA" font-weight="700" opacity="0.95">RDBMS</text>
+        <text x="140" y="62" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#60A5FA" opacity="0.55">PostgreSQL · Oracle · MySQL</text>
+
+        <!-- RDBMS data shape bubble -->
+        <rect x="58" y="78" width="166" height="22" rx="11" fill="#60A5FA" fill-opacity="0.1" stroke="#60A5FA" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="141" y="93" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#60A5FA" opacity="0.8">Tables · Rows · Joins</text>
+
+        <!-- RDBMS key QAs -->
+        <text x="60" y="130" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ ACID Consistency</text>
+        <text x="60" y="146" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Interoperability (SQL)</text>
+        <text x="60" y="162" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Data Integrity</text>
+        <text x="60" y="184" font-family="'Inter',sans-serif" font-size="8.5" fill="#475569">✗ Schema flexibility low</text>
+        <text x="60" y="199" font-family="'Inter',sans-serif" font-size="8.5" fill="#475569">✗ Horizontal scale hard</text>
+
+        <!-- RDBMS best for -->
+        <text x="140" y="230" text-anchor="middle" font-family="'Inter',sans-serif" font-size="8" fill="#64748B">Finance · ERP · Healthcare · Reporting</text>
+
+        <!-- GraphDB quadrant content -->
+        <text x="420" y="44" text-anchor="middle" font-family="'Playfair Display',serif" font-size="17" fill="#F472B6" font-weight="700" opacity="0.95">GraphDB</text>
+        <text x="420" y="62" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#F472B6" opacity="0.55">Neo4j · Neptune · ArangoDB</text>
+
+        <rect x="336" y="78" width="168" height="22" rx="11" fill="#F472B6" fill-opacity="0.1" stroke="#F472B6" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="420" y="93" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#F472B6" opacity="0.8">Nodes · Edges · Properties</text>
+
+        <text x="336" y="130" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Relationship traversal speed</text>
+        <text x="336" y="146" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Schema flexibility</text>
+        <text x="336" y="162" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Pattern detection</text>
+        <text x="336" y="184" font-family="'Inter',sans-serif" font-size="8.5" fill="#475569">✗ Weak on flat/tabular data</text>
+        <text x="336" y="199" font-family="'Inter',sans-serif" font-size="8.5" fill="#475569">✗ Hard to scale partitions</text>
+
+        <text x="420" y="230" text-anchor="middle" font-family="'Inter',sans-serif" font-size="8" fill="#64748B">Social · Fraud · Recommendation · Knowledge</text>
+
+        <!-- TimeSeriesDB quadrant content -->
+        <text x="140" y="304" text-anchor="middle" font-family="'Playfair Display',serif" font-size="17" fill="#34D399" font-weight="700" opacity="0.95">TimeSeriesDB</text>
+        <text x="140" y="322" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#34D399" opacity="0.55">InfluxDB · TimescaleDB · Prometheus</text>
+
+        <rect x="46" y="336" width="190" height="22" rx="11" fill="#34D399" fill-opacity="0.1" stroke="#34D399" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="141" y="351" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#34D399" opacity="0.8">Timestamps · Measurements · Tags</text>
+
+        <text x="60" y="390" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Massive write throughput</text>
+        <text x="60" y="406" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Time-range query speed</text>
+        <text x="60" y="422" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Auto compression / retention</text>
+        <text x="60" y="444" font-family="'Inter',sans-serif" font-size="8.5" fill="#475569">✗ Not for relational queries</text>
+        <text x="60" y="459" font-family="'Inter',sans-serif" font-size="8.5" fill="#475569">✗ Rigid measurement schema</text>
+
+        <text x="140" y="496" text-anchor="middle" font-family="'Inter',sans-serif" font-size="8" fill="#64748B">IoT · Metrics · Logs · Finance Ticks</text>
+
+        <!-- ObjectDB quadrant content -->
+        <text x="420" y="304" text-anchor="middle" font-family="'Playfair Display',serif" font-size="17" fill="#FBBF24" font-weight="700" opacity="0.95">ObjectDB</text>
+        <text x="420" y="322" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="8" fill="#FBBF24" opacity="0.55">MongoDB · Couchbase · DynamoDB</text>
+
+        <rect x="330" y="336" width="180" height="22" rx="11" fill="#FBBF24" fill-opacity="0.1" stroke="#FBBF24" stroke-opacity="0.3" stroke-width="1"/>
+        <text x="420" y="351" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="9" fill="#FBBF24" opacity="0.8">Documents · Collections · BSON</text>
+
+        <text x="336" y="390" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Schema flexibility</text>
+        <text x="336" y="406" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Horizontal scalability</text>
+        <text x="336" y="422" font-family="'Inter',sans-serif" font-size="9" fill="#94A3B8">✓ Nested document support</text>
+        <text x="336" y="444" font-family="'Inter',sans-serif" font-size="8.5" fill="#475569">✗ Eventual consistency default</text>
+        <text x="336" y="459" font-family="'Inter',sans-serif" font-size="8.5" fill="#475569">✗ Weak cross-doc integrity</text>
+
+        <text x="420" y="496" text-anchor="middle" font-family="'Inter',sans-serif" font-size="8" fill="#64748B">Catalog · CMS · User Profiles · API Data</text>
+
+        <!-- Active zone highlight overlay (hidden by default) -->
+        <rect id="highlight-rect" x="0" y="0" width="280" height="260" rx="6"
+              fill="none" stroke="white" stroke-width="0" stroke-dasharray="6,4" opacity="0.4"/>
+
+        <!-- Center origin dot -->
+        <circle cx="280" cy="260" r="4" fill="#334155"/>
+        <circle cx="280" cy="260" r="2" fill="#475569"/>
+
+        <!-- Axis direction arrows (subtle) -->
+        <text x="275" y="14" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#F472B6" opacity="0.6">▲</text>
+        <text x="275" y="514" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#60A5FA" opacity="0.4">▼</text>
+        <text x="548" y="264" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#FBBF24" opacity="0.6">►</text>
+        <text x="12"  y="264" text-anchor="middle" font-family="'JetBrains Mono',monospace" font-size="11" fill="#60A5FA" opacity="0.6">◄</text>
+      </svg>
+      <div class="axis-side" style="color:#FBBF24">FLEX ►<br><span style="font-size:8px;color:#475569;letter-spacing:0">Dynamic schema</span></div>
+    </div>
+    <div class="axis-label-bot" style="color:#94A3B8">▼ FLAT / SEQUENTIAL &nbsp;·&nbsp; Independent records &amp; time streams</div>
+  </div>
+
+  <!-- Detail Panel -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="placeholder">
+      <div class="arrow">👆</div>
+      Click any quadrant zone<br>to explore the DB type,<br>key QA drivers,<br>and technology examples.
+    </div>
+  </div>
+</div>
+
+<!-- Axis explanation -->
+<div class="axis-note">
+  <div>
+    <div class="axis-note-label">X-Axis — Schema Flexibility</div>
+    <div class="axis-note-text">
+      <strong style="color:#60A5FA">Rigid (left):</strong> Schema is defined upfront and enforced — every row must match. Changes require formal migrations. Enables constraints, foreign keys, and optimizer efficiency.<br><br>
+      <strong style="color:#FBBF24">Flexible (right):</strong> Schema is optional or dynamic — each document or node can have different fields. Enables rapid evolution but loses enforcement and query predictability.
+    </div>
+  </div>
+  <div class="axis-note-divider"></div>
+  <div>
+    <div class="axis-note-label">Y-Axis — Data Connectivity</div>
+    <div class="axis-note-text">
+      <strong style="color:#F472B6">Highly Connected (top):</strong> Data entities are linked — queries must traverse relationships. "Who knows who?" or "Which accounts share a device?" require relationship-aware engines.<br><br>
+      <strong style="color:#34D399">Flat / Sequential (bottom):</strong> Records are largely independent or ordered by time. Queries are range-based or key-based — no traversal required. Optimized for append-heavy workloads.
+    </div>
+  </div>
+</div>
+
+<script>
+const ZONES = {
+  rdbms: {
+    name: "RDBMS",
+    full: "Relational Database",
+    icon: "🗂️",
+    color: "#60A5FA",
+    position: "Rigid schema · Medium-high connectivity",
+    why: "Invented for structured business data where relationships between entities (customers, orders, products) must be enforced. The join is the fundamental operation.",
+    qas: [
+      { name: "Data Consistency (ACID)", score: 5 },
+      { name: "Interoperability (SQL)", score: 5 },
+      { name: "Data Integrity",          score: 5 },
+      { name: "Query Performance",       score: 4 },
+      { name: "Schema Maintainability",  score: 2 },
+      { name: "Scalability (horiz.)",    score: 3 },
+    ],
+    techs: [
+      { icon: "🐘", name: "PostgreSQL",   desc: "Best open-source choice. JSONB for flexibility, RLS for security, excellent for complex queries." },
+      { icon: "🏛️", name: "Oracle DB",    desc: "Enterprise gold standard. Compliance, auditing, row-level security. High cost." },
+      { icon: "🐬", name: "MySQL",        desc: "Fast reads, wide hosting support, large ecosystem. Simpler than PostgreSQL." },
+      { icon: "🪟", name: "SQL Server",   desc: "Deep Microsoft/Azure integration. Strong BI tooling with Power BI." },
+    ],
+    goodFor: "Finance · Healthcare · ERP · Reporting · Inventory",
+    tradeoffGood: "Best ACID guarantees. Universal SQL tooling. Mature, battle-tested.",
+    tradeoffBad: "Schema changes are painful. Hard to scale horizontally beyond a single machine.",
+  },
+  graph: {
+    name: "GraphDB",
+    full: "Graph Database",
+    icon: "🕸️",
+    color: "#F472B6",
+    position: "Flexible schema · Highly connected",
+    why: "Invented when SQL JOIN chains became too slow and complex for relationship-dense data. The edge (relationship) is a first-class citizen — not a derived artifact of a join.",
+    qas: [
+      { name: "Relationship Traversal",  score: 5 },
+      { name: "Data Model Fit",          score: 5 },
+      { name: "Schema Maintainability",  score: 4 },
+      { name: "Query Performance",       score: 5 },
+      { name: "Interoperability",        score: 3 },
+      { name: "Scalability (horiz.)",    score: 3 },
+    ],
+    techs: [
+      { icon: "🔵", name: "Neo4j",          desc: "Most mature graph DB. Cypher query language. Excellent for fraud detection & recommendations." },
+      { icon: "☁️", name: "Amazon Neptune", desc: "Managed cloud graph DB. Supports Gremlin & SPARQL. Good for AWS-native stacks." },
+      { icon: "🔶", name: "ArangoDB",       desc: "Multi-model: graph + document + search in one engine. Good for flexible workloads." },
+    ],
+    goodFor: "Social Networks · Fraud Detection · Recommendations · Knowledge Graphs",
+    tradeoffGood: "6-degree traversals in milliseconds. Relationship queries that would be minutes in SQL.",
+    tradeoffBad: "Specialized query language (Cypher). Limited BI tool support. Partitioning across nodes is hard.",
+  },
+  ts: {
+    name: "TimeSeriesDB",
+    full: "Time Series Database",
+    icon: "📈",
+    color: "#34D399",
+    position: "Rigid schema · Flat / sequential",
+    why: "Invented for sensor and monitoring data where millions of timestamped measurements arrive per second. RDBMS insert rates collapse under this workload. Time is the primary key.",
+    qas: [
+      { name: "Write Throughput",        score: 5 },
+      { name: "Time-range Performance",  score: 5 },
+      { name: "Scalability",             score: 5 },
+      { name: "Data Compression",        score: 5 },
+      { name: "Schema Maintainability",  score: 3 },
+      { name: "Relationship Queries",    score: 1 },
+    ],
+    techs: [
+      { icon: "📊", name: "InfluxDB",      desc: "Purpose-built time series. Flux query language. Auto data retention policies. IoT & monitoring." },
+      { icon: "⏱️", name: "TimescaleDB",   desc: "PostgreSQL extension — time series power with full SQL compatibility. Best of both worlds." },
+      { icon: "🔥", name: "Prometheus",    desc: "Pull-based metrics collection. Pairs with Grafana. Standard for Kubernetes monitoring." },
+      { icon: "📉", name: "Apache Druid",  desc: "Real-time analytics on event streams. Sub-second queries on billions of rows." },
+    ],
+    goodFor: "IoT Sensors · Infrastructure Metrics · Financial Ticks · Log Analytics",
+    tradeoffGood: "Handles millions of writes/sec. Automatic compression and data expiry. Fast time-range aggregations.",
+    tradeoffBad: "Not designed for joins or complex relationships. Schema per measurement type is fixed.",
+  },
+  obj: {
+    name: "ObjectDB",
+    full: "Object / Document Store",
+    icon: "📦",
+    color: "#FBBF24",
+    position: "Flexible schema · Low-medium connectivity",
+    why: "Invented when product catalogs and user profiles had wildly varying fields — a shirt has size/color, a laptop has RAM/CPU. RDBMS NULL columns and migrations were too painful.",
+    qas: [
+      { name: "Schema Maintainability",  score: 5 },
+      { name: "Scalability (horiz.)",    score: 5 },
+      { name: "Developer Experience",    score: 5 },
+      { name: "Query Performance",       score: 4 },
+      { name: "Data Consistency",        score: 3 },
+      { name: "Relationship Queries",    score: 2 },
+    ],
+    techs: [
+      { icon: "🍃", name: "MongoDB",     desc: "Most popular document DB. Rich query language, Atlas managed service, field-level encryption." },
+      { icon: "⚡", name: "DynamoDB",    desc: "AWS-native key-value + document. Millisecond latency at any scale. Serverless-friendly." },
+      { icon: "🔷", name: "Couchbase",   desc: "In-memory performance + document model. Good for mobile sync and session data." },
+      { icon: "🔥", name: "Firestore",   desc: "Google Firebase real-time document DB. Offline sync built in. Great for mobile apps." },
+    ],
+    goodFor: "Product Catalogs · CMS · User Profiles · API Backends · Mobile Apps",
+    tradeoffGood: "Zero-migration schema evolution. Native horizontal sharding. JSON-native — no ORM needed.",
+    tradeoffBad: "Eventual consistency by default. No cross-document transactions without careful design.",
+  },
+};
+
+const ZONE_RECTS = {
+  rdbms: { x: 0,   y: 0,   w: 280, h: 260 },
+  graph: { x: 280, y: 0,   w: 280, h: 260 },
+  ts:    { x: 0,   y: 260, w: 280, h: 260 },
+  obj:   { x: 280, y: 260, w: 280, h: 260 },
+};
+
+let activeZone = null;
+
+function onSvgClick(e) {
+  const target = e.target;
+  const zone = target.dataset.zone;
+  if (zone) clickZone(zone);
+}
+
+function clickZone(zoneId) {
+  if (activeZone === zoneId) {
+    activeZone = null;
+    resetHighlight();
+    showPlaceholder();
+    return;
+  }
+  activeZone = zoneId;
+  highlightZone(zoneId);
+  renderDetail(zoneId);
+}
+
+function highlightZone(zoneId) {
+  const r = ZONE_RECTS[zoneId];
+  const db = ZONES[zoneId];
+  const rect = document.getElementById('highlight-rect');
+  rect.setAttribute('x', r.x + 2);
+  rect.setAttribute('y', r.y + 2);
+  rect.setAttribute('width', r.w - 4);
+  rect.setAttribute('height', r.h - 4);
+  rect.setAttribute('stroke', db.color);
+  rect.setAttribute('stroke-width', '2');
+
+  // Brighten active fill
+  Object.keys(ZONE_RECTS).forEach(id => {
+    const fill = document.getElementById('fill-' + id);
+    if (id === zoneId) {
+      fill.setAttribute('fill-opacity', '1');
+    } else {
+      fill.setAttribute('fill-opacity', '0.35');
+    }
+  });
+}
+
+function resetHighlight() {
+  const rect = document.getElementById('highlight-rect');
+  rect.setAttribute('stroke-width', '0');
+  Object.keys(ZONE_RECTS).forEach(id => {
+    const fill = document.getElementById('fill-' + id);
+    fill.setAttribute('fill-opacity', '1');
+  });
+}
+
+function showPlaceholder() {
+  document.getElementById('detail-panel').innerHTML = `
+    <div class="placeholder">
+      <div class="arrow">👆</div>
+      Click any quadrant zone<br>to explore the DB type,<br>key QA drivers,<br>and technology examples.
+    </div>`;
+}
+
+function makeDots(score, color) {
+  let h = '<div class="dots">';
+  for (let i = 1; i <= 5; i++) {
+    h += `<div class="dot" style="background:${i<=score?color:'#1E293B'};border-color:${i<=score?color:'#2D3F5E'}"></div>`;
+  }
+  return h + '</div>';
+}
+
+function renderDetail(zoneId) {
+  const db = ZONES[zoneId];
+
+  const qaRows = db.qas.map(qa => `
+    <div class="qa-row">
+      <div class="qa-row-name">${qa.name}</div>
+      ${makeDots(qa.score, db.color)}
+    </div>`).join('');
+
+  const techItems = db.techs.map(t => `
+    <div class="tech-item">
+      <div class="tech-logo">${t.icon}</div>
+      <div>
+        <div class="tech-name" style="color:${db.color}">${t.name}</div>
+        <div class="tech-desc">${t.desc}</div>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('detail-panel').innerHTML = `
+    <div class="detail-card" style="border-color:${db.color}40">
+      <div class="detail-header" style="border-bottom-color:${db.color}30;background:${db.color}0a">
+        <div class="detail-icon">${db.icon}</div>
+        <div>
+          <div class="detail-name" style="color:${db.color}">${db.name}</div>
+          <div class="detail-type">${db.full}</div>
+        </div>
+      </div>
+      <div class="detail-body">
+
+        <div>
+          <div class="detail-section-label" style="color:${db.color}">Quadrant Position</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:#64748B;background:#0D1220;padding:6px 10px;border-radius:4px">${db.position}</div>
+        </div>
+
+        <div>
+          <div class="detail-section-label" style="color:${db.color}">Why This DB Type Exists</div>
+          <div class="detail-text">${db.why}</div>
+        </div>
+
+        <div>
+          <div class="detail-section-label" style="color:${db.color}">Key QA Fit Scores</div>
+          ${qaRows}
+          <div style="font-size:9px;color:#475569;margin-top:5px;font-style:italic">Scores = fit for this DB's design intent, not global ranking.</div>
+        </div>
+
+        <div>
+          <div class="detail-section-label" style="color:${db.color}">Technology Examples</div>
+          <div class="tech-list">${techItems}</div>
+        </div>
+
+        <div>
+          <div class="detail-section-label" style="color:${db.color}">Trade-offs</div>
+          <div class="tradeoff-box">
+            <div class="tradeoff-col">
+              <div class="tradeoff-col-label" style="color:#4ADE80">✓ Strengths</div>
+              <div class="tradeoff-col-text">${db.tradeoffGood}</div>
+            </div>
+            <div class="tradeoff-col">
+              <div class="tradeoff-col-label" style="color:#F87171">✗ Weaknesses</div>
+              <div class="tradeoff-col-text">${db.tradeoffBad}</div>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="detail-section-label" style="color:${db.color}">Best Used For</div>
+          <div style="font-size:10px;color:#64748B;line-height:1.6">${db.goodFor}</div>
+        </div>
+
+      </div>
+    </div>`;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>System Tier Architecture · Deployment Structure Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#070B16;--bg2:#0A0F1C;--bg3:#0E1525;--bg4:#12192E;
+    --border:#172035;--border2:#1F2E48;
+    --text:#DCE6F5;--muted:#8096BE;--dim:#435470;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:16px 20px;display:flex;flex-direction:column;align-items:center}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 70% 45% at 15% 15%,rgba(56,189,248,.04) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 85% 85%,rgba(251,191,36,.03) 0%,transparent 60%);pointer-events:none;z-index:0}
+  body>*{position:relative;z-index:1}
+
+  .header{text-align:center;margin-bottom:16px;max-width:760px}
+  .header-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+  .header h1{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#EEF4FF;margin-bottom:6px;letter-spacing:-.02em}
+  .header p{font-size:11.5px;color:var(--muted);line-height:1.7}
+
+  .tab-nav{display:flex;gap:3px;margin-bottom:14px;background:var(--bg3);padding:3px;border-radius:8px;border:1px solid var(--border)}
+  .tab-btn{font-family:'JetBrains Mono',monospace;font-size:9px;padding:6px 13px;border-radius:5px;border:none;background:transparent;color:var(--dim);cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{background:var(--bg4);color:#EEF4FF;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+
+  .tab-panel{display:none;width:100%;max-width:1120px;flex-direction:column;align-items:center}
+  .tab-panel.active{display:flex}
+
+  .cat-filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;width:100%}
+  .cat-btn{font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 11px;border-radius:14px;border:1px solid var(--border);background:transparent;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;color:var(--dim)}
+
+  .layout{display:flex;gap:14px;width:100%;align-items:flex-start}
+  .chart-wrap{flex:1;min-width:0}
+  .axis-top{text-align:center;margin-bottom:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+  .axis-sub{font-size:8px;color:#1E2E48;letter-spacing:0;font-family:'DM Sans',sans-serif}
+  .axis-row{display:flex;align-items:center;gap:5px}
+  .axis-side{min-width:54px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;line-height:1.6}
+  .axis-bot{text-align:center;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+  #map-svg{width:100%;display:block;border:1px solid var(--border);border-radius:8px}
+
+  .detail-panel{width:308px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+  .placeholder{background:var(--bg3);border:1px dashed var(--border2);border-radius:8px;padding:22px;text-align:center;color:var(--dim);font-size:11px;line-height:1.8}
+  .placeholder .big{font-size:26px;margin-bottom:7px}
+
+  .detail-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .detail-head{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:11px}
+  .d-icon{font-size:26px;flex-shrink:0;margin-top:1px}
+  .d-name{font-size:15px;font-weight:600;font-family:'Playfair Display',serif;letter-spacing:-.01em}
+  .d-sub{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);margin-top:2px}
+  .d-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;border-radius:6px;display:inline-block}
+
+  .detail-body{padding:13px 15px;display:flex;flex-direction:column;gap:10px;max-height:67vh;overflow-y:auto}
+  .sec-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px}
+  .sec-text{font-size:11px;color:var(--muted);line-height:1.7}
+
+  .qa-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+  .qa-name{font-size:10px;color:var(--muted);width:148px;flex-shrink:0}
+  .dots{display:flex;gap:2px}
+  .dot{width:8px;height:8px;border-radius:50%;border:1px solid;display:inline-block}
+
+  /* Tier diagram inside detail */
+  .tier-diagram{display:flex;flex-direction:column;gap:3px}
+  .tier-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border-radius:5px;border:1px solid}
+  .tier-icon{font-size:14px;flex-shrink:0}
+  .tier-label{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:600;flex-shrink:0;width:90px}
+  .tier-desc{font-size:9px;color:var(--dim);line-height:1.4}
+  .tier-arrow{text-align:center;color:#2A3E5E;font-size:10px;margin:0 0 0 20px}
+
+  .example-grid{display:flex;flex-direction:column;gap:4px}
+  .ex-item{background:var(--bg2);border-radius:4px;padding:8px 10px;display:flex;gap:8px;align-items:flex-start}
+  .ex-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+  .ex-name{font-size:11px;font-weight:600;margin-bottom:1px}
+  .ex-desc{font-size:9px;color:var(--dim);line-height:1.4}
+
+  .tradeoffs{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .tf-col{background:var(--bg2);border-radius:4px;padding:8px}
+  .tf-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;margin-bottom:3px}
+  .tf-text{font-size:10px;color:var(--muted);line-height:1.55}
+  .pos-tag{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--bg2);border-radius:4px;padding:5px 9px;color:var(--dim);line-height:1.55}
+  .when-use{background:var(--bg2);border-radius:4px;padding:9px 10px}
+  .when-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.12em;margin-bottom:4px}
+  .when-text{font-size:10px;color:var(--muted);line-height:1.6}
+
+  .axis-note{width:100%;margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 16px;display:grid;grid-template-columns:1fr 1px 1fr;gap:14px}
+  .an-div{background:var(--border)}
+  .an-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--dim);margin-bottom:4px;text-transform:uppercase}
+  .an-text{font-size:10px;color:var(--muted);line-height:1.65}
+
+  .tbl-wrap{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .tbl-lbl{padding:10px 16px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em}
+  table{width:100%;border-collapse:collapse}
+  th{padding:8px 11px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.1em;background:var(--bg2);border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap}
+  td{padding:7px 11px;border-bottom:1px solid #080F1C;font-size:10px;vertical-align:top;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#070C18}
+  .tbl-badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 6px;border-radius:6px;white-space:nowrap}
+
+  .guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%}
+  .guide-card{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+  .guide-q{font-size:12px;color:#EEF4FF;font-weight:500;margin-bottom:8px;line-height:1.5}
+  .guide-opts{display:flex;gap:6px;flex-wrap:wrap}
+  .g-yes{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:3px 9px;border-radius:8px;background:rgba(74,222,128,.1);color:#4ADE80;line-height:1.5}
+  .g-no{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:3px 9px;border-radius:8px;background:rgba(148,163,184,.08);color:#94A3B8;line-height:1.5}
+
+  /* Tier visual tab */
+  .tier-vis-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
+  .tier-vis-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 16px}
+  .tv-title{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;text-transform:uppercase;margin-bottom:12px}
+  .tv-layers{display:flex;flex-direction:column;gap:3px}
+  .tv-layer{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:5px;font-size:10px}
+  .tv-layer-icon{font-size:14px;flex-shrink:0}
+  .tv-layer-name{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;flex:1}
+  .tv-layer-desc{font-size:9px;color:var(--dim)}
+  .tv-arrow{text-align:center;color:#1E2E48;font-size:11px;line-height:1.2;margin:1px 0 1px 30px}
+  .tv-note{font-size:9px;color:var(--dim);margin-top:10px;border-top:1px solid var(--border);padding-top:8px;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">System Analysis · Deployment Design · Tier Architecture Patterns</div>
+  <h1>System Tier Architecture Styles</h1>
+  <p>From a single self-contained app to globally distributed edge nodes — tier architecture defines where each layer of your system physically lives, who owns it, and how components communicate. Every tier boundary is a network call.</p>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('quadrant',this)">📍 Architecture Map</button>
+  <button class="tab-btn" onclick="showTab('visuals',this)">🏗️ Tier Diagrams</button>
+  <button class="tab-btn" onclick="showTab('compare',this)">📊 Comparison Table</button>
+  <button class="tab-btn" onclick="showTab('decision',this)">🧭 Decision Guide</button>
+</div>
+
+<!-- ════════ TAB 1: QUADRANT ════════ -->
+<div class="tab-panel active" id="tab-quadrant">
+  <div class="cat-filters" id="cat-filters"></div>
+  <div class="layout">
+    <div class="chart-wrap">
+      <div class="axis-top" style="color:#38BDF8">▲ THICK CLIENT &nbsp;<span class="axis-sub">· Logic on the client · Client is powerful · Offline capable</span></div>
+      <div class="axis-row">
+        <div class="axis-side" style="color:#A78BFA">◄ FEW TIERS<br><span style="font-size:7px;color:#1E2E48;font-family:'DM Sans';letter-spacing:0">Simple structure<br>Fewer hops</span></div>
+
+        <svg id="map-svg" viewBox="0 0 640 530">
+          <defs>
+            <radialGradient id="rg1" cx="20%" cy="20%" r="45%"><stop offset="0%" stop-color="#38BDF8" stop-opacity=".05"/><stop offset="100%" stop-color="#38BDF8" stop-opacity="0"/></radialGradient>
+            <radialGradient id="rg2" cx="80%" cy="20%" r="45%"><stop offset="0%" stop-color="#34D399" stop-opacity=".05"/><stop offset="100%" stop-color="#34D399" stop-opacity="0"/></radialGradient>
+            <radialGradient id="rg3" cx="20%" cy="80%" r="45%"><stop offset="0%" stop-color="#A78BFA" stop-opacity=".05"/><stop offset="100%" stop-color="#A78BFA" stop-opacity="0"/></radialGradient>
+            <radialGradient id="rg4" cx="80%" cy="80%" r="45%"><stop offset="0%" stop-color="#FBBF24" stop-opacity=".05"/><stop offset="100%" stop-color="#FBBF24" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="640" height="530" fill="#0A0F1C" rx="7"/>
+          <rect width="640" height="530" rx="7" fill="url(#rg1)" pointer-events="none"/>
+          <rect width="640" height="530" rx="7" fill="url(#rg2)" pointer-events="none"/>
+          <rect width="640" height="530" rx="7" fill="url(#rg3)" pointer-events="none"/>
+          <rect width="640" height="530" rx="7" fill="url(#rg4)" pointer-events="none"/>
+
+          <!-- Grid -->
+          <line x1="160" y1="0" x2="160" y2="530" stroke="#0C1525" stroke-width="1" pointer-events="none"/>
+          <line x1="320" y1="0" x2="320" y2="530" stroke="#0C1525" stroke-width="1" pointer-events="none"/>
+          <line x1="480" y1="0" x2="480" y2="530" stroke="#0C1525" stroke-width="1" pointer-events="none"/>
+          <line x1="0" y1="132" x2="640" y2="132" stroke="#0C1525" stroke-width="1" pointer-events="none"/>
+          <line x1="0" y1="265" x2="640" y2="265" stroke="#0C1525" stroke-width="1" pointer-events="none"/>
+          <line x1="0" y1="397" x2="640" y2="397" stroke="#0C1525" stroke-width="1" pointer-events="none"/>
+
+          <!-- Zone fills -->
+          <rect x="2"   y="2"   width="316" height="261" rx="5" fill="#38BDF8" fill-opacity=".03" stroke="#38BDF8" stroke-opacity=".08" stroke-width="1" pointer-events="none"/>
+          <rect x="322" y="2"   width="316" height="261" rx="5" fill="#34D399" fill-opacity=".03" stroke="#34D399" stroke-opacity=".08" stroke-width="1" pointer-events="none"/>
+          <rect x="2"   y="267" width="316" height="261" rx="5" fill="#A78BFA" fill-opacity=".03" stroke="#A78BFA" stroke-opacity=".08" stroke-width="1" pointer-events="none"/>
+          <rect x="322" y="267" width="316" height="261" rx="5" fill="#FBBF24" fill-opacity=".03" stroke="#FBBF24" stroke-opacity=".08" stroke-width="1" pointer-events="none"/>
+
+          <!-- Zone corner labels -->
+          <text x="16" y="22"  font-family="'Playfair Display',serif" font-size="11" fill="#38BDF8" opacity=".55" pointer-events="none">Thick + Simple</text>
+          <text x="16" y="35"  font-family="'JetBrains Mono',monospace" font-size="7" fill="#38BDF8" opacity=".3" pointer-events="none">1-tier · 2-tier · Desktop apps</text>
+          <text x="328" y="22" font-family="'Playfair Display',serif" font-size="11" fill="#34D399" opacity=".55" pointer-events="none">Thick + Layered</text>
+          <text x="328" y="35" font-family="'JetBrains Mono',monospace" font-size="7" fill="#34D399" opacity=".3" pointer-events="none">Rich client + deep backend · PWA</text>
+          <text x="16" y="283" font-family="'Playfair Display',serif" font-size="11" fill="#A78BFA" opacity=".55" pointer-events="none">Thin + Simple</text>
+          <text x="16" y="296" font-family="'JetBrains Mono',monospace" font-size="7" fill="#A78BFA" opacity=".3" pointer-events="none">2-tier thin · Terminal · Dumb client</text>
+          <text x="328" y="283" font-family="'Playfair Display',serif" font-size="11" fill="#FBBF24" opacity=".55" pointer-events="none">Thin + Deeply Layered</text>
+          <text x="328" y="296" font-family="'JetBrains Mono',monospace" font-size="7" fill="#FBBF24" opacity=".3" pointer-events="none">3-tier · N-tier · Microservices · Edge</text>
+
+          <!-- Center axes -->
+          <line x1="320" y1="0" x2="320" y2="530" stroke="#192035" stroke-width="1.5" pointer-events="none"/>
+          <line x1="0" y1="265" x2="640" y2="265" stroke="#192035" stroke-width="1.5" pointer-events="none"/>
+          <circle cx="320" cy="265" r="4" fill="#1E2E48" pointer-events="none"/>
+          <circle cx="320" cy="265" r="2" fill="#2A3E60" pointer-events="none"/>
+          <text x="315" y="16"  font-size="12" fill="#38BDF8" opacity=".5" pointer-events="none">▲</text>
+          <text x="315" y="528" font-size="12" fill="#FBBF24" opacity=".5" pointer-events="none">▼</text>
+          <text x="620" y="270" font-size="12" fill="#FBBF24" opacity=".5" pointer-events="none">►</text>
+          <text x="8"   y="270" font-size="12" fill="#A78BFA" opacity=".5" pointer-events="none">◄</text>
+
+          <g id="glow-layer"   pointer-events="none"></g>
+          <circle id="active-ring" cx="-400" cy="-400" r="0" fill="none" stroke="white" stroke-width="2" stroke-dasharray="5,3" opacity=".7" pointer-events="none"/>
+          <g id="bubble-layer"></g>
+          <g id="label-layer"  pointer-events="none"></g>
+        </svg>
+
+        <div class="axis-side" style="color:#FBBF24">MANY TIERS ►<br><span style="font-size:7px;color:#1E2E48;font-family:'DM Sans';letter-spacing:0">Complex structure<br>More hops</span></div>
+      </div>
+      <div class="axis-bot" style="color:#A78BFA">▼ THIN CLIENT &nbsp;<span class="axis-sub">· Logic on the server · Client just renders · Always online</span></div>
+    </div>
+
+    <div class="detail-panel" id="detail-panel">
+      <div class="placeholder">
+        <div class="big">🏛️</div>
+        Click any bubble to explore the tier architecture — physical structure, where each layer lives, real-world examples, and trade-offs.
+      </div>
+    </div>
+  </div>
+
+  <div class="axis-note">
+    <div>
+      <div class="an-label">Y-Axis — Client Thickness (Thick ↔ Thin)</div>
+      <div class="an-text">
+        <strong style="color:#38BDF8">Thick Client (top):</strong> Significant logic, processing, or state lives on the client machine. Can work offline. Client may have its own local database. Updates require distributing new client software.<br>
+        <strong style="color:#A78BFA">Thin Client (bottom):</strong> Client only renders UI and forwards input. All logic lives on the server. Easier to update (just deploy server). Requires network connection. Web browsers are the ultimate thin client.
+      </div>
+    </div>
+    <div class="an-div"></div>
+    <div>
+      <div class="an-label">X-Axis — Tier Count (Few ↔ Many)</div>
+      <div class="an-text">
+        <strong style="color:#A78BFA">Few Tiers (left):</strong> Fewer physical/logical layers. Less network overhead. Simpler to deploy and debug. Harder to scale individual layers independently.<br>
+        <strong style="color:#FBBF24">Many Tiers (right):</strong> Each concern is a separate layer — presentation, logic, cache, data, edge. Each can scale, be secured, and be updated independently. More complexity, more resilience.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ TAB 2: TIER DIAGRAMS ════════ -->
+<div class="tab-panel" id="tab-visuals" style="align-items:stretch">
+  <div class="tier-vis-grid" id="vis-grid"></div>
+</div>
+
+<!-- ════════ TAB 3: COMPARE ════════ -->
+<div class="tab-panel" id="tab-compare" style="align-items:stretch">
+  <div class="tbl-wrap">
+    <div class="tbl-lbl">All Tier Architectures — Full Comparison Matrix</div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th>Architecture</th><th>Tiers</th><th>Client Type</th><th>Offline Support</th>
+        <th>Scalability</th><th>Deploy Complexity</th><th>Latency Hops</th>
+        <th>Security Surface</th><th>Best For</th><th>Avoid When</th>
+      </tr></thead>
+      <tbody id="cmp-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ════════ TAB 4: DECISION ════════ -->
+<div class="tab-panel" id="tab-decision" style="align-items:stretch">
+  <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+    <div class="guide-grid" id="guide-cards"></div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em">PROJECT TYPE → RECOMMENDED TIER ARCHITECTURE</div>
+      <div id="profile-rows" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const TIERS = [
+  // ── THICK + FEW TIERS (top-left) ──
+  {
+    id:"one_tier", name:"1-Tier (Standalone)", icon:"💻",
+    category:"Single Tier", catColor:"#38BDF8", cx:100, cy:100, r:24, color:"#38BDF8",
+    quadrant:"Thick Client · Single Deployment Unit",
+    clientType:"Thick", tierCount:"1",
+    why:"Everything in one place — UI, business logic, and data all run on the same machine. No network calls. Classic desktop apps (Excel, Photoshop, games). Fast, offline by default, but hard to share data across users.",
+    layers:[
+      {icon:"🖥️", label:"Presentation", desc:"UI rendered locally", color:"#38BDF8"},
+      {icon:"⚙️", label:"Business Logic", desc:"All rules processed locally", color:"#38BDF8"},
+      {icon:"💾", label:"Data Storage", desc:"Local file / embedded DB (SQLite)", color:"#38BDF8"},
+    ],
+    qas:[
+      {name:"Offline Capability",score:5},{name:"Performance (local)",score:5},
+      {name:"Deploy Simplicity",score:5},{name:"Data Sharing",score:1},
+      {name:"Scalability",score:1},{name:"Remote Updates",score:2},
+    ],
+    examples:[
+      {icon:"📊",name:"Microsoft Excel",desc:"All computation, rendering, and storage on your machine."},
+      {icon:"🎮",name:"Single-player Games",desc:"Game engine + assets + save file — all local."},
+      {icon:"🖼️",name:"Photoshop / Figma Desktop",desc:"UI + rendering engine + local project files."},
+    ],
+    goodFor:"Desktop tools · Single-user apps · Offline-first · High-performance local processing",
+    tradeoffGood:"Zero latency. Works offline. No server cost. Full hardware access.",
+    tradeoffBad:"Hard to share data. Updates require re-distributing the app. No central data.",
+    whenToUse:"When users need offline capability and data does not need to be shared across devices.",
+  },
+  {
+    id:"two_tier_thick", name:"2-Tier (Thick Client)", icon:"🖥️",
+    category:"Two Tier", catColor:"#60A5FA", cx:180, cy:148, r:22, color:"#60A5FA",
+    quadrant:"Thick Client · Client + Database Server",
+    clientType:"Thick", tierCount:"2",
+    why:"The classic client-server model. Client contains all UI AND business logic — it connects directly to the database server. Common in LAN-based enterprise apps before the web era. MS Access + SQL Server is a textbook example.",
+    layers:[
+      {icon:"🖥️", label:"Client Tier", desc:"UI + Business Logic", color:"#60A5FA"},
+      {icon:"🗄️", label:"Data Tier", desc:"Database Server (SQL Server, Oracle)", color:"#60A5FA"},
+    ],
+    qas:[
+      {name:"Performance",score:4},{name:"Simplicity",score:4},
+      {name:"Offline Partial",score:3},{name:"Security",score:2},
+      {name:"Scalability",score:2},{name:"Maintenance",score:2},
+    ],
+    examples:[
+      {icon:"📊",name:"MS Access + SQL Server",desc:"Form-based client, SQL Server backend over LAN."},
+      {icon:"🏢",name:"Legacy ERP Clients",desc:"SAP GUI, Oracle Forms — thick client connects to DB directly."},
+      {icon:"🏦",name:"Early Banking Terminals",desc:"Branch terminals with direct DB connections."},
+    ],
+    goodFor:"LAN-based tools · Small office systems · Legacy enterprise apps",
+    tradeoffGood:"Simple. Fast on LAN. Business logic easy to build in client frameworks.",
+    tradeoffBad:"Logic in client = hard to update all machines. DB exposed to client network. Doesn't scale.",
+    whenToUse:"LAN environments with controlled users. Avoid for internet-facing or large-scale systems.",
+  },
+  {
+    id:"rich_client", name:"Rich Client + API", icon:"⚡",
+    category:"Two Tier", catColor:"#60A5FA", cx:270, cy:108, r:20, color:"#7DD3FC",
+    quadrant:"Thick Client · Client + API Backend",
+    clientType:"Thick (SPA/Mobile)", tierCount:"2 (logical)",
+    why:"Modern SPA or mobile app where the client does significant work — routing, state management, validation, rendering — and talks to an API backend. The client is 'thick' in logic but not in data storage.",
+    layers:[
+      {icon:"🌐", label:"SPA / Mobile App", desc:"React/Vue/Flutter — routing, state, validation", color:"#7DD3FC"},
+      {icon:"🔧", label:"API Backend", desc:"REST or GraphQL — business logic + data access", color:"#7DD3FC"},
+    ],
+    qas:[
+      {name:"User Experience",score:5},{name:"Developer Experience",score:5},
+      {name:"Time to Market",score:4},{name:"SEO (by default)",score:2},
+      {name:"Initial Load Speed",score:3},{name:"Offline Support",score:3},
+    ],
+    examples:[
+      {icon:"📱",name:"React + Node.js API",desc:"Standard modern web app — SPA frontend + REST API."},
+      {icon:"📱",name:"Flutter + Firebase",desc:"Mobile app with embedded logic + cloud backend."},
+      {icon:"⚡",name:"Vue + FastAPI",desc:"SPA with Python backend — common data dashboard pattern."},
+    ],
+    goodFor:"Modern web apps · Dashboards · Internal tools · Mobile apps",
+    tradeoffGood:"Smooth UX. Independent deploy of frontend and backend. Easy to iterate.",
+    tradeoffBad:"Large JS bundles. SEO requires SSR. State sync complexity. CORS management.",
+    whenToUse:"Default choice for most modern web applications with a team that knows frontend frameworks.",
+  },
+
+  // ── THICK + MANY TIERS (top-right) ──
+  {
+    id:"pwa", name:"PWA + Backend", icon:"📱",
+    category:"Modern", catColor:"#34D399", cx:420, cy:118, r:20, color:"#34D399",
+    quadrant:"Thick Client · Progressive Web App + Multiple Backend Tiers",
+    clientType:"Thick (offline-capable)", tierCount:"3+",
+    why:"Progressive Web App — a web app that behaves like a native app. Service worker enables offline mode by caching resources and data. Syncs with backend when online. Best of both worlds: web distribution + native-like offline experience.",
+    layers:[
+      {icon:"📱", label:"PWA Client", desc:"Service Worker + Cache + Local IndexedDB", color:"#34D399"},
+      {icon:"☁️", label:"CDN / Edge", desc:"Static assets served globally", color:"#34D399"},
+      {icon:"🔧", label:"API Layer", desc:"REST or GraphQL", color:"#34D399"},
+      {icon:"🗄️", label:"Data Layer", desc:"Database + sync engine", color:"#34D399"},
+    ],
+    qas:[
+      {name:"Offline Support",score:5},{name:"No App Store Needed",score:5},
+      {name:"Cross-Platform",score:5},{name:"Native Features Access",score:3},
+      {name:"Complexity",score:3},{name:"Background Sync",score:4},
+    ],
+    examples:[
+      {icon:"🐦",name:"Twitter Lite PWA",desc:"Offline timeline, push notifications, installable — 70% less data usage."},
+      {icon:"📰",name:"The Guardian PWA",desc:"Offline reading, push breaking news, installable on Android."},
+      {icon:"📊",name:"Starbucks PWA",desc:"Order offline, sync when connected. Works on slow 2G networks."},
+    ],
+    goodFor:"Mobile web users · Low-bandwidth markets · Apps needing offline + web distribution",
+    tradeoffGood:"Installable without App Store. Offline capable. Reduced data usage.",
+    tradeoffBad:"Limited iOS support for some PWA features. Service worker complexity. Cache invalidation.",
+    whenToUse:"When targeting mobile web users who need offline access but you want web deployment simplicity.",
+  },
+  {
+    id:"three_tier", name:"3-Tier Architecture", icon:"🏗️",
+    category:"Three Tier", catColor:"#FBBF24", cx:490, cy:340, r:28, color:"#FBBF24",
+    quadrant:"Thin Client · 3 Distinct Physical Tiers",
+    clientType:"Thin (browser/terminal)", tierCount:"3",
+    why:"The dominant architecture for web applications. Three clearly separated, independently deployable tiers: Presentation (browser/mobile), Application Logic (app server), and Data (database). Each tier can scale independently. The industry default for most systems.",
+    layers:[
+      {icon:"🌐", label:"Presentation Tier", desc:"Browser / Mobile App — HTML, CSS, JS", color:"#FBBF24"},
+      {icon:"⚙️", label:"Application Tier", desc:"Web Server + Business Logic + API", color:"#FBBF24"},
+      {icon:"🗄️", label:"Data Tier", desc:"Relational DB / NoSQL / Cache", color:"#FBBF24"},
+    ],
+    qas:[
+      {name:"Scalability",score:4},{name:"Security Separation",score:4},
+      {name:"Maintainability",score:4},{name:"Industry Standard",score:5},
+      {name:"Operational Cost",score:3},{name:"Complexity",score:3},
+    ],
+    examples:[
+      {icon:"🛒",name:"E-commerce (standard)",desc:"Browser → Node.js/Spring → PostgreSQL. Classic web stack."},
+      {icon:"🏦",name:"Banking Web App",desc:"Browser → Java EE App Server → Oracle DB. Standard enterprise."},
+      {icon:"🏥",name:"Hospital Systems",desc:"Browser → Application Server → Clinical DB. Separated for compliance."},
+    ],
+    goodFor:"Most web applications · Enterprise systems · Any team > 3 developers",
+    tradeoffGood:"Clean separation of concerns. Independent scaling of each tier. Industry standard.",
+    tradeoffBad:"More infrastructure to manage than 2-tier. Network latency between tiers.",
+    whenToUse:"The default architecture for any non-trivial web application. Start here unless you have specific reasons not to.",
+  },
+  {
+    id:"n_tier", name:"N-Tier Architecture", icon:"🎯",
+    category:"N-Tier", catColor:"#F97316", cx:565, cy:390, r:22, color:"#F97316",
+    quadrant:"Thin Client · Many Specialized Tiers",
+    clientType:"Thin", tierCount:"4–6+",
+    why:"An extension of 3-tier where additional specialized tiers are inserted for specific concerns: CDN tier, load balancer tier, application tier, cache tier, message queue tier, data tier. Each tier is a horizontal scalability and security boundary.",
+    layers:[
+      {icon:"🌍", label:"Client Tier", desc:"Browser / App", color:"#F97316"},
+      {icon:"🚀", label:"CDN Tier", desc:"Edge caching — static assets", color:"#F97316"},
+      {icon:"⚖️", label:"Load Balancer", desc:"Traffic distribution + SSL termination", color:"#F97316"},
+      {icon:"⚙️", label:"Application Tier", desc:"App servers (auto-scaled)", color:"#F97316"},
+      {icon:"⚡", label:"Cache Tier", desc:"Redis / Memcached", color:"#F97316"},
+      {icon:"🗄️", label:"Data Tier", desc:"Primary DB + Read replicas", color:"#F97316"},
+    ],
+    qas:[
+      {name:"Horizontal Scalability",score:5},{name:"Fault Isolation",score:5},
+      {name:"Security Boundaries",score:5},{name:"Deploy Complexity",score:2},
+      {name:"Infra Cost",score:2},{name:"Debugging",score:2},
+    ],
+    examples:[
+      {icon:"🛒",name:"Amazon.com",desc:"CDN → LB → App Cluster → ElastiCache → Aurora RDS."},
+      {icon:"🎬",name:"Large Media Platforms",desc:"Multiple specialized tiers for different content types."},
+      {icon:"🏢",name:"Enterprise SOA",desc:"ESB, application server farm, database cluster, archive tier."},
+    ],
+    goodFor:"High-traffic systems · Enterprise scale · Systems needing independent tier scaling",
+    tradeoffGood:"Each tier scales independently. Fault in one tier is isolated. Deep security zones.",
+    tradeoffBad:"Complex infrastructure. More latency hops. Expensive to run at full scale.",
+    whenToUse:"When your 3-tier app is hitting limits — either traffic, security, or operational bottlenecks.",
+  },
+  {
+    id:"microservices_tier", name:"Microservices Mesh", icon:"🔬",
+    category:"N-Tier", catColor:"#F97316", cx:590, cy:305, r:20, color:"#FB923C",
+    quadrant:"Thin Client · Many Distributed Service Tiers",
+    clientType:"Thin", tierCount:"Many (per service)",
+    why:"Each microservice has its own tier stack — its own application layer, its own data store. An API gateway sits in front. Each service communicates via APIs or events. The tier model becomes per-service rather than system-wide.",
+    layers:[
+      {icon:"🌐", label:"Client", desc:"Browser / App", color:"#FB923C"},
+      {icon:"🚪", label:"API Gateway", desc:"Route, auth, rate limit", color:"#FB923C"},
+      {icon:"🔬", label:"Service A", desc:"Own app + own DB", color:"#FB923C"},
+      {icon:"🔬", label:"Service B", desc:"Own app + own DB", color:"#FB923C"},
+      {icon:"🔬", label:"Service N", desc:"Own app + own DB", color:"#FB923C"},
+    ],
+    qas:[
+      {name:"Team Autonomy",score:5},{name:"Independent Scaling",score:5},
+      {name:"Data Isolation",score:5},{name:"Operational Complexity",score:1},
+      {name:"Dev Velocity (startup)",score:1},{name:"Network Overhead",score:2},
+    ],
+    examples:[
+      {icon:"🎬",name:"Netflix",desc:"Browser → API Gateway → ~700 microservices, each with own tier stack."},
+      {icon:"🛒",name:"Amazon",desc:"Each product page assembles data from dozens of independent service tiers."},
+    ],
+    goodFor:"Large engineering orgs · Multiple autonomous teams · Different scaling needs per domain",
+    tradeoffGood:"True independence. Teams own their full tier stack. Elastic scaling per service.",
+    tradeoffBad:"Enormous operational complexity. Distributed tracing. Service mesh required at scale.",
+    whenToUse:"Only when team size (50+ engineers) makes a single shared tier stack a bottleneck.",
+  },
+
+  // ── THIN + FEW TIERS (bottom-left) ──
+  {
+    id:"two_tier_thin", name:"2-Tier (Thin Client)", icon:"🖥️",
+    category:"Two Tier", catColor:"#60A5FA", cx:110, cy:400, r:20, color:"#818CF8",
+    quadrant:"Thin Client · Client + Server (Terminal Model)",
+    clientType:"Thin (terminal/browser)", tierCount:"2",
+    why:"Terminal or browser connects directly to a server that does everything. No logic on the client. Classic mainframe terminals, VT100 terminals, RDP sessions. Modern equivalent: a web app where the server renders every page (old-school PHP/Rails with no JS).",
+    layers:[
+      {icon:"🖥️", label:"Client/Terminal", desc:"Renders output only — no logic", color:"#818CF8"},
+      {icon:"🖥️", label:"Server", desc:"All logic + all data + rendering", color:"#818CF8"},
+    ],
+    qas:[
+      {name:"Centralized Control",score:5},{name:"Deploy Simplicity",score:5},
+      {name:"Security (central)",score:5},{name:"Offline Support",score:1},
+      {name:"Client Scalability",score:2},{name:"Network Dependency",score:1},
+    ],
+    examples:[
+      {icon:"💻",name:"Mainframe + VT100 Terminals",desc:"All processing on mainframe. Terminal just shows characters."},
+      {icon:"🖥️",name:"RDP / VDI (Remote Desktop)",desc:"Thin client shows pixels only — all compute on remote server."},
+      {icon:"🌐",name:"Server-Side Rendered Web (old PHP)",desc:"PHP renders full HTML page on every request — client just shows HTML."},
+    ],
+    goodFor:"Kiosk systems · Highly controlled environments · Legacy mainframe modernization",
+    tradeoffGood:"All logic centrally controlled. Easy to update. Secure — nothing sensitive on client.",
+    tradeoffBad:"Completely network-dependent. Server must handle all load. Poor UX for complex interactions.",
+    whenToUse:"For kiosks, controlled terminals, or legacy system modernization where clients must be dumb.",
+  },
+  {
+    id:"serverless_tier", name:"Serverless Architecture", icon:"☁️",
+    category:"Modern", catColor:"#34D399", cx:200, cy:440, r:22, color:"#A7F3D0",
+    quadrant:"Thin Client · No Fixed Server Tier",
+    clientType:"Thin/Thick (varies)", tierCount:"0 visible (FaaS)",
+    why:"There IS no application tier — functions spin up on demand and disappear. The tier model inverts: you define event handlers, not servers. BaaS (Backend as a Service) like Firebase or Supabase replaces the entire backend tier with managed services.",
+    layers:[
+      {icon:"🌐", label:"Client", desc:"SPA or mobile app", color:"#A7F3D0"},
+      {icon:"⚡", label:"Functions (FaaS)", desc:"Lambda/Cloud Functions — spin up per request", color:"#A7F3D0"},
+      {icon:"🗄️", label:"BaaS Services", desc:"Managed DB + Auth + Storage (Firebase, Supabase)", color:"#A7F3D0"},
+    ],
+    qas:[
+      {name:"Ops Overhead",score:5},{name:"Cost at Low Traffic",score:5},
+      {name:"Auto-scaling",score:5},{name:"Vendor Lock-in",score:1},
+      {name:"Cold Start Latency",score:2},{name:"Complex Workflows",score:2},
+    ],
+    examples:[
+      {icon:"🟢",name:"Supabase + Next.js",desc:"No app server tier — Supabase IS the backend tier."},
+      {icon:"🔥",name:"Firebase + React Native",desc:"Mobile app talks directly to Firebase — no custom server."},
+      {icon:"⚡",name:"Vercel + Lambda",desc:"Static SPA + serverless API routes — no persistent servers."},
+    ],
+    goodFor:"MVPs · Variable traffic · Event-driven apps · Teams without backend infrastructure expertise",
+    tradeoffGood:"Zero server management. Scales to zero cost when idle. Ship in hours.",
+    tradeoffBad:"Cold starts. Vendor lock-in is severe. Complex business logic is hard in FaaS.",
+    whenToUse:"For new projects with unpredictable traffic or small teams who cannot manage infrastructure.",
+  },
+  {
+    id:"peer_to_peer", name:"Peer-to-Peer (P2P)", icon:"🔗",
+    category:"Specialized", catColor:"#F472B6", cx:68, cy:320, r:18, color:"#F472B6",
+    quadrant:"Thick Client · No Central Server Tier",
+    clientType:"Thick (peer node)", tierCount:"0 central (distributed peers)",
+    why:"No server tier at all. Every node is both client and server. Data is distributed across all participating nodes. No single point of failure — but coordination is extremely hard. Used where decentralization is a core requirement.",
+    layers:[
+      {icon:"💻", label:"Peer Node A", desc:"Client + partial server + local data", color:"#F472B6"},
+      {icon:"🔗", label:"P2P Network", desc:"Distributed hash table or gossip protocol", color:"#F472B6"},
+      {icon:"💻", label:"Peer Node B", desc:"Client + partial server + local data", color:"#F472B6"},
+    ],
+    qas:[
+      {name:"Decentralization",score:5},{name:"No Single Point Failure",score:5},
+      {name:"Censorship Resistance",score:5},{name:"Data Consistency",score:1},
+      {name:"Operational Control",score:1},{name:"Implementation Complexity",score:1},
+    ],
+    examples:[
+      {icon:"₿",name:"Bitcoin / Blockchain",desc:"Each node has a full copy. No central server."},
+      {icon:"🎵",name:"BitTorrent",desc:"File chunks distributed across all seeders."},
+      {icon:"📞",name:"WebRTC (video calls)",desc:"Browser-to-browser direct media stream — no media server."},
+    ],
+    goodFor:"Decentralized systems · Blockchain · File distribution · Browser-to-browser streaming",
+    tradeoffGood:"No central server cost. No single point of failure. Censorship resistant.",
+    tradeoffBad:"Extremely hard to implement correctly. Eventual consistency. Sybil attacks. No control.",
+    whenToUse:"Only when decentralization is a core product requirement, not just a feature.",
+  },
+
+  // ── THIN + MANY TIERS (bottom-right) ──
+  {
+    id:"three_tier_cdn", name:"3-Tier + CDN", icon:"🌍",
+    category:"Three Tier", catColor:"#FBBF24", cx:390, cy:400, r:22, color:"#FCD34D",
+    quadrant:"Thin Client · 3-Tier + CDN Edge Layer",
+    clientType:"Thin (browser)", tierCount:"3 + CDN",
+    why:"Standard 3-tier with a CDN layer in front that caches static assets at edge locations worldwide. The most common real-world production architecture. Static assets (JS, CSS, images) served from 200+ edge nodes. Dynamic requests pass through to the app tier.",
+    layers:[
+      {icon:"🌐", label:"Browser", desc:"Renders HTML/CSS/JS from CDN", color:"#FCD34D"},
+      {icon:"🚀", label:"CDN Layer", desc:"Static assets cached at edge — Cloudflare, CloudFront", color:"#FCD34D"},
+      {icon:"⚙️", label:"App Tier", desc:"API server — dynamic requests only", color:"#FCD34D"},
+      {icon:"🗄️", label:"Data Tier", desc:"DB + Cache layer", color:"#FCD34D"},
+    ],
+    qas:[
+      {name:"Global Performance",score:5},{name:"Static Asset Speed",score:5},
+      {name:"Scalability",score:4},{name:"Cost Efficiency",score:4},
+      {name:"Operational Complexity",score:3},{name:"Cache Invalidation",score:3},
+    ],
+    examples:[
+      {icon:"🛒",name:"Most SaaS Products",desc:"React SPA on CloudFront/Cloudflare + API + RDS — standard production."},
+      {icon:"📰",name:"News / Media Sites",desc:"WordPress/CMS content cached on CDN. Origin rarely hit."},
+      {icon:"🎓",name:"EdTech Platforms",desc:"Video/content from CDN. Interactive features from app tier."},
+    ],
+    goodFor:"Any public-facing web product · Global audience · High-traffic content sites",
+    tradeoffGood:"Static assets served in <10ms globally. Reduces app tier load dramatically.",
+    tradeoffBad:"Cache invalidation is famously hard. CDN config mistakes cause stale content at scale.",
+    whenToUse:"The production default for any web app with significant traffic or global users.",
+  },
+  {
+    id:"edge_tier", name:"Edge + Origin", icon:"🌐",
+    category:"Modern", catColor:"#34D399", cx:490, cy:445, r:22, color:"#6EE7B7",
+    quadrant:"Thin Client · Edge Compute + Origin Backend",
+    clientType:"Thin (browser/app)", tierCount:"3 (edge-first)",
+    why:"Instead of just caching static assets, the entire application logic runs at the edge (Cloudflare Workers, Vercel Edge, Deno Deploy). Dynamic requests are handled at the nearest PoP globally. The origin backend handles only data and heavy computation.",
+    layers:[
+      {icon:"🌐", label:"Client", desc:"Browser / App", color:"#6EE7B7"},
+      {icon:"⚡", label:"Edge Tier", desc:"Workers at 300+ global locations — auth, routing, API", color:"#6EE7B7"},
+      {icon:"🗄️", label:"Origin Tier", desc:"Primary DB + heavy compute — central region", color:"#6EE7B7"},
+    ],
+    qas:[
+      {name:"Global Latency",score:5},{name:"Auto-scaling",score:5},
+      {name:"Cold Starts",score:5},{name:"Stateful Operations",score:2},
+      {name:"Complex DB Queries",score:2},{name:"Compute Duration",score:2},
+    ],
+    examples:[
+      {icon:"🟠",name:"Cloudflare Workers + D1",desc:"Workers at edge handle API + D1 SQLite DB replicated globally."},
+      {icon:"▲",name:"Vercel Edge Runtime",desc:"Next.js edge middleware + edge API routes at global PoPs."},
+      {icon:"🦕",name:"Deno Deploy",desc:"TypeScript functions deployed globally — zero cold starts."},
+    ],
+    goodFor:"Global consumer apps · API latency optimization · Auth/routing at edge",
+    tradeoffGood:"Sub-20ms response globally. Zero cold starts. No server provisioning.",
+    tradeoffBad:"Edge runtimes have CPU time limits. No complex DB access patterns. New paradigm.",
+    whenToUse:"When global latency is a core QA requirement and your logic fits edge runtime constraints.",
+  },
+  {
+    id:"ssr_tier", name:"SSR / Full-Stack Framework", icon:"🔄",
+    category:"Three Tier", catColor:"#FBBF24", cx:360, cy:320, r:20, color:"#F0ABFC",
+    quadrant:"Medium Client · Server-Side Rendering Tier",
+    clientType:"Thin-ish (HTML first, hydrated)", tierCount:"2–3",
+    why:"Next.js, Nuxt, SvelteKit, Remix — frameworks that blur the line between client and server. Pages are rendered on the server for initial load (SEO, performance), then hydrated to a rich client. One codebase, but multiple rendering environments.",
+    layers:[
+      {icon:"🖥️", label:"SSR Server", desc:"Renders HTML on first load + handles API routes", color:"#F0ABFC"},
+      {icon:"⚡", label:"Hydrated Client", desc:"React/Vue takes over after first render", color:"#F0ABFC"},
+      {icon:"🗄️", label:"Data Tier", desc:"DB accessed via server-side data fetching", color:"#F0ABFC"},
+    ],
+    qas:[
+      {name:"SEO",score:5},{name:"Initial Load Speed",score:5},
+      {name:"Developer Experience",score:5},{name:"Complexity",score:3},
+      {name:"Caching Strategy",score:3},{name:"Server Cost",score:3},
+    ],
+    examples:[
+      {icon:"⚫",name:"Next.js (App Router)",desc:"Page → Server Component → DB query. No separate API needed."},
+      {icon:"🔴",name:"Remix",desc:"Nested routes with server loaders. Progressive enhancement."},
+      {icon:"🟢",name:"Nuxt 3",desc:"Vue universal app. SSR + SPA + SSG in one framework."},
+    ],
+    goodFor:"SEO-critical products · Marketing + product in one app · Full-stack JS teams",
+    tradeoffGood:"Best of SSR (SEO) and SPA (interactivity). One codebase. Co-located data fetching.",
+    tradeoffBad:"Hydration complexity. Caching strategy is nuanced. Server always needed (not static).",
+    whenToUse:"For public-facing web products where SEO matters and you want a full-stack JS team.",
+  },
+  {
+    id:"mobile_backend", name:"Mobile + BaaS", icon:"📱",
+    category:"Modern", catColor:"#34D399", cx:475, cy:215, r:20, color:"#86EFAC",
+    quadrant:"Thick Client · Mobile + Managed Backend Tiers",
+    clientType:"Thick (native mobile)", tierCount:"2–3 (managed)",
+    why:"Native mobile app (iOS/Android) with a managed backend-as-a-service handling auth, database, storage, and push notifications. The mobile client is thick — it has its own UI framework, local storage, and business logic — but the backend is fully managed.",
+    layers:[
+      {icon:"📱", label:"Native Mobile App", desc:"iOS / Android — own local DB (SQLite/Realm)", color:"#86EFAC"},
+      {icon:"🔐", label:"Auth + Push Tier", desc:"Firebase Auth / Supabase Auth / APNs", color:"#86EFAC"},
+      {icon:"☁️", label:"Cloud Data Tier", desc:"Firestore / Supabase / Amplify — synced", color:"#86EFAC"},
+    ],
+    qas:[
+      {name:"Mobile DX",score:5},{name:"Offline Sync",score:5},
+      {name:"Push Notifications",score:5},{name:"Vendor Lock-in",score:2},
+      {name:"Custom Backend Logic",score:2},{name:"Cost at Scale",score:3},
+    ],
+    examples:[
+      {icon:"📱",name:"React Native + Supabase",desc:"Cross-platform mobile with managed Postgres backend."},
+      {icon:"🔥",name:"Flutter + Firebase",desc:"Most popular mobile + BaaS combination."},
+      {icon:"🍎",name:"SwiftUI + CloudKit",desc:"Native iOS with Apple-managed backend and iCloud sync."},
+    ],
+    goodFor:"Mobile apps · Consumer apps with offline sync · Small teams",
+    tradeoffGood:"Offline sync built-in. Push notifications. No backend servers to manage.",
+    tradeoffBad:"Vendor lock-in to Firebase/Supabase. Complex custom logic requires Cloud Functions.",
+    whenToUse:"For mobile apps where offline sync and push notifications are required and team is small.",
+  },
+];
+
+const CATEGORIES = ["All", ...new Set(TIERS.map(t=>t.category))];
+let activeCat="All", activeID=null;
+const NS="http://www.w3.org/2000/svg";
+
+// ── Filters ──
+const catEl=document.getElementById("cat-filters");
+CATEGORIES.forEach(cat=>{
+  const btn=document.createElement("button");
+  btn.className="cat-btn";btn.dataset.cat=cat;
+  const p=TIERS.find(x=>x.category===cat);
+  const c=cat==="All"?"#60A5FA":(p?.catColor||"#64748B");
+  btn.textContent=cat;
+  if(cat==="All"){btn.style.background="#60A5FA18";btn.style.color="#60A5FA";btn.style.borderColor="#60A5FA45";}
+  else{btn.style.color=c;}
+  btn.addEventListener("click",()=>{
+    activeCat=cat;
+    document.querySelectorAll(".cat-btn").forEach(b=>{
+      const bc=TIERS.find(x=>x.category===b.dataset.cat)?.catColor||(b.dataset.cat==="All"?"#60A5FA":"#64748B");
+      if(b.dataset.cat===cat){b.style.background=bc+"22";b.style.color=bc;b.style.borderColor=bc+"55";}
+      else{b.style.background="";b.style.borderColor="";b.style.color=bc;}
+    });
+    renderAll();
+  });
+  catEl.appendChild(btn);
+});
+
+// ── Render SVG ──
+function renderAll(){
+  ["glow-layer","bubble-layer","label-layer"].forEach(id=>document.getElementById(id).innerHTML="");
+  TIERS.forEach(p=>{
+    const dim=activeCat!=="All"&&p.category!==activeCat;
+    const active=activeID===p.id;
+    const g=document.createElementNS(NS,"circle");
+    g.setAttribute("cx",p.cx);g.setAttribute("cy",p.cy);g.setAttribute("r",p.r+12);
+    g.setAttribute("fill",p.color);g.setAttribute("fill-opacity",dim?0:active?.28:.08);
+    document.getElementById("glow-layer").appendChild(g);
+    const c=document.createElementNS(NS,"circle");
+    c.setAttribute("cx",p.cx);c.setAttribute("cy",p.cy);c.setAttribute("r",p.r);
+    c.setAttribute("fill",p.color);c.setAttribute("fill-opacity",dim?.05:active?.88:.20);
+    c.setAttribute("stroke",p.color);c.setAttribute("stroke-width",active?2.5:1.5);
+    c.setAttribute("stroke-opacity",dim?.1:.85);
+    c.setAttribute("data-tid",p.id);c.style.cursor=dim?"default":"pointer";
+    document.getElementById("bubble-layer").appendChild(c);
+    const icon=document.createElementNS(NS,"text");
+    icon.setAttribute("x",p.cx);icon.setAttribute("y",p.cy);
+    icon.setAttribute("text-anchor","middle");icon.setAttribute("dominant-baseline","central");
+    icon.setAttribute("font-size",Math.round(p.r*.72));icon.setAttribute("opacity",dim?.08:1);
+    icon.textContent=p.icon;
+    document.getElementById("label-layer").appendChild(icon);
+    const lbl=document.createElementNS(NS,"text");
+    lbl.setAttribute("x",p.cx);lbl.setAttribute("y",p.cy+p.r+11);
+    lbl.setAttribute("text-anchor","middle");lbl.setAttribute("font-family","'JetBrains Mono',monospace");
+    lbl.setAttribute("font-size","7.5");lbl.setAttribute("fill",p.color);lbl.setAttribute("opacity",dim?.08:.85);
+    lbl.textContent=p.name;
+    document.getElementById("label-layer").appendChild(lbl);
+  });
+  const ring=document.getElementById("active-ring");
+  if(activeID){const p=TIERS.find(x=>x.id===activeID);ring.setAttribute("cx",p.cx);ring.setAttribute("cy",p.cy);ring.setAttribute("r",p.r+17);ring.setAttribute("stroke",p.color);ring.setAttribute("stroke-width","2");}
+  else{ring.setAttribute("cx",-400);ring.setAttribute("cy",-400);ring.setAttribute("r",0);}
+}
+
+// ── Click ──
+document.getElementById("map-svg").addEventListener("click",e=>{
+  let t=e.target;
+  while(t&&t!==e.currentTarget){if(t.dataset?.tid)break;t=t.parentElement;}
+  const tid=t?.dataset?.tid;
+  if(!tid)return;
+  const p=TIERS.find(x=>x.id===tid);
+  if(!p||activeCat!=="All"&&p.category!==activeCat)return;
+  activeID=activeID===tid?null:tid;
+  renderAll();
+  activeID?renderDetail(activeID):showPlaceholder();
+});
+
+function showPlaceholder(){document.getElementById("detail-panel").innerHTML=`<div class="placeholder"><div class="big">🏛️</div>Click any bubble to explore the tier architecture — physical structure, where each layer lives, real-world examples, and trade-offs.</div>`;}
+
+function makeDots(score,color){
+  let h='<div class="dots">';
+  for(let i=1;i<=5;i++)h+=`<span class="dot" style="background:${i<=score?color:'#111A2E'};border-color:${i<=score?color:'#1A2840'}"></span>`;
+  return h+"</div>";
+}
+
+function renderDetail(tid){
+  const p=TIERS.find(x=>x.id===tid);
+  const qaRows=p.qas.map(q=>`<div class="qa-row"><div class="qa-name">${q.name}</div>${makeDots(q.score,p.color)}</div>`).join("");
+  const layerRows=p.layers.map((l,i)=>`
+    ${i>0?`<div class="tier-arrow">↕</div>`:""}
+    <div class="tier-row" style="background:${l.color}0c;border-color:${l.color}25">
+      <span class="tier-icon">${l.icon}</span>
+      <span class="tier-label" style="color:${l.color}">${l.label}</span>
+      <span class="tier-desc">${l.desc}</span>
+    </div>`).join("");
+  const exItems=p.examples.map(e=>`<div class="ex-item"><div class="ex-icon">${e.icon}</div><div><div class="ex-name" style="color:${p.color}">${e.name}</div><div class="ex-desc">${e.desc}</div></div></div>`).join("");
+  document.getElementById("detail-panel").innerHTML=`
+    <div class="detail-card" style="border-color:${p.color}40">
+      <div class="detail-head" style="background:${p.color}0c;border-bottom-color:${p.color}20">
+        <div class="d-icon">${p.icon}</div>
+        <div>
+          <div class="d-name" style="color:${p.color}">${p.name}</div>
+          <div class="d-sub">Client: ${p.clientType} · Tiers: ${p.tierCount}</div>
+          <div class="d-badges">
+            <span class="badge" style="background:${p.catColor}1A;color:${p.catColor}">${p.category}</span>
+          </div>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div><div class="sec-label" style="color:${p.color}">Map Position</div><div class="pos-tag">${p.quadrant}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">Why This Structure Exists</div><div class="sec-text">${p.why}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">Physical Tier Structure</div><div class="tier-diagram">${layerRows}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">QA Fit Scores</div>${qaRows}</div>
+        <div><div class="sec-label" style="color:${p.color}">Real-World Examples</div><div class="example-grid">${exItems}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">Trade-offs</div>
+          <div class="tradeoffs">
+            <div class="tf-col"><div class="tf-label" style="color:#4ADE80">✓ Strengths</div><div class="tf-text">${p.tradeoffGood}</div></div>
+            <div class="tf-col"><div class="tf-label" style="color:#F87171">✗ Weaknesses</div><div class="tf-text">${p.tradeoffBad}</div></div>
+          </div>
+        </div>
+        <div class="when-use"><div class="when-label">WHEN TO USE</div><div class="when-text">${p.whenToUse}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">Best Used For</div><div style="font-size:10px;color:#3A4E6E;line-height:1.6">${p.goodFor}</div></div>
+      </div>
+    </div>`;
+}
+
+// ── Tab ──
+function showTab(tabId,btn){
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+tabId).classList.add("active");
+  btn.classList.add("active");
+}
+
+// ── Tier Diagram Visuals ──
+const VIS_DATA=[
+  {title:"1-Tier (Standalone)",color:"#38BDF8",layers:[
+    {icon:"💻",name:"Everything",desc:"UI + Logic + Data — all on one machine",c:"#38BDF8"},
+  ],note:"Single machine. No network. Classic desktop application."},
+  {title:"2-Tier (Thick Client)",color:"#60A5FA",layers:[
+    {icon:"🖥️",name:"Client Tier",desc:"UI + Business Logic",c:"#60A5FA"},
+    {icon:"🗄️",name:"Data Tier",desc:"Database Server",c:"#60A5FA"},
+  ],note:"Client contains business logic. Connects directly to DB server over LAN."},
+  {title:"2-Tier (Thin Client)",color:"#818CF8",layers:[
+    {icon:"📟",name:"Terminal / Browser",desc:"Renders output only",c:"#818CF8"},
+    {icon:"🖥️",name:"Application Server",desc:"All logic + data",c:"#818CF8"},
+  ],note:"Dumb terminal. All processing on the server."},
+  {title:"3-Tier Architecture",color:"#FBBF24",layers:[
+    {icon:"🌐",name:"Presentation Tier",desc:"Browser / Mobile App",c:"#FBBF24"},
+    {icon:"⚙️",name:"Application Tier",desc:"Business Logic / API Server",c:"#FBBF24"},
+    {icon:"🗄️",name:"Data Tier",desc:"Database Server",c:"#FBBF24"},
+  ],note:"Industry standard. Each tier independently deployable and scalable."},
+  {title:"3-Tier + CDN",color:"#FCD34D",layers:[
+    {icon:"🌐",name:"Browser",desc:"Receives HTML from CDN or App",c:"#FCD34D"},
+    {icon:"🚀",name:"CDN Layer",desc:"Static assets at edge (Cloudflare)",c:"#FCD34D"},
+    {icon:"⚙️",name:"App Tier",desc:"Dynamic API responses",c:"#FCD34D"},
+    {icon:"🗄️",name:"Data Tier",desc:"DB + Redis Cache",c:"#FCD34D"},
+  ],note:"CDN handles static files. App tier handles dynamic data only."},
+  {title:"N-Tier (Enterprise)",color:"#F97316",layers:[
+    {icon:"🌐",name:"Client",desc:"Browser / App",c:"#F97316"},
+    {icon:"🚀",name:"CDN",desc:"Edge caching",c:"#F97316"},
+    {icon:"⚖️",name:"Load Balancer",desc:"Traffic + SSL",c:"#F97316"},
+    {icon:"⚙️",name:"App Cluster",desc:"Auto-scaled instances",c:"#F97316"},
+    {icon:"⚡",name:"Cache Tier",desc:"Redis / Memcached",c:"#F97316"},
+    {icon:"🗄️",name:"Data Tier",desc:"Primary DB + Replicas",c:"#F97316"},
+  ],note:"Each tier independently scaled. Deep security zones between layers."},
+  {title:"Serverless (FaaS)",color:"#A7F3D0",layers:[
+    {icon:"🌐",name:"Client (SPA)",desc:"React / Vue / Flutter",c:"#A7F3D0"},
+    {icon:"⚡",name:"Functions",desc:"Lambda / Cloud Functions (stateless)",c:"#A7F3D0"},
+    {icon:"☁️",name:"BaaS",desc:"Firebase / Supabase (managed DB + Auth)",c:"#A7F3D0"},
+  ],note:"No persistent application server. Functions spin up per request."},
+  {title:"SSR Framework",color:"#F0ABFC",layers:[
+    {icon:"🌐",name:"Browser",desc:"Receives server-rendered HTML",c:"#F0ABFC"},
+    {icon:"🔄",name:"SSR Server",desc:"Next.js / Nuxt — renders + API routes",c:"#F0ABFC"},
+    {icon:"🗄️",name:"Data Tier",desc:"DB accessed server-side at render time",c:"#F0ABFC"},
+  ],note:"One codebase renders on server (SEO) then hydrates to SPA on client."},
+  {title:"Edge + Origin",color:"#6EE7B7",layers:[
+    {icon:"🌐",name:"Client",desc:"Browser / App",c:"#6EE7B7"},
+    {icon:"⚡",name:"Edge Tier",desc:"Workers at 300+ global PoPs",c:"#6EE7B7"},
+    {icon:"🗄️",name:"Origin Tier",desc:"Central DB + heavy compute",c:"#6EE7B7"},
+  ],note:"Application logic runs at the edge globally. Origin only for data writes."},
+];
+document.getElementById("vis-grid").innerHTML=VIS_DATA.map(v=>`
+  <div class="tier-vis-card">
+    <div class="tv-title" style="color:${v.color}">${v.title}</div>
+    <div class="tv-layers">
+      ${v.layers.map((l,i)=>`
+        ${i>0?`<div class="tv-arrow">↕</div>`:""}
+        <div class="tv-layer" style="background:${l.c}10;border:1px solid ${l.c}25">
+          <div class="tv-layer-icon">${l.icon}</div>
+          <div class="tv-layer-name" style="color:${l.c}">${l.name}</div>
+          <div class="tv-layer-desc">${l.desc}</div>
+        </div>`).join("")}
+    </div>
+    <div class="tv-note">${v.note}</div>
+  </div>`).join("");
+
+// ── Compare Table ──
+const CMP=[
+  {name:"1-Tier (Standalone)",  cat:"Single Tier",  tiers:"1",  client:"Thick",   offline:"Full",   scale:"None",   deploy:"Trivial", hops:"0",    security:"Local",     best:"Desktop tools",              avoid:"Shared data needs"},
+  {name:"2-Tier Thick Client",  cat:"Two Tier",     tiers:"2",  client:"Thick",   offline:"Partial",scale:"Low",    deploy:"Simple",  hops:"1",    security:"Low",       best:"LAN office apps",            avoid:"Internet-facing systems"},
+  {name:"2-Tier Thin Client",   cat:"Two Tier",     tiers:"2",  client:"Thin",    offline:"None",   scale:"Server", deploy:"Simple",  hops:"1",    security:"Centralized",best:"Controlled terminals",       avoid:"Interactive UX needed"},
+  {name:"Rich Client + API",    cat:"Two Tier",     tiers:"2",  client:"Thick",   offline:"Partial",scale:"API",    deploy:"Medium",  hops:"1",    security:"Medium",    best:"Modern web/mobile apps",     avoid:"SEO-critical sites"},
+  {name:"3-Tier Architecture",  cat:"Three Tier",   tiers:"3",  client:"Thin",    offline:"None",   scale:"Per tier",deploy:"Medium", hops:"2",    security:"Zoned",     best:"Most web applications",      avoid:"Real-time / global latency"},
+  {name:"3-Tier + CDN",         cat:"Three Tier",   tiers:"3+", client:"Thin",    offline:"None",   scale:"Per tier",deploy:"Medium", hops:"1–2",  security:"Zoned",     best:"Public-facing products",     avoid:"Dynamic-only content"},
+  {name:"SSR Framework",        cat:"Three Tier",   tiers:"2–3",client:"Medium",  offline:"None",   scale:"Medium", deploy:"Medium",  hops:"1–2",  security:"Medium",    best:"SEO + rich interaction",     avoid:"Static sites (use SSG)"},
+  {name:"N-Tier Enterprise",    cat:"N-Tier",       tiers:"5+", client:"Thin",    offline:"None",   scale:"High",   deploy:"Complex", hops:"4–6",  security:"Deep zones",best:"High-traffic enterprise",    avoid:"Small teams, early stage"},
+  {name:"Microservices Mesh",   cat:"N-Tier",       tiers:"Many",client:"Thin",   offline:"None",   scale:"Extreme",deploy:"V.Complex","hops":"5+", security:"Per service",best:"Large org, 50+ devs",        avoid:"Small teams"},
+  {name:"PWA + Backend",        cat:"Modern",       tiers:"3+", client:"Thick",   offline:"Full",   scale:"Medium", deploy:"Medium",  hops:"0–3",  security:"Medium",    best:"Mobile web, offline",        avoid:"Complex business logic"},
+  {name:"Serverless / FaaS",    cat:"Modern",       tiers:"0+", client:"Thin",    offline:"None",   scale:"Auto",   deploy:"Simple",  hops:"1–2",  security:"Managed",   best:"Variable traffic MVPs",      avoid:"Sustained high traffic"},
+  {name:"Mobile + BaaS",        cat:"Modern",       tiers:"2–3",client:"Thick",   offline:"Sync",   scale:"Managed",deploy:"Simple",  hops:"1–2",  security:"Managed",   best:"Mobile apps",                avoid:"Complex backend logic"},
+  {name:"Edge + Origin",        cat:"Modern",       tiers:"2",  client:"Thin",    offline:"None",   scale:"Global", deploy:"Medium",  hops:"1",    security:"Edge+Origin",best:"Global latency-critical",    avoid:"Long compute tasks"},
+  {name:"Peer-to-Peer",         cat:"Specialized",  tiers:"0",  client:"Thick",   offline:"Full",   scale:"Network",deploy:"Complex", hops:"P2P",  security:"Distributed",best:"Decentralized systems",      avoid:"Controlled environments"},
+];
+const catClr={"Single Tier":"#38BDF8","Two Tier":"#60A5FA","Three Tier":"#FBBF24","N-Tier":"#F97316","Modern":"#34D399","Specialized":"#F472B6"};
+const scaleClr={"None":"#F87171","Low":"#F97316","Server":"#FBBF24","API":"#FBBF24","Per tier":"#34D399","Medium":"#34D399","High":"#4ADE80","Extreme":"#4ADE80","Auto":"#34D399","Global":"#4ADE80","Managed":"#34D399","Network":"#94A3B8"};
+const offlineClr={"Full":"#34D399","Partial":"#FBBF24","Sync":"#FBBF24","None":"#F87171"};
+function tbadge(v,m){const c=m[v]||"#94A3B8";return `<span class="tbl-badge" style="background:${c}18;color:${c}">${v}</span>`;}
+document.getElementById("cmp-tbody").innerHTML=CMP.map(r=>`<tr>
+  <td style="font-weight:600;color:#D1D5DB;white-space:nowrap">${r.name}</td>
+  <td>${tbadge(r.cat,catClr)}</td>
+  <td style="color:#94A3B8;font-family:'JetBrains Mono',monospace;font-size:9px">${r.tiers}</td>
+  <td style="color:#64748B;font-size:9px">${r.client}</td>
+  <td>${tbadge(r.offline,offlineClr)}</td>
+  <td>${tbadge(r.scale,scaleClr)}</td>
+  <td style="color:#64748B;font-size:9px">${r.deploy}</td>
+  <td style="color:#64748B;font-size:9px">${r.hops}</td>
+  <td style="color:#64748B;font-size:9px">${r.security}</td>
+  <td style="color:#60A5FA;font-size:9px">${r.best}</td>
+  <td style="color:#435470;font-size:9px">${r.avoid}</td>
+</tr>`).join("");
+
+// ── Decision Guide ──
+const QS=[
+  {q:"Does the app need to work fully offline (no internet)?",         yes:"1-Tier or PWA or Mobile+BaaS",         no:"3-Tier or Serverless is fine"},
+  {q:"Is the app only used within a local network (LAN)?",             yes:"2-Tier Thick Client is acceptable",     no:"3-Tier or web architecture"},
+  {q:"Does SEO matter for your content?",                              yes:"SSR Framework (Next.js/Nuxt)",          no:"SPA + API (Rich Client) is fine"},
+  {q:"Do you have more than 3 tiers of traffic separation needs?",     yes:"N-Tier or CDN + App + Data layers",     no:"Standard 3-Tier is sufficient"},
+  {q:"Is your audience global and latency is a core QA requirement?",  yes:"Edge + Origin or CDN + 3-Tier",         no:"Single-region 3-Tier is fine"},
+  {q:"Are you building a native mobile app?",                          yes:"Mobile + BaaS (Firebase / Supabase)",   no:"Web architecture (3-Tier or SSR)"},
+  {q:"Is traffic highly variable or unpredictable?",                   yes:"Serverless (FaaS) or edge compute",     no:"Traditional app servers with autoscaling"},
+  {q:"Do different parts of the system need to scale independently?",  yes:"N-Tier or Microservices mesh",          no:"3-Tier with horizontal scaling"},
+];
+document.getElementById("guide-cards").innerHTML=QS.map(q=>`
+  <div class="guide-card">
+    <div class="guide-q">❓ ${q.q}</div>
+    <div class="guide-opts">
+      <span class="g-yes">YES → ${q.yes}</span>
+      <span class="g-no">NO → ${q.no}</span>
+    </div>
+  </div>`).join("");
+
+const PROFILES=[
+  {icon:"📊",u:"Desktop Productivity Tool",      rec:"1-Tier Standalone",                    why:"Offline. No network. No server cost. Local file storage."},
+  {icon:"🏢",u:"Small Office LAN App (10 users)", rec:"2-Tier Thick Client + DB Server",      why:"Simple. Fast on LAN. No web server needed."},
+  {icon:"🌐",u:"Standard Web Application",        rec:"3-Tier Architecture",                  why:"Industry default. Browser + App Server + DB. Independently scalable."},
+  {icon:"🚀",u:"Public SaaS Product",             rec:"3-Tier + CDN (CloudFront/Cloudflare)",  why:"CDN reduces app tier load. Global static asset delivery."},
+  {icon:"📰",u:"SEO-Critical Blog / E-commerce",  rec:"SSR Framework (Next.js / Nuxt)",       why:"Server-renders pages for Google + hydrates to SPA after load."},
+  {icon:"📱",u:"Consumer Mobile App",             rec:"Mobile + BaaS (Firebase / Supabase)",  why:"Native app with offline sync, auth, and push notifications."},
+  {icon:"⚡",u:"MVP / Startup (< 6 months old)",  rec:"Serverless + BaaS (Supabase + Vercel)", why:"Zero infrastructure. Ship today. Scale when needed."},
+  {icon:"🌍",u:"Global App (sub-50ms requirement)",rec:"Edge + Origin (Cloudflare Workers)",  why:"Application logic at 300+ edge nodes. Sub-20ms globally."},
+  {icon:"🏦",u:"Enterprise / Bank / Government",  rec:"N-Tier with security zones",           why:"Separate network zones per tier. Compliance-ready firewall rules."},
+  {icon:"🎮",u:"Real-time Multiplayer Game",       rec:"3-Tier + WebSocket + Game Server",    why:"Dedicated game server tier between client and DB for state sync."},
+  {icon:"⛓️",u:"Decentralized / Blockchain App",  rec:"Peer-to-Peer (P2P)",                  why:"No central server. Each node holds a copy of truth."},
+  {icon:"🤖",u:"AI / ML Product",                 rec:"3-Tier + GPU Inference Tier",          why:"Add a separate ML inference tier between app and data layers."},
+];
+document.getElementById("profile-rows").innerHTML=PROFILES.map(r=>`
+  <div style="display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid #080F1C">
+    <div style="font-size:20px;flex-shrink:0;margin-top:1px">${r.icon}</div>
+    <div>
+      <div style="font-size:12px;color:#D1D5DB;font-weight:500;margin-bottom:2px">${r.u}</div>
+      <div style="font-size:11px;color:#60A5FA;margin-bottom:2px">→ ${r.rec}</div>
+      <div style="font-size:10px;color:#3A4E6E">${r.why}</div>
+    </div>
+  </div>`).join("");
+
+renderAll();
+</script>
+</body>
+</html>

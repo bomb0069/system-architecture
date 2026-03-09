@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API & Communication Styles · System Design Map</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=JetBrains+Mono:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap');
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#080D1A;--bg2:#0B1120;--bg3:#0F1628;--bg4:#141E35;
+    --border:#192038;--border2:#21304F;
+    --text:#DDE5F4;--muted:#8494BE;--dim:#465878;
+  }
+  body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;padding:16px 20px;display:flex;flex-direction:column;align-items:center}
+  body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% 20%,rgba(99,102,241,.04) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(245,158,11,.03) 0%,transparent 60%);pointer-events:none;z-index:0}
+  body>*{position:relative;z-index:1}
+
+  .header{text-align:center;margin-bottom:16px;max-width:760px}
+  .header-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.4em;color:var(--dim);text-transform:uppercase;margin-bottom:8px}
+  .header h1{font-family:'Playfair Display',serif;font-size:24px;font-weight:600;color:#EEF2FF;margin-bottom:6px;letter-spacing:-.02em}
+  .header p{font-size:11.5px;color:var(--muted);line-height:1.7}
+
+  .tab-nav{display:flex;gap:3px;margin-bottom:14px;background:var(--bg3);padding:3px;border-radius:8px;border:1px solid var(--border)}
+  .tab-btn{font-family:'JetBrains Mono',monospace;font-size:9px;padding:6px 14px;border-radius:5px;border:none;background:transparent;color:var(--dim);cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;white-space:nowrap}
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{background:var(--bg4);color:#EEF2FF;box-shadow:0 1px 4px rgba(0,0,0,.5)}
+
+  .tab-panel{display:none;width:100%;max-width:1120px;flex-direction:column;align-items:center}
+  .tab-panel.active{display:flex}
+
+  .cat-filters{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px;width:100%}
+  .cat-btn{font-family:'JetBrains Mono',monospace;font-size:8px;padding:3px 11px;border-radius:14px;border:1px solid var(--border);background:transparent;cursor:pointer;letter-spacing:.1em;text-transform:uppercase;transition:all .15s;color:var(--dim)}
+  .cat-btn:hover{border-color:var(--border2);color:var(--muted)}
+
+  .layout{display:flex;gap:14px;width:100%;align-items:flex-start}
+  .chart-wrap{flex:1;min-width:0}
+  .axis-top{text-align:center;margin-bottom:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+  .axis-sub{font-size:8px;color:#2A3A58;letter-spacing:0;font-family:'DM Sans',sans-serif}
+  .axis-row{display:flex;align-items:center;gap:5px}
+  .axis-side{min-width:52px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.08em;text-transform:uppercase;line-height:1.6}
+  .axis-bot{text-align:center;margin-top:4px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.16em;text-transform:uppercase}
+  #map-svg{width:100%;display:block;border:1px solid var(--border);border-radius:8px}
+
+  .detail-panel{width:306px;flex-shrink:0;display:flex;flex-direction:column;gap:8px}
+  .placeholder{background:var(--bg3);border:1px dashed var(--border2);border-radius:8px;padding:22px;text-align:center;color:var(--dim);font-size:11px;line-height:1.8}
+  .placeholder .big{font-size:26px;margin-bottom:7px}
+
+  .detail-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .detail-head{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:11px}
+  .d-icon{font-size:26px;flex-shrink:0;margin-top:1px}
+  .d-name{font-size:15px;font-weight:600;font-family:'Playfair Display',serif;letter-spacing:-.01em}
+  .d-sub{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);margin-top:2px}
+  .d-badges{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+  .badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 7px;border-radius:6px;display:inline-block}
+
+  .detail-body{padding:13px 15px;display:flex;flex-direction:column;gap:10px;max-height:67vh;overflow-y:auto}
+  .sec-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px}
+  .sec-text{font-size:11px;color:var(--muted);line-height:1.7}
+
+  .qa-row{display:flex;align-items:center;gap:6px;margin-bottom:4px}
+  .qa-name{font-size:10px;color:var(--muted);width:148px;flex-shrink:0}
+  .dots{display:flex;gap:2px}
+  .dot{width:8px;height:8px;border-radius:50%;border:1px solid;display:inline-block}
+
+  .example-grid{display:flex;flex-direction:column;gap:4px}
+  .ex-item{background:var(--bg2);border-radius:4px;padding:8px 10px;display:flex;gap:8px;align-items:flex-start}
+  .ex-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+  .ex-name{font-size:11px;font-weight:600;margin-bottom:1px}
+  .ex-desc{font-size:9px;color:var(--dim);line-height:1.4}
+
+  .code-snippet{background:#0A0F1E;border:1px solid var(--border);border-radius:4px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#94A3B8;line-height:1.7;overflow-x:auto;white-space:pre}
+  .code-snippet .kw{color:#818CF8}
+  .code-snippet .str{color:#34D399}
+  .code-snippet .cmt{color:#374151;font-style:italic}
+
+  .tradeoffs{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+  .tf-col{background:var(--bg2);border-radius:4px;padding:8px}
+  .tf-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.1em;margin-bottom:3px}
+  .tf-text{font-size:10px;color:var(--muted);line-height:1.55}
+  .pos-tag{font-family:'JetBrains Mono',monospace;font-size:8px;background:var(--bg2);border-radius:4px;padding:5px 9px;color:var(--dim);line-height:1.55}
+  .when-to-use{background:var(--bg2);border-radius:4px;padding:9px 10px}
+  .when-label{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.12em;margin-bottom:4px}
+  .when-text{font-size:10px;color:var(--muted);line-height:1.6}
+
+  .axis-note{width:100%;margin-top:10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:10px 16px;display:grid;grid-template-columns:1fr 1px 1fr;gap:14px}
+  .an-div{background:var(--border)}
+  .an-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.18em;color:var(--dim);margin-bottom:4px;text-transform:uppercase}
+  .an-text{font-size:10px;color:var(--muted);line-height:1.65}
+
+  .tbl-wrap{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+  .tbl-lbl{padding:10px 16px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em}
+  table{width:100%;border-collapse:collapse}
+  th{padding:8px 11px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);letter-spacing:.1em;background:var(--bg2);border-bottom:1px solid var(--border);font-weight:400;white-space:nowrap}
+  td{padding:7px 11px;border-bottom:1px solid #0A1020;font-size:10px;vertical-align:top;color:var(--muted)}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:#080E1C}
+  .tbl-badge{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 6px;border-radius:6px;white-space:nowrap}
+
+  .guide-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;width:100%}
+  .guide-card{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:12px 14px}
+  .guide-q{font-size:12px;color:#EEF2FF;font-weight:500;margin-bottom:8px;line-height:1.5}
+  .guide-opts{display:flex;gap:6px;flex-wrap:wrap}
+  .g-yes{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:3px 9px;border-radius:8px;background:rgba(74,222,128,.1);color:#4ADE80;line-height:1.5}
+  .g-no{font-family:'JetBrains Mono',monospace;font-size:8.5px;padding:3px 9px;border-radius:8px;background:rgba(148,163,184,.08);color:#94A3B8;line-height:1.5}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-eyebrow">System Analysis · Interface Design · API & Communication Patterns</div>
+  <h1>Application Communication Styles</h1>
+  <p>REST, GraphQL, gRPC, WebSocket, WebHook, MQTT, SSE, tRPC — every style is an answer to a specific communication problem. Two axes that reveal why each protocol was invented.</p>
+</div>
+
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="showTab('quadrant',this)">📍 Communication Map</button>
+  <button class="tab-btn" onclick="showTab('compare',this)">📊 Comparison Table</button>
+  <button class="tab-btn" onclick="showTab('flow',this)">🔄 Request Flow Diagrams</button>
+  <button class="tab-btn" onclick="showTab('decision',this)">🧭 Decision Guide</button>
+</div>
+
+<!-- ════════ TAB 1: QUADRANT ════════ -->
+<div class="tab-panel active" id="tab-quadrant">
+  <div class="cat-filters" id="cat-filters"></div>
+  <div class="layout">
+    <div class="chart-wrap">
+      <div class="axis-top" style="color:#A78BFA">▲ STRICT / TYPED CONTRACT &nbsp;<span class="axis-sub">· Schema-enforced · Strong typing · Generated clients</span></div>
+      <div class="axis-row">
+        <div class="axis-side" style="color:#60A5FA">◄ PULL<br><span style="font-size:7px;color:#243050;font-family:'DM Sans';letter-spacing:0">Client requests<br>when ready</span></div>
+
+        <svg id="map-svg" viewBox="0 0 640 530">
+          <defs>
+            <radialGradient id="g1" cx="25%" cy="20%" r="50%">
+              <stop offset="0%" stop-color="#818CF8" stop-opacity="0.07"/>
+              <stop offset="100%" stop-color="#818CF8" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="g2" cx="75%" cy="20%" r="40%">
+              <stop offset="0%" stop-color="#34D399" stop-opacity="0.07"/>
+              <stop offset="100%" stop-color="#34D399" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="g3" cx="25%" cy="80%" r="45%">
+              <stop offset="0%" stop-color="#FBBF24" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="#FBBF24" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="g4" cx="75%" cy="80%" r="45%">
+              <stop offset="0%" stop-color="#F472B6" stop-opacity="0.06"/>
+              <stop offset="100%" stop-color="#F472B6" stop-opacity="0"/>
+            </radialGradient>
+          </defs>
+
+          <rect width="640" height="530" fill="#0B1120" rx="7"/>
+          <rect width="640" height="530" rx="7" fill="url(#g1)" pointer-events="none"/>
+          <rect width="640" height="530" rx="7" fill="url(#g2)" pointer-events="none"/>
+          <rect width="640" height="530" rx="7" fill="url(#g3)" pointer-events="none"/>
+          <rect width="640" height="530" rx="7" fill="url(#g4)" pointer-events="none"/>
+
+          <!-- Grid -->
+          <line x1="160" y1="0" x2="160" y2="530" stroke="#0F1A2E" stroke-width="1" pointer-events="none"/>
+          <line x1="320" y1="0" x2="320" y2="530" stroke="#0F1A2E" stroke-width="1" pointer-events="none"/>
+          <line x1="480" y1="0" x2="480" y2="530" stroke="#0F1A2E" stroke-width="1" pointer-events="none"/>
+          <line x1="0" y1="132" x2="640" y2="132" stroke="#0F1A2E" stroke-width="1" pointer-events="none"/>
+          <line x1="0" y1="265" x2="640" y2="265" stroke="#0F1A2E" stroke-width="1" pointer-events="none"/>
+          <line x1="0" y1="397" x2="640" y2="397" stroke="#0F1A2E" stroke-width="1" pointer-events="none"/>
+
+          <!-- Zone fills -->
+          <rect x="2"   y="2"   width="316" height="261" rx="5" fill="#818CF8" fill-opacity="0.03" stroke="#818CF8" stroke-opacity="0.08" stroke-width="1" pointer-events="none"/>
+          <rect x="322" y="2"   width="316" height="261" rx="5" fill="#34D399" fill-opacity="0.03" stroke="#34D399" stroke-opacity="0.08" stroke-width="1" pointer-events="none"/>
+          <rect x="2"   y="267" width="316" height="261" rx="5" fill="#FBBF24" fill-opacity="0.03" stroke="#FBBF24" stroke-opacity="0.08" stroke-width="1" pointer-events="none"/>
+          <rect x="322" y="267" width="316" height="261" rx="5" fill="#F472B6" fill-opacity="0.03" stroke="#F472B6" stroke-opacity="0.08" stroke-width="1" pointer-events="none"/>
+
+          <!-- Zone corner labels -->
+          <text x="16" y="22"  font-family="'Playfair Display',serif" font-size="11" fill="#818CF8" opacity="0.55" pointer-events="none">Typed Pull APIs</text>
+          <text x="16" y="35"  font-family="'JetBrains Mono',monospace" font-size="7" fill="#818CF8" opacity="0.3" pointer-events="none">gRPC · SOAP · tRPC · JSON-RPC</text>
+          <text x="328" y="22" font-family="'Playfair Display',serif" font-size="11" fill="#34D399" opacity="0.55" pointer-events="none">Typed Push / Streaming</text>
+          <text x="328" y="35" font-family="'JetBrains Mono',monospace" font-size="7" fill="#34D399" opacity="0.3" pointer-events="none">gRPC Stream · WebSocket (typed) · MQTT</text>
+          <text x="16" y="283" font-family="'Playfair Display',serif" font-size="11" fill="#FBBF24" opacity="0.55" pointer-events="none">Flexible Pull APIs</text>
+          <text x="16" y="296" font-family="'JetBrains Mono',monospace" font-size="7" fill="#FBBF24" opacity="0.3" pointer-events="none">REST · GraphQL · OpenAPI</text>
+          <text x="328" y="283" font-family="'Playfair Display',serif" font-size="11" fill="#F472B6" opacity="0.55" pointer-events="none">Flexible Push / Event-Driven</text>
+          <text x="328" y="296" font-family="'JetBrains Mono',monospace" font-size="7" fill="#F472B6" opacity="0.3" pointer-events="none">WebHook · SSE · WebSocket · Long Poll</text>
+
+          <!-- Center axes -->
+          <line x1="320" y1="0"   x2="320" y2="530" stroke="#1A2840" stroke-width="1.5" pointer-events="none"/>
+          <line x1="0"   y1="265" x2="640" y2="265" stroke="#1A2840" stroke-width="1.5" pointer-events="none"/>
+          <circle cx="320" cy="265" r="4" fill="#1E3050" pointer-events="none"/>
+          <circle cx="320" cy="265" r="2" fill="#2A4070" pointer-events="none"/>
+          <text x="315" y="16"  font-size="12" fill="#A78BFA" opacity="0.5" pointer-events="none">▲</text>
+          <text x="315" y="528" font-size="12" fill="#FBBF24" opacity="0.5" pointer-events="none">▼</text>
+          <text x="620" y="270" font-size="12" fill="#F472B6" opacity="0.5" pointer-events="none">►</text>
+          <text x="8"   y="270" font-size="12" fill="#60A5FA" opacity="0.5" pointer-events="none">◄</text>
+
+          <g id="glow-layer"   pointer-events="none"></g>
+          <circle id="active-ring" cx="-400" cy="-400" r="0" fill="none" stroke="white" stroke-width="2" stroke-dasharray="5,3" opacity="0.7" pointer-events="none"/>
+          <g id="bubble-layer"></g>
+          <g id="label-layer"  pointer-events="none"></g>
+        </svg>
+
+        <div class="axis-side" style="color:#F472B6">PUSH ►<br><span style="font-size:7px;color:#243050;font-family:'DM Sans';letter-spacing:0">Server pushes<br>when event fires</span></div>
+      </div>
+      <div class="axis-bot" style="color:#FBBF24">▼ LOOSE / FLEXIBLE CONTRACT &nbsp;<span class="axis-sub">· Schema optional · Human-readable · Easy to explore</span></div>
+    </div>
+
+    <div class="detail-panel" id="detail-panel">
+      <div class="placeholder">
+        <div class="big">🔌</div>
+        Click any bubble to explore the communication style — when to use it, contract type, real-world examples, and trade-offs.
+      </div>
+    </div>
+  </div>
+
+  <div class="axis-note">
+    <div>
+      <div class="an-label">Y-Axis — Contract Strictness (Typed ↔ Flexible)</div>
+      <div class="an-text">
+        <strong style="color:#A78BFA">Strict / Typed (top):</strong> Schema is required. Types are enforced at compile time or code-generation time. Client and server contracts are versioned and validated — breaking changes are caught before deployment.<br>
+        <strong style="color:#FBBF24">Flexible / Loose (bottom):</strong> Schema is optional or implicit. JSON payload can evolve freely. Easy to prototype, but no automatic safety net for breaking changes.
+      </div>
+    </div>
+    <div class="an-div"></div>
+    <div>
+      <div class="an-label">X-Axis — Communication Direction (Pull ↔ Push)</div>
+      <div class="an-text">
+        <strong style="color:#60A5FA">Pull / Request-Response (left):</strong> Client always initiates. Server responds, then the connection closes. Simple, stateless, cacheable — but client must poll if it wants updates.<br>
+        <strong style="color:#F472B6">Push / Event-Driven (right):</strong> Server sends data to client when something happens — without the client asking. Requires persistent connection or a delivery mechanism. Essential for real-time.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ TAB 2: COMPARE ════════ -->
+<div class="tab-panel" id="tab-compare" style="align-items:stretch">
+  <div class="tbl-wrap">
+    <div class="tbl-lbl">All Communication Styles — Full Comparison Matrix</div>
+    <div style="overflow-x:auto"><table>
+      <thead><tr>
+        <th>Protocol / Style</th><th>Direction</th><th>Contract</th><th>Transport</th>
+        <th>Payload</th><th>Latency</th><th>Browser Support</th>
+        <th>Caching</th><th>Best For</th><th>Avoid When</th>
+      </tr></thead>
+      <tbody id="cmp-tbody"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<!-- ════════ TAB 3: FLOW DIAGRAMS ════════ -->
+<div class="tab-panel" id="tab-flow" style="align-items:stretch">
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;width:100%" id="flow-grid"></div>
+</div>
+
+<!-- ════════ TAB 4: DECISION ════════ -->
+<div class="tab-panel" id="tab-decision" style="align-items:stretch">
+  <div style="display:flex;flex-direction:column;gap:10px;width:100%">
+    <div class="guide-grid" id="guide-cards"></div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+      <div style="padding:10px 16px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--dim);letter-spacing:.2em">USE CASE → RECOMMENDED COMMUNICATION STYLE</div>
+      <div id="profile-rows" style="padding:12px 16px;display:flex;flex-direction:column;gap:8px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const PROTOCOLS = [
+  // ── TYPED + PULL (top-left) ──
+  {
+    id:"grpc", name:"gRPC", icon:"⚡", category:"Typed Pull", catColor:"#818CF8",
+    cx:100, cy:105, r:26, color:"#818CF8",
+    quadrant:"Strict Contract · Pull / Bidirectional Streaming",
+    direction:"Request-Response + Streaming", contract:"Strict (Protobuf IDL)",
+    transport:"HTTP/2", payload:"Binary (Protobuf)", latency:"Very Low",
+    browserSupport:"Limited (grpc-web proxy)", caching:"No",
+    why:"Google's answer to the performance cost of JSON REST. Protobuf is 3–10x smaller and faster than JSON. HTTP/2 enables multiplexing and bidirectional streaming. Used internally at Google, Netflix, Uber for high-throughput service-to-service communication.",
+    qas:[
+      {name:"Performance",score:5},{name:"Type Safety",score:5},
+      {name:"Streaming Support",score:5},{name:"Code Generation",score:5},
+      {name:"Browser Support",score:2},{name:"Human Readability",score:1},
+    ],
+    examples:[
+      {icon:"🔵",name:"Google Internal APIs",desc:"gRPC was born inside Google. Used across all internal microservices."},
+      {icon:"🎬",name:"Netflix",desc:"Inter-service communication. 100K+ RPCs/sec with sub-ms latency."},
+      {icon:"☸️",name:"Kubernetes API",desc:"kubectl communicates with K8s API server via gRPC."},
+    ],
+    snippet:`// Proto definition (contract)
+service UserService {
+  rpc GetUser (UserRequest) returns (User);
+  rpc StreamUsers (Empty) returns (stream User);
+}
+
+// Generated client (Go)
+client.GetUser(ctx, &pb.UserRequest{Id: "u1"})`,
+    goodFor:"Microservice-to-service · IoT · Mobile apps (bandwidth-sensitive) · Real-time streaming",
+    tradeoffGood:"Fastest RPC. Binary efficiency. Bidirectional streaming. Strong contract.",
+    tradeoffBad:"Not human-readable. Poor browser support. Requires toolchain setup.",
+    whenToUse:"When services talk to each other at high volume and latency matters. Not for public APIs.",
+  },
+  {
+    id:"soap", name:"SOAP / WSDL", icon:"🧼", category:"Typed Pull", catColor:"#818CF8",
+    cx:58, cy:185, r:20, color:"#94A3B8",
+    quadrant:"Strict Contract · Pull — Enterprise Legacy Standard",
+    direction:"Request-Response", contract:"Strict (WSDL/XML Schema)",
+    transport:"HTTP, SMTP, TCP", payload:"XML", latency:"High",
+    browserSupport:"Yes (verbose)", caching:"Limited",
+    why:"The 2000s enterprise web service standard. WSDL defines the contract in XML. Everything is strongly typed. Banks, governments, and healthcare systems still use it because the standard mandates WS-Security, WS-ReliableMessaging, and formal audit trails.",
+    qas:[
+      {name:"Contract Strictness",score:5},{name:"Enterprise Compliance",score:5},
+      {name:"WS-Security",score:5},{name:"Developer Experience",score:1},
+      {name:"Performance",score:2},{name:"Modern Tooling",score:1},
+    ],
+    examples:[
+      {icon:"🏦",name:"Banking / SWIFT",desc:"Most inter-bank communication still uses SOAP-based messaging."},
+      {icon:"🏥",name:"Healthcare (HL7)",desc:"Hospital information systems, insurance claims processing."},
+      {icon:"🏛️",name:"Government APIs",desc:"Tax agencies, customs systems — formal contract enforcement."},
+    ],
+    snippet:`<!-- SOAP Request (XML) -->
+<soap:Envelope>
+  <soap:Body>
+    <GetAccountBalance>
+      <AccountId>ACC-001</AccountId>
+    </GetAccountBalance>
+  </soap:Body>
+</soap:Envelope>`,
+    goodFor:"Banking · Healthcare · Government · Legacy enterprise integration",
+    tradeoffGood:"Formal contracts. Built-in security (WS-Security). Proven compliance.",
+    tradeoffBad:"Extremely verbose XML. Slow. Poor developer experience. Avoid for new systems.",
+    whenToUse:"Only when integrating with existing SOAP systems. Never choose it for new projects.",
+  },
+  {
+    id:"trpc", name:"tRPC", icon:"🔷", category:"Typed Pull", catColor:"#818CF8",
+    cx:165, cy:145, r:20, color:"#60A5FA",
+    quadrant:"Strict Contract · Pull — TypeScript End-to-End Types",
+    direction:"Request-Response", contract:"Strict (TypeScript types)",
+    transport:"HTTP", payload:"JSON", latency:"Low",
+    browserSupport:"Full (HTTP-based)", caching:"Yes",
+    why:"tRPC eliminates the API layer entirely for TypeScript full-stack apps. The server's function signatures ARE the contract — no code generation, no schema files. If you rename a parameter, your IDE immediately shows the error in the frontend code.",
+    qas:[
+      {name:"TypeScript DX",score:5},{name:"Type Safety",score:5},
+      {name:"Zero-Config",score:5},{name:"Language Agnostic",score:1},
+      {name:"Non-TS Consumers",score:1},{name:"Public API Suitability",score:2},
+    ],
+    examples:[
+      {icon:"⚫",name:"Next.js Full-Stack",desc:"T3 Stack — Next.js + tRPC + Prisma. Most popular TS stack."},
+      {icon:"🔷",name:"Vercel",desc:"Vercel's internal tooling uses tRPC for type-safe APIs."},
+      {icon:"🚂",name:"create-t3-app",desc:"Most cloned TypeScript starter — tRPC is the default API layer."},
+    ],
+    snippet:`// Server (TypeScript)
+const appRouter = router({
+  getUser: procedure
+    .input(z.object({ id: z.string() }))
+    .query(({ input }) => db.user.findById(input.id))
+});
+
+// Client — fully typed, no code gen needed
+const user = await trpc.getUser.query({ id: "u1" });`,
+    goodFor:"TypeScript full-stack monorepos · Next.js · Internal apps · T3 Stack",
+    tradeoffGood:"Zero API schema maintenance. Instant type errors across stack. Incredible DX.",
+    tradeoffBad:"TypeScript only. Cannot serve external consumers. Tight client-server coupling.",
+    whenToUse:"When client and server are both TypeScript in the same codebase.",
+  },
+  {
+    id:"jsonrpc", name:"JSON-RPC", icon:"📞", category:"Typed Pull", catColor:"#818CF8",
+    cx:100, cy:218, r:17, color:"#7DD3FC",
+    quadrant:"Semi-Typed Contract · Pull — Simple RPC over JSON",
+    direction:"Request-Response", contract:"Semi-typed (method name contract)",
+    transport:"HTTP, WebSocket", payload:"JSON", latency:"Low",
+    browserSupport:"Full", caching:"Limited",
+    why:"Lightweight RPC protocol using JSON. You call methods by name and pass parameters — simpler than gRPC, more structured than raw REST. Used widely in blockchain, IDE tooling, and embedded systems.",
+    qas:[
+      {name:"Simplicity",score:5},{name:"Human Readability",score:4},
+      {name:"Browser Support",score:5},{name:"Type Safety",score:3},
+      {name:"Performance",score:3},{name:"Tooling Ecosystem",score:3},
+    ],
+    examples:[
+      {icon:"⛓️",name:"Ethereum / Web3",desc:"All Ethereum node communication uses JSON-RPC (eth_getBalance, etc.)."},
+      {icon:"💻",name:"VS Code LSP",desc:"Language Server Protocol uses JSON-RPC between editor and language server."},
+      {icon:"₿",name:"Bitcoin RPC",desc:"Bitcoin Core's API is JSON-RPC over HTTP."},
+    ],
+    snippet:`// JSON-RPC 2.0 request
+{
+  "jsonrpc": "2.0",
+  "method": "eth_getBalance",
+  "params": ["0xABC...", "latest"],
+  "id": 1
+}`,
+    goodFor:"Blockchain · IDE tooling · Embedded systems · Simple RPC without gRPC complexity",
+    tradeoffGood:"Simple. Human-readable. Works over HTTP and WebSocket. Widely supported.",
+    tradeoffBad:"No automatic type generation. No built-in streaming. Loose by default.",
+    whenToUse:"When you want RPC semantics but gRPC is too heavy and REST is too resource-oriented.",
+  },
+
+  // ── TYPED + PUSH (top-right) ──
+  {
+    id:"grpc_stream", name:"gRPC Streaming", icon:"🌊", category:"Typed Push", catColor:"#34D399",
+    cx:430, cy:95, r:22, color:"#34D399",
+    quadrant:"Strict Contract · Bidirectional Streaming",
+    direction:"Bidirectional Streaming", contract:"Strict (Protobuf)",
+    transport:"HTTP/2", payload:"Binary (Protobuf)", latency:"Very Low",
+    browserSupport:"Limited (grpc-web)", caching:"No",
+    why:"gRPC's streaming modes allow server-streaming (server pushes multiple responses), client-streaming (client uploads stream), or bidirectional streaming (both sides stream simultaneously). Built on HTTP/2 multiplexing — no new connections per stream.",
+    qas:[
+      {name:"Streaming Performance",score:5},{name:"Type Safety",score:5},
+      {name:"Bidirectional Support",score:5},{name:"Backpressure Control",score:5},
+      {name:"Browser Support",score:2},{name:"Simplicity",score:2},
+    ],
+    examples:[
+      {icon:"🚗",name:"Uber Driver Location",desc:"Real-time GPS streaming from drivers to dispatch — typed, high frequency."},
+      {icon:"🎙️",name:"Google Speech-to-Text",desc:"Audio stream in, transcription stream out — bidirectional gRPC."},
+      {icon:"📊",name:"Financial Data Feeds",desc:"Tick-by-tick price streams with typed Protobuf contracts."},
+    ],
+    snippet:`// Server streaming (server pushes to client)
+rpc StreamPrices (Symbol) returns (stream Price);
+
+// Bidirectional streaming
+rpc Chat (stream Message) returns (stream Message);`,
+    goodFor:"Real-time typed feeds · IoT telemetry · Audio/video processing pipelines",
+    tradeoffGood:"Typed streaming. Backpressure built-in. Multiplexed on one HTTP/2 connection.",
+    tradeoffBad:"Not usable directly from browsers. Requires grpc-web + proxy layer.",
+    whenToUse:"For high-frequency typed data streams between backend services.",
+  },
+  {
+    id:"websocket_typed", name:"WebSocket (typed)", icon:"🔌", category:"Typed Push", catColor:"#34D399",
+    cx:530, cy:148, r:22, color:"#6EE7B7",
+    quadrant:"Semi-Typed · Full-Duplex Persistent Connection",
+    direction:"Full-Duplex (both sides)", contract:"Semi-typed (app-level schema)",
+    transport:"WebSocket (TCP upgrade)", payload:"JSON or Binary", latency:"Very Low",
+    browserSupport:"Full", caching:"No",
+    why:"A persistent full-duplex TCP connection between browser and server. Once upgraded from HTTP, both sides can send messages at any time. The transport is standard — what you send over it determines the contract strictness.",
+    qas:[
+      {name:"Real-time Latency",score:5},{name:"Browser Support",score:5},
+      {name:"Full-Duplex",score:5},{name:"Connection Overhead",score:3},
+      {name:"Scalability",score:3},{name:"Caching",score:1},
+    ],
+    examples:[
+      {icon:"💬",name:"Slack / Discord",desc:"Persistent WebSocket per client for message delivery."},
+      {icon:"🎮",name:"Online Games",desc:"Real-time multiplayer state sync — sub-10ms round trips."},
+      {icon:"📈",name:"Trading Platforms",desc:"Live order book updates — persistent connection, typed messages."},
+    ],
+    snippet:`// Client
+const ws = new WebSocket("wss://api.example.com");
+ws.onmessage = (event) => {
+  const data = JSON.parse(event.data);
+};
+ws.send(JSON.stringify({ type: "subscribe", symbol: "AAPL" }));`,
+    goodFor:"Chat · Multiplayer games · Live trading · Collaborative editing",
+    tradeoffGood:"True full-duplex. Works in all browsers. Very low latency.",
+    tradeoffBad:"Stateful — hard to scale horizontally. Need sticky sessions or pub/sub backend.",
+    whenToUse:"When you need the server AND client to send messages at any time with low latency.",
+  },
+  {
+    id:"mqtt", name:"MQTT", icon:"📡", category:"Typed Push", catColor:"#34D399",
+    cx:590, cy:88, r:19, color:"#A7F3D0",
+    quadrant:"Semi-Typed · Publish-Subscribe for Constrained Devices",
+    direction:"Pub/Sub (push)", contract:"Semi-typed (topic structure)",
+    transport:"TCP (lightweight)", payload:"Binary or JSON", latency:"Very Low",
+    browserSupport:"MQTT over WebSocket", caching:"No",
+    why:"Message Queuing Telemetry Transport — designed for IoT devices with minimal CPU and battery. A broker (Mosquitto, AWS IoT) receives published messages and routes to subscribers. 2-byte header overhead. Runs on devices with 256KB RAM.",
+    qas:[
+      {name:"IoT Suitability",score:5},{name:"Payload Efficiency",score:5},
+      {name:"Pub/Sub Model",score:5},{name:"Offline Support (QoS)",score:5},
+      {name:"Browser Native Support",score:2},{name:"Complex Queries",score:1},
+    ],
+    examples:[
+      {icon:"🏭",name:"Industrial IoT (IIoT)",desc:"Sensor data from factory floor to SCADA systems."},
+      {icon:"🏠",name:"Smart Home",desc:"Home Assistant, AWS IoT, Zigbee gateways — device state pub/sub."},
+      {icon:"🚗",name:"Connected Vehicles",desc:"OBD data streaming from cars to cloud analytics."},
+    ],
+    snippet:`// Subscribe to temperature sensor topic
+client.subscribe("sensors/factory/temp/unit5");
+
+// Publish from device
+client.publish("sensors/factory/temp/unit5",
+  JSON.stringify({ value: 38.2, unit: "C" }),
+  { qos: 1 }
+);`,
+    goodFor:"IoT · Sensor networks · Connected devices · Smart home automation",
+    tradeoffGood:"Minimal overhead. QoS levels (at most once, at least once, exactly once).",
+    tradeoffBad:"Not for complex queries or request-response. Topic naming needs governance.",
+    whenToUse:"For any constrained device or high-volume sensor data publish-subscribe scenario.",
+  },
+
+  // ── FLEXIBLE + PULL (bottom-left) ──
+  {
+    id:"rest", name:"REST API", icon:"🌐", category:"Flexible Pull", catColor:"#FBBF24",
+    cx:115, cy:368, r:28, color:"#FBBF24",
+    quadrant:"Flexible Contract · Pull — Dominant Web Standard",
+    direction:"Request-Response", contract:"Flexible (OpenAPI optional)",
+    transport:"HTTP/HTTPS", payload:"JSON (usually)", latency:"Low-Medium",
+    browserSupport:"Full (fetch/XHR)", caching:"Yes (HTTP cache headers)",
+    why:"REpresentational State Transfer. Resources are URLs, operations are HTTP verbs (GET/POST/PUT/DELETE). The dominant API style for the web because it leverages HTTP infrastructure — caching, load balancers, CDN, browser DevTools. JSON is human-readable and widely tooled.",
+    qas:[
+      {name:"Ecosystem & Tooling",score:5},{name:"Cacheability",score:5},
+      {name:"Discoverability",score:5},{name:"Browser Support",score:5},
+      {name:"Type Safety",score:2},{name:"Over-fetching Risk",score:2},
+    ],
+    examples:[
+      {icon:"🐙",name:"GitHub API",desc:"REST-first public API. Hundreds of millions of requests/day."},
+      {icon:"💳",name:"Stripe API",desc:"Gold standard REST design — versioned, documented, predictable."},
+      {icon:"🗺️",name:"Google Maps API",desc:"GET /maps/api/geocode/json?address=..."},
+    ],
+    snippet:`// GET /users/123
+GET https://api.example.com/v1/users/123
+Authorization: Bearer <token>
+
+// Response
+{
+  "id": "123",
+  "name": "Alice",
+  "email": "alice@example.com"
+}`,
+    goodFor:"Public APIs · Mobile apps · Browser apps · Any standard CRUD interface",
+    tradeoffGood:"Universal. HTTP caching. Familiar to every developer. Great tooling (Postman, OpenAPI).",
+    tradeoffBad:"Over-fetching (getting too much data) and under-fetching (multiple round trips).",
+    whenToUse:"Default choice for any API. Start here unless you have a specific reason to use something else.",
+  },
+  {
+    id:"graphql", name:"GraphQL", icon:"◈", category:"Flexible Pull", catColor:"#FBBF24",
+    cx:195, cy:418, r:24, color:"#E879F9",
+    quadrant:"Flexible Contract · Pull — Client-Defined Queries",
+    direction:"Request-Response (+ Subscriptions)", contract:"Semi-strict (SDL Schema)",
+    transport:"HTTP (POST)", payload:"JSON", latency:"Low",
+    browserSupport:"Full", caching:"Complex (no HTTP cache)",
+    why:"Invented at Facebook to solve REST's over-fetching problem for mobile apps. The client specifies exactly which fields it needs in the query — no more, no less. One endpoint, many possible shapes of response. The schema is always present but clients decide what to request.",
+    qas:[
+      {name:"Client Control",score:5},{name:"No Over-fetching",score:5},
+      {name:"Schema Documentation",score:5},{name:"Cacheability",score:2},
+      {name:"N+1 Query Problem",score:2},{name:"Simplicity",score:3},
+    ],
+    examples:[
+      {icon:"📸",name:"GitHub GraphQL API",desc:"GitHub v4 API is GraphQL — client selects exactly needed fields."},
+      {icon:"🛒",name:"Shopify Storefront",desc:"E-commerce product data — mobile needs fewer fields than web."},
+      {icon:"🎬",name:"Netflix",desc:"API gateway aggregates microservices via GraphQL federation."},
+    ],
+    snippet:`# Query — client asks for exactly what it needs
+query GetUser($id: ID!) {
+  user(id: $id) {
+    name
+    email
+    recentOrders(limit: 3) {
+      id
+      total
+    }
+  }
+}`,
+    goodFor:"APIs serving multiple client types · Mobile apps · Complex nested data · API gateways",
+    tradeoffGood:"Clients get exactly what they need. Self-documenting schema. One endpoint.",
+    tradeoffBad:"Complex caching. N+1 query problem requires DataLoader. Overkill for simple APIs.",
+    whenToUse:"When mobile and web clients need different shapes of data, or when clients are external.",
+  },
+  {
+    id:"openapi_rest", name:"OpenAPI / REST", icon:"📋", category:"Flexible Pull", catColor:"#FBBF24",
+    cx:68, cy:430, r:18, color:"#FCD34D",
+    quadrant:"Documented REST — Schema-First Design",
+    direction:"Request-Response", contract:"Semi-strict (OpenAPI 3.x spec)",
+    transport:"HTTP/HTTPS", payload:"JSON", latency:"Low",
+    browserSupport:"Full", caching:"Yes",
+    why:"REST with a formal OpenAPI spec. The YAML/JSON spec generates documentation (Swagger UI), client SDKs, mock servers, and validation middleware. The spec IS the contract — clients and servers code-generate against it.",
+    qas:[
+      {name:"Documentation",score:5},{name:"Client Code Gen",score:5},
+      {name:"Contract Clarity",score:4},{name:"Runtime Validation",score:4},
+      {name:"Type Safety",score:3},{name:"Flexibility",score:3},
+    ],
+    examples:[
+      {icon:"💳",name:"Stripe (OpenAPI spec)",desc:"Publishes full OpenAPI spec — used to generate 8+ client SDKs."},
+      {icon:"✈️",name:"Amadeus Travel API",desc:"Aviation + hotel booking — OpenAPI spec for B2B partners."},
+      {icon:"🔶",name:"AWS APIs",desc:"All AWS service APIs documented and code-generated from specs."},
+    ],
+    snippet:`# openapi: 3.0.0
+paths:
+  /users/{id}:
+    get:
+      summary: Get user by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'`,
+    goodFor:"Public APIs · Partner integrations · Multi-language SDK generation",
+    tradeoffGood:"Auto-generated docs, validation, and SDKs. Industry-standard format.",
+    tradeoffBad:"Spec drift (code diverges from spec). Verbose YAML. Needs spec governance.",
+    whenToUse:"For any public or partner API where multiple teams or languages consume it.",
+  },
+
+  // ── FLEXIBLE + PUSH (bottom-right) ──
+  {
+    id:"webhook", name:"WebHook", icon:"🪝", category:"Flexible Push", catColor:"#F472B6",
+    cx:415, cy:368, r:24, color:"#F472B6",
+    quadrant:"Flexible Contract · Push — Event Notification via HTTP",
+    direction:"Server → Client (one-way push)", contract:"Flexible (JSON payload)",
+    transport:"HTTP POST", payload:"JSON", latency:"Medium (event-triggered)",
+    browserSupport:"Server-to-server only", caching:"No",
+    why:"'Don't call us, we'll call you.' Instead of polling, the server sends an HTTP POST to a URL you register when an event happens. The simplest form of event-driven architecture. No persistent connection — just an outbound HTTP request.",
+    qas:[
+      {name:"Simplicity",score:5},{name:"Serverless Friendly",score:5},
+      {name:"No Persistent Connection",score:5},{name:"Guaranteed Delivery",score:3},
+      {name:"Real-time Latency",score:3},{name:"Reliability",score:3},
+    ],
+    examples:[
+      {icon:"💳",name:"Stripe Webhooks",desc:"payment_intent.succeeded → POST to your /webhook endpoint."},
+      {icon:"🐙",name:"GitHub Webhooks",desc:"push, PR, issue events → trigger your CI/CD pipeline."},
+      {icon:"📦",name:"Shopify",desc:"order.created → inventory system, fulfillment, email notification."},
+    ],
+    snippet:`// Your endpoint receives:
+POST https://yourapp.com/webhooks/stripe
+{
+  "type": "payment_intent.succeeded",
+  "data": {
+    "object": {
+      "id": "pi_abc123",
+      "amount": 2000
+    }
+  }
+}`,
+    goodFor:"Payment events · CI/CD triggers · SaaS integrations · Async notifications",
+    tradeoffGood:"Dead simple. No polling. Works with serverless functions. Push without connection.",
+    tradeoffBad:"No guaranteed delivery without retry logic. Your endpoint must be publicly reachable.",
+    whenToUse:"When you need to be notified of events in a third-party system (Stripe, GitHub, Shopify).",
+  },
+  {
+    id:"sse", name:"SSE", icon:"📻", category:"Flexible Push", catColor:"#F472B6",
+    cx:510, cy:415, r:20, color:"#FB7185",
+    quadrant:"Flexible Contract · Server-Sent Events — One-Way Stream",
+    direction:"Server → Client (one-way)", contract:"Flexible (text/event-stream)",
+    transport:"HTTP (long-lived GET)", payload:"Text / JSON", latency:"Low",
+    browserSupport:"Full (EventSource API)", caching:"No",
+    why:"Server-Sent Events — a simple HTTP response that never closes. The server keeps writing events, the client keeps reading. Simpler than WebSocket when you only need server-to-client push. Works through HTTP proxies and load balancers that WebSocket struggles with.",
+    qas:[
+      {name:"Simplicity",score:5},{name:"Browser Native Support",score:5},
+      {name:"Auto-reconnect",score:5},{name:"Full-Duplex",score:1},
+      {name:"Binary Payload",score:1},{name:"Scalability",score:3},
+    ],
+    examples:[
+      {icon:"🤖",name:"ChatGPT / Claude",desc:"AI token streaming — server sends tokens as they generate via SSE."},
+      {icon:"📊",name:"Live Dashboards",desc:"Real-time server metrics, stock prices, election results."},
+      {icon:"🔔",name:"Notification Systems",desc:"Server pushes notifications without client polling."},
+    ],
+    snippet:`// Server (Node.js)
+res.setHeader('Content-Type', 'text/event-stream');
+res.write(\`data: ${JSON.stringify({ msg: "hello" })}\n\n\`);
+
+// Client (browser — built-in API)
+const es = new EventSource('/stream');
+es.onmessage = (e) => console.log(JSON.parse(e.data));`,
+    goodFor:"AI token streaming · Live feeds · Notifications · Dashboards (server-to-client only)",
+    tradeoffGood:"Auto-reconnect built-in. Works with regular HTTP. Simple to implement.",
+    tradeoffBad:"One-way only. Text-only by spec. HTTP/1.1 has 6-connection-per-host limit.",
+    whenToUse:"When you need server-to-client push but don't need the client to send data back.",
+  },
+  {
+    id:"long_polling", name:"Long Polling", icon:"🔄", category:"Flexible Push", catColor:"#F472B6",
+    cx:355, cy:445, r:17, color:"#FDA4AF",
+    quadrant:"Flexible Contract · Simulated Push via Repeated Requests",
+    direction:"Simulated push (HTTP trick)", contract:"Flexible",
+    transport:"HTTP", payload:"JSON", latency:"Medium",
+    browserSupport:"Full", caching:"No",
+    why:"Before WebSocket and SSE, developers faked push by having the client send a request that the server holds open until it has something to say, then responds, and the client immediately sends the next request. Solves push over plain HTTP — but wastes connections.",
+    qas:[
+      {name:"Compatibility",score:5},{name:"Firewall Friendly",score:5},
+      {name:"Simplicity (client)",score:4},{name:"Server Efficiency",score:2},
+      {name:"Real-time Latency",score:3},{name:"Modern Relevance",score:2},
+    ],
+    examples:[
+      {icon:"💬",name:"Old Chat Systems",desc:"Pre-WebSocket chat (Facebook Chat pre-2011, Campfire)."},
+      {icon:"📧",name:"Email Clients",desc:"Legacy webmail refresh polling for new messages."},
+      {icon:"🔧",name:"Fallback Transport",desc:"Socket.IO uses long-polling as fallback when WebSocket is blocked."},
+    ],
+    snippet:`// Client keeps re-requesting
+async function poll() {
+  const res = await fetch('/api/events?since=' + lastId);
+  const data = await res.json();
+  process(data);
+  poll(); // immediately re-poll
+}`,
+    goodFor:"Legacy system fallback · Environments that block WebSocket · Simple notifications",
+    tradeoffGood:"Works everywhere — plain HTTP. No special server support needed.",
+    tradeoffBad:"Wastes server connections. High overhead. Use SSE or WebSocket instead if possible.",
+    whenToUse:"Only as a fallback when WebSocket or SSE are blocked (corporate firewalls).",
+  },
+  {
+    id:"websocket_loose", name:"WebSocket (loose)", icon:"🔌", category:"Flexible Push", catColor:"#F472B6",
+    cx:460, cy:330, r:20, color:"#C084FC",
+    quadrant:"Flexible Contract · Full-Duplex Real-time",
+    direction:"Full-Duplex", contract:"Flexible (application-defined)",
+    transport:"WebSocket (TCP upgrade)", payload:"JSON or Binary", latency:"Very Low",
+    browserSupport:"Full", caching:"No",
+    why:"WebSocket without a formal message schema — just raw JSON objects over a persistent connection. Common in many real-time apps where flexibility matters more than type safety. Socket.IO adds rooms, namespaces, and auto-reconnect on top of WebSocket.",
+    qas:[
+      {name:"Flexibility",score:5},{name:"Real-time",score:5},
+      {name:"Ease of Start",score:5},{name:"Type Safety",score:2},
+      {name:"Scalability",score:3},{name:"Connection Cost",score:3},
+    ],
+    examples:[
+      {icon:"🎯",name:"Socket.IO apps",desc:"Most real-time web apps — chat, notifications, collaboration."},
+      {icon:"📝",name:"Collaborative Tools",desc:"Figma, Notion — cursor positions, live document edits."},
+      {icon:"🔔",name:"Live Notifications",desc:"Push notifications in web apps without polling."},
+    ],
+    snippet:`// Socket.IO (adds rooms + namespaces on top)
+io.on("connection", (socket) => {
+  socket.join("room:123");
+  socket.to("room:123").emit("user_joined", {
+    userId: socket.id
+  });
+});`,
+    goodFor:"Rapid prototyping · Chat · Collaborative apps · Notifications",
+    tradeoffGood:"Simple to start. Full-duplex. Socket.IO adds resilience and rooms.",
+    tradeoffBad:"Untyped messages — breaking changes are invisible. Stateful server is hard to scale.",
+    whenToUse:"For quick real-time features where you control both client and server and don't need strict typing.",
+  },
+  {
+    id:"message_queue", name:"Message Queue", icon:"📮", category:"Flexible Push", catColor:"#F472B6",
+    cx:580, cy:365, r:20, color:"#FB923C",
+    quadrant:"Flexible · Async Decoupled Messaging",
+    direction:"Async Push (via broker)", contract:"Flexible (message schema)",
+    transport:"AMQP, Kafka, SQS", payload:"JSON / Binary", latency:"Medium (async)",
+    browserSupport:"Server-side only", caching:"Yes (broker stores messages)",
+    why:"Messages are put in a queue by a producer and consumed by a consumer at its own pace. The broker (Kafka, RabbitMQ, SQS) stores messages if the consumer is slow or down. Fundamental for decoupling microservices — the producer doesn't know or care who processes it.",
+    qas:[
+      {name:"Decoupling",score:5},{name:"Durability",score:5},
+      {name:"Backpressure Handling",score:5},{name:"Real-time Latency",score:2},
+      {name:"Debugging Complexity",score:2},{name:"Strong Consistency",score:2},
+    ],
+    examples:[
+      {icon:"🟠",name:"Apache Kafka",desc:"Event streaming backbone. Replay, audit log, fan-out patterns."},
+      {icon:"🐰",name:"RabbitMQ",desc:"AMQP broker. Work queues, routing, topic exchanges."},
+      {icon:"🔶",name:"Amazon SQS",desc:"Managed queue. Dead letter queues. FIFO ordering option."},
+    ],
+    snippet:`// Producer (publish)
+await kafka.producer.send({
+  topic: "order.created",
+  messages: [{ value: JSON.stringify(order) }]
+});
+
+// Consumer (subscribe)
+await kafka.consumer.run({
+  eachMessage: async ({ message }) => {
+    processOrder(JSON.parse(message.value));
+  }
+});`,
+    goodFor:"Microservice decoupling · Background jobs · Order processing · Event sourcing",
+    tradeoffGood:"Buffer during traffic spikes. Guaranteed delivery. Replay history (Kafka).",
+    tradeoffBad:"Eventual consistency only. Complex debugging. Message ordering challenges.",
+    whenToUse:"For async workflows between services where the producer should not wait for the consumer.",
+  },
+];
+
+const CATEGORIES = ["All", ...new Set(PROTOCOLS.map(p => p.category))];
+let activeCat = "All", activeID = null;
+const NS = "http://www.w3.org/2000/svg";
+
+// ── Filters ──
+const catEl = document.getElementById("cat-filters");
+CATEGORIES.forEach(cat => {
+  const btn = document.createElement("button");
+  btn.className = "cat-btn"; btn.dataset.cat = cat;
+  const p = PROTOCOLS.find(x=>x.category===cat);
+  const c = cat==="All"?"#60A5FA":(p?.catColor||"#64748B");
+  btn.textContent = cat;
+  if(cat==="All"){btn.style.background="#60A5FA18";btn.style.color="#60A5FA";btn.style.borderColor="#60A5FA45";}
+  else{btn.style.color=c;}
+  btn.addEventListener("click",()=>{
+    activeCat=cat;
+    document.querySelectorAll(".cat-btn").forEach(b=>{
+      const bc=PROTOCOLS.find(x=>x.category===b.dataset.cat)?.catColor||(b.dataset.cat==="All"?"#60A5FA":"#64748B");
+      if(b.dataset.cat===cat){b.style.background=bc+"22";b.style.color=bc;b.style.borderColor=bc+"55";}
+      else{b.style.background="";b.style.borderColor="";b.style.color=bc;}
+    });
+    renderAll();
+  });
+  catEl.appendChild(btn);
+});
+
+// ── Render SVG ──
+function renderAll(){
+  ["glow-layer","bubble-layer","label-layer"].forEach(id=>document.getElementById(id).innerHTML="");
+  PROTOCOLS.forEach(p=>{
+    const dim=activeCat!=="All"&&p.category!==activeCat;
+    const active=activeID===p.id;
+    const g=document.createElementNS(NS,"circle");
+    g.setAttribute("cx",p.cx);g.setAttribute("cy",p.cy);g.setAttribute("r",p.r+12);
+    g.setAttribute("fill",p.color);g.setAttribute("fill-opacity",dim?0:active?0.28:0.08);
+    document.getElementById("glow-layer").appendChild(g);
+    const c=document.createElementNS(NS,"circle");
+    c.setAttribute("cx",p.cx);c.setAttribute("cy",p.cy);c.setAttribute("r",p.r);
+    c.setAttribute("fill",p.color);c.setAttribute("fill-opacity",dim?0.05:active?0.88:0.2);
+    c.setAttribute("stroke",p.color);c.setAttribute("stroke-width",active?2.5:1.5);
+    c.setAttribute("stroke-opacity",dim?0.1:0.85);
+    c.setAttribute("data-pid",p.id);c.style.cursor=dim?"default":"pointer";
+    document.getElementById("bubble-layer").appendChild(c);
+    const icon=document.createElementNS(NS,"text");
+    icon.setAttribute("x",p.cx);icon.setAttribute("y",p.cy);
+    icon.setAttribute("text-anchor","middle");icon.setAttribute("dominant-baseline","central");
+    icon.setAttribute("font-size",Math.round(p.r*0.72));icon.setAttribute("opacity",dim?0.08:1);
+    icon.textContent=p.icon;
+    document.getElementById("label-layer").appendChild(icon);
+    const lbl=document.createElementNS(NS,"text");
+    lbl.setAttribute("x",p.cx);lbl.setAttribute("y",p.cy+p.r+11);
+    lbl.setAttribute("text-anchor","middle");lbl.setAttribute("font-family","'JetBrains Mono',monospace");
+    lbl.setAttribute("font-size","7.5");lbl.setAttribute("fill",p.color);lbl.setAttribute("opacity",dim?0.08:0.85);
+    lbl.textContent=p.name;
+    document.getElementById("label-layer").appendChild(lbl);
+  });
+  const ring=document.getElementById("active-ring");
+  if(activeID){const p=PROTOCOLS.find(x=>x.id===activeID);ring.setAttribute("cx",p.cx);ring.setAttribute("cy",p.cy);ring.setAttribute("r",p.r+17);ring.setAttribute("stroke",p.color);ring.setAttribute("stroke-width","2");}
+  else{ring.setAttribute("cx",-400);ring.setAttribute("cy",-400);ring.setAttribute("r",0);}
+}
+
+// ── Click ──
+document.getElementById("map-svg").addEventListener("click",e=>{
+  let t=e.target;
+  while(t&&t!==e.currentTarget){if(t.dataset?.pid)break;t=t.parentElement;}
+  const pid=t?.dataset?.pid;
+  if(!pid)return;
+  const p=PROTOCOLS.find(x=>x.id===pid);
+  if(!p)return;
+  if(activeCat!=="All"&&p.category!==activeCat)return;
+  activeID=activeID===pid?null:pid;
+  renderAll();
+  activeID?renderDetail(activeID):showPlaceholder();
+});
+
+function showPlaceholder(){document.getElementById("detail-panel").innerHTML=`<div class="placeholder"><div class="big">🔌</div>Click any bubble to explore the communication style — when to use it, contract type, real-world examples, and trade-offs.</div>`;}
+
+function makeDots(score,color){
+  let h='<div class="dots">';
+  for(let i=1;i<=5;i++)h+=`<span class="dot" style="background:${i<=score?color:'#131D30'};border-color:${i<=score?color:'#1E2E48'}"></span>`;
+  return h+"</div>";
+}
+
+function renderDetail(pid){
+  const p=PROTOCOLS.find(x=>x.id===pid);
+  const qaRows=p.qas.map(q=>`<div class="qa-row"><div class="qa-name">${q.name}</div>${makeDots(q.score,p.color)}</div>`).join("");
+  const exItems=p.examples.map(e=>`<div class="ex-item"><div class="ex-icon">${e.icon}</div><div><div class="ex-name" style="color:${p.color}">${e.name}</div><div class="ex-desc">${e.desc}</div></div></div>`).join("");
+  document.getElementById("detail-panel").innerHTML=`
+    <div class="detail-card" style="border-color:${p.color}45">
+      <div class="detail-head" style="background:${p.color}0c;border-bottom-color:${p.color}22">
+        <div class="d-icon">${p.icon}</div>
+        <div>
+          <div class="d-name" style="color:${p.color}">${p.name}</div>
+          <div class="d-sub">${p.direction}</div>
+          <div class="d-badges">
+            <span class="badge" style="background:${p.catColor}1A;color:${p.catColor}">${p.category}</span>
+            <span class="badge" style="background:#1E2E4880;color:#465878">${p.contract}</span>
+          </div>
+        </div>
+      </div>
+      <div class="detail-body">
+        <div><div class="sec-label" style="color:${p.color}">Map Position</div><div class="pos-tag">${p.quadrant}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">Why This Protocol Exists</div><div class="sec-text">${p.why}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">QA Fit Scores</div>${qaRows}</div>
+        <div><div class="sec-label" style="color:${p.color}">Code Pattern</div><div class="code-snippet">${p.snippet.replace(/</g,"&lt;").replace(/>/g,"&gt;")}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">Real-World Examples</div><div class="example-grid">${exItems}</div></div>
+        <div><div class="sec-label" style="color:${p.color}">Trade-offs</div>
+          <div class="tradeoffs">
+            <div class="tf-col"><div class="tf-label" style="color:#4ADE80">✓ Strengths</div><div class="tf-text">${p.tradeoffGood}</div></div>
+            <div class="tf-col"><div class="tf-label" style="color:#F87171">✗ Weaknesses</div><div class="tf-text">${p.tradeoffBad}</div></div>
+          </div>
+        </div>
+        <div class="when-to-use"><div class="when-label">WHEN TO USE</div><div class="when-text">${p.whenToUse}</div></div>
+      </div>
+    </div>`;
+}
+
+// ── Tab switching ──
+function showTab(tabId,btn){
+  document.querySelectorAll(".tab-panel").forEach(p=>p.classList.remove("active"));
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+tabId).classList.add("active");
+  btn.classList.add("active");
+}
+
+// ── Compare Table ──
+const CMP=[
+  {name:"REST API",         cat:"Flexible Pull",  dir:"Req-Res",      contract:"Optional (OpenAPI)",  transport:"HTTP",       payload:"JSON",    latency:"Low",      browser:"Full",   cache:"Yes",   best:"Public APIs, CRUD",          avoid:"Real-time, strict contracts"},
+  {name:"GraphQL",          cat:"Flexible Pull",  dir:"Req-Res+Sub",  contract:"SDL Schema",          transport:"HTTP POST",  payload:"JSON",    latency:"Low",      browser:"Full",   cache:"Hard",  best:"Multiple clients, complex data",avoid:"Simple APIs, caching needed"},
+  {name:"OpenAPI/REST",     cat:"Flexible Pull",  dir:"Req-Res",      contract:"OpenAPI 3.x",         transport:"HTTP",       payload:"JSON",    latency:"Low",      browser:"Full",   cache:"Yes",   best:"Public/partner APIs",         avoid:"Internal TS apps (use tRPC)"},
+  {name:"gRPC",             cat:"Typed Pull",     dir:"Req-Res+Stream","contract":"Protobuf IDL",     transport:"HTTP/2",     payload:"Binary",  latency:"Very Low", browser:"Limited",cache:"No",    best:"Internal microservices",      avoid:"Public browser APIs"},
+  {name:"gRPC Streaming",   cat:"Typed Push",     dir:"Streaming",    contract:"Protobuf IDL",        transport:"HTTP/2",     payload:"Binary",  latency:"Very Low", browser:"Limited",cache:"No",    best:"Typed real-time feeds",       avoid:"Browser direct access"},
+  {name:"tRPC",             cat:"Typed Pull",     dir:"Req-Res",      contract:"TypeScript types",    transport:"HTTP",       payload:"JSON",    latency:"Low",      browser:"Full",   cache:"Yes",   best:"TypeScript full-stack",       avoid:"Non-TS, external consumers"},
+  {name:"SOAP/WSDL",        cat:"Typed Pull",     dir:"Req-Res",      contract:"WSDL/XML Schema",     transport:"HTTP/SMTP",  payload:"XML",     latency:"High",     browser:"Yes",    cache:"No",    best:"Legacy enterprise, banking",  avoid:"New systems"},
+  {name:"JSON-RPC",         cat:"Typed Pull",     dir:"Req-Res",      contract:"Method names",        transport:"HTTP/WS",    payload:"JSON",    latency:"Low",      browser:"Full",   cache:"No",    best:"Blockchain, IDE tooling",     avoid:"Resource-oriented APIs"},
+  {name:"WebSocket",        cat:"Flexible Push",  dir:"Full-Duplex",  contract:"App-defined",         transport:"WS (TCP)",   payload:"JSON/bin",latency:"Very Low", browser:"Full",   cache:"No",    best:"Chat, games, collaboration",  avoid:"High-scale stateful servers"},
+  {name:"SSE",              cat:"Flexible Push",  dir:"Server→Client","contract":"text/event-stream", transport:"HTTP GET",   payload:"Text/JSON",latency:"Low",     browser:"Full",   cache:"No",    best:"AI streaming, live feeds",    avoid:"Client needs to send data"},
+  {name:"WebHook",          cat:"Flexible Push",  dir:"Server→Server","contract":"JSON payload",      transport:"HTTP POST",  payload:"JSON",    latency:"Event-dep",browser:"No",     cache:"No",    best:"Payment events, CI/CD triggers",avoid:"Need confirmed delivery"},
+  {name:"Long Polling",     cat:"Flexible Push",  dir:"Simulated push","contract":"Flexible",         transport:"HTTP",       payload:"JSON",    latency:"Medium",   browser:"Full",   cache:"No",    best:"Fallback for blocked WS",     avoid:"Modern systems (use SSE/WS)"},
+  {name:"MQTT",             cat:"Typed Push",     dir:"Pub/Sub",      contract:"Topic structure",     transport:"TCP",        payload:"Binary",  latency:"Very Low", browser:"via WS", cache:"No",    best:"IoT, sensor networks",        avoid:"Complex queries, web apps"},
+  {name:"Message Queue",    cat:"Flexible Push",  dir:"Async Push",   contract:"Message schema",      transport:"AMQP/Kafka", payload:"JSON/bin",latency:"Async",    browser:"No",     cache:"Broker",best:"Microservice decoupling",     avoid:"Synchronous workflows"},
+];
+const catClr={"Flexible Pull":"#FBBF24","Typed Pull":"#818CF8","Typed Push":"#34D399","Flexible Push":"#F472B6"};
+const latClr={"Very Low":"#34D399","Low":"#34D399","Low-Medium":"#FBBF24","Medium":"#FBBF24","High":"#F87171","Async":"#94A3B8","Event-dep":"#94A3B8"};
+const cacheClr={"Yes":"#34D399","No":"#F87171","Hard":"#FBBF24","Limited":"#FBBF24","Broker":"#60A5FA"};
+function tbadge(v,clrMap){const c=clrMap[v]||"#94A3B8";return `<span class="tbl-badge" style="background:${c}18;color:${c}">${v}</span>`;}
+document.getElementById("cmp-tbody").innerHTML=CMP.map(r=>`<tr>
+  <td style="font-weight:600;color:#D1D5DB;white-space:nowrap">${r.name}</td>
+  <td>${tbadge(r.cat,catClr)}</td>
+  <td style="color:#64748B;font-size:9px">${r.dir}</td>
+  <td style="color:#64748B;font-size:9px">${r.contract}</td>
+  <td style="color:#64748B;font-size:9px">${r.transport}</td>
+  <td style="color:#64748B;font-size:9px">${r.payload}</td>
+  <td>${tbadge(r.latency,latClr)}</td>
+  <td style="color:#64748B;font-size:9px">${r.browser}</td>
+  <td>${tbadge(r.cache,cacheClr)}</td>
+  <td style="color:#60A5FA;font-size:9px">${r.best}</td>
+  <td style="color:#465878;font-size:9px">${r.avoid}</td>
+</tr>`).join("");
+
+// ── Flow Diagrams ──
+const FLOWS=[
+  {title:"REST / Request-Response",color:"#FBBF24",icon:"🌐",steps:[
+    {from:"Client",to:"Server",label:"GET /users/123",dir:"→",color:"#FBBF24"},
+    {from:"Server",to:"Client",label:"200 OK {data}",dir:"←",color:"#4ADE80"},
+    {from:"Client",to:"Server",label:"POST /users",dir:"→",color:"#FBBF24"},
+    {from:"Server",to:"Client",label:"201 Created",dir:"←",color:"#4ADE80"},
+  ],note:"Stateless. Each request is independent. HTTP cache works on GET."},
+  {title:"WebSocket — Full Duplex",color:"#C084FC",icon:"🔌",steps:[
+    {from:"Client",to:"Server",label:"HTTP Upgrade → WebSocket",dir:"→",color:"#FBBF24"},
+    {from:"Server",to:"Client",label:"101 Switching Protocols",dir:"←",color:"#4ADE80"},
+    {from:"Client",to:"Server",label:"send: { type: 'join' }",dir:"→",color:"#C084FC"},
+    {from:"Server",to:"Client",label:"push: { type: 'update' }",dir:"←",color:"#C084FC"},
+    {from:"Server",to:"Client",label:"push: { type: 'update' }",dir:"←",color:"#C084FC"},
+  ],note:"Single persistent connection. Both sides send at any time."},
+  {title:"WebHook — Server Push",color:"#F472B6",icon:"🪝",steps:[
+    {from:"Client",to:"Platform",label:"Register URL: /webhooks",dir:"→",color:"#FBBF24"},
+    {from:"Platform",to:"Client",label:"OK: webhook registered",dir:"←",color:"#4ADE80"},
+    {from:"Event",to:"Platform",label:"payment.succeeded fires",dir:"→",color:"#F97316"},
+    {from:"Platform",to:"Client",label:"POST /webhooks {event}",dir:"→",color:"#F472B6"},
+    {from:"Client",to:"Platform",label:"200 OK (acknowledge)",dir:"←",color:"#4ADE80"},
+  ],note:"Client registers. Platform calls back when events happen."},
+  {title:"gRPC — Binary RPC",color:"#818CF8",icon:"⚡",steps:[
+    {from:"Client",to:"Protobuf",label:"serialize(UserRequest)",dir:"→",color:"#818CF8"},
+    {from:"Protobuf",to:"Server",label:"binary frame (HTTP/2)",dir:"→",color:"#818CF8"},
+    {from:"Server",to:"Protobuf",label:"serialize(User response)",dir:"→",color:"#818CF8"},
+    {from:"Protobuf",to:"Client",label:"binary frame → deserialize",dir:"←",color:"#4ADE80"},
+  ],note:"Binary serialization. 3–10x smaller than JSON. HTTP/2 multiplexed."},
+  {title:"SSE — Server Streaming",color:"#FB7185",icon:"📻",steps:[
+    {from:"Client",to:"Server",label:"GET /stream (EventSource)",dir:"→",color:"#FBBF24"},
+    {from:"Server",to:"Client",label:"Content-Type: text/event-stream",dir:"←",color:"#4ADE80"},
+    {from:"Server",to:"Client",label:"data: {token: 'Hello'}",dir:"←",color:"#FB7185"},
+    {from:"Server",to:"Client",label:"data: {token: ' world'}",dir:"←",color:"#FB7185"},
+    {from:"Server",to:"Client",label:"data: [DONE]",dir:"←",color:"#FB7185"},
+  ],note:"One-way. Connection stays open. Client reconnects automatically."},
+  {title:"GraphQL — Flexible Query",color:"#E879F9",icon:"◈",steps:[
+    {from:"Client",to:"Server",label:"POST /graphql",dir:"→",color:"#FBBF24"},
+    {from:"Client",to:"Server",label:"query { user { name orders{id} } }",dir:"→",color:"#E879F9"},
+    {from:"Server",to:"Client",label:"{ data: { user: {name, orders} } }",dir:"←",color:"#4ADE80"},
+  ],note:"Client defines the shape. Server returns exactly that — no more, no less."},
+];
+
+document.getElementById("flow-grid").innerHTML=FLOWS.map(f=>`
+  <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+      <span style="font-size:18px">${f.icon}</span>
+      <div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:${f.color};letter-spacing:.1em">${f.title}</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:5px;margin-bottom:10px">
+      ${f.steps.map(s=>`
+        <div style="display:flex;align-items:center;gap:6px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#465878;width:52px;text-align:right;flex-shrink:0">${s.from}</div>
+          <div style="font-size:11px;color:${s.color}">${s.dir}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:${s.color};background:${s.color}12;padding:2px 7px;border-radius:4px;flex:1">${s.label}</div>
+          <div style="font-family:'JetBrains Mono',monospace;font-size:8px;color:#465878;width:52px;flex-shrink:0">${s.to}</div>
+        </div>`).join("")}
+    </div>
+    <div style="font-size:9px;color:${f.color}60;font-style:italic;border-top:1px solid var(--border);padding-top:7px">${f.note}</div>
+  </div>`).join("");
+
+// ── Decision Guide ──
+const QS=[
+  {q:"Do you need the server to push data to the client without polling?",   yes:"WebSocket · SSE · WebHook · MQTT",    no:"REST · GraphQL · gRPC · tRPC"},
+  {q:"Is this a public API consumed by external developers?",                yes:"REST + OpenAPI",                       no:"gRPC · tRPC · GraphQL (internal)"},
+  {q:"Is your stack 100% TypeScript (client + server in same repo)?",        yes:"tRPC",                                 no:"REST · GraphQL · gRPC"},
+  {q:"Do different clients need different shapes of the same data?",         yes:"GraphQL",                              no:"REST is simpler"},
+  {q:"Is performance / bandwidth critical (mobile, IoT, internal services)?",yes:"gRPC (binary, HTTP/2)",               no:"REST or GraphQL is fine"},
+  {q:"Is this IoT / sensor / constrained device communication?",             yes:"MQTT",                                 no:"REST or WebSocket"},
+  {q:"Do you need real-time bidirectional communication (chat, games)?",     yes:"WebSocket",                           no:"SSE (if only server→client)"},
+  {q:"Is this AI streaming output (token by token)?",                        yes:"SSE",                                  no:"REST for non-streaming"},
+  {q:"Is this decoupled async background processing between services?",      yes:"Message Queue (Kafka, SQS, RabbitMQ)",no:"Direct API call (REST or gRPC)"},
+  {q:"Is this notifying your server when a 3rd party event occurs?",        yes:"WebHook (register with provider)",     no:"You poll their API"},
+];
+document.getElementById("guide-cards").innerHTML=QS.map(q=>`
+  <div class="guide-card">
+    <div class="guide-q">❓ ${q.q}</div>
+    <div class="guide-opts">
+      <span class="g-yes">YES → ${q.yes}</span>
+      <span class="g-no">NO → ${q.no}</span>
+    </div>
+  </div>`).join("");
+
+const PROFILES=[
+  {icon:"📱",u:"Mobile App API (iOS/Android)",        rec:"REST + OpenAPI or GraphQL",         why:"HTTP caching + standard tooling. GraphQL if data shapes differ significantly."},
+  {icon:"🌐",u:"Public REST API (third-party devs)",  rec:"REST + OpenAPI 3.x",                why:"Universal. Auto-generated docs + SDKs. Stripe/GitHub are the gold standard."},
+  {icon:"⚫",u:"TypeScript Full-Stack (Next.js etc.)", rec:"tRPC",                              why:"End-to-end types. Zero API layer maintenance. Best DX in TypeScript monorepos."},
+  {icon:"💬",u:"Real-time Chat / Collaboration",       rec:"WebSocket (Socket.IO)",             why:"Full-duplex. Low latency. Built-in rooms and reconnection."},
+  {icon:"🤖",u:"AI / LLM Streaming Responses",         rec:"SSE (Server-Sent Events)",         why:"ChatGPT / Claude stream tokens via SSE. Simple, built-in browser support."},
+  {icon:"🔬",u:"Internal Microservice Communication",  rec:"gRPC",                             why:"Binary efficiency. Strong contract. HTTP/2 multiplexing. 3–10x faster than JSON."},
+  {icon:"🏠",u:"IoT / Smart Home / Sensors",           rec:"MQTT",                             why:"Tiny overhead. QoS levels. Designed for constrained devices."},
+  {icon:"💳",u:"Payment / Third-party Event Notifications",rec:"WebHook",                      why:"Stripe, PayPal, Shopify all use WebHook to notify your server of events."},
+  {icon:"📊",u:"Live Dashboard / Monitoring",           rec:"SSE or WebSocket",                why:"SSE for simple server push. WebSocket if dashboard sends filter commands back."},
+  {icon:"⚙️",u:"Background Job / Async Pipeline",       rec:"Message Queue (Kafka / SQS)",     why:"Decouples producer from consumer. Buffer during spikes. Guaranteed delivery."},
+  {icon:"🏦",u:"Legacy Enterprise Integration",         rec:"SOAP or REST + OpenAPI",          why:"SOAP if integrating existing WSDL systems. REST for new services."},
+  {icon:"🎮",u:"Multiplayer Game / Live Auctions",       rec:"WebSocket",                      why:"Sub-10ms round trips. Full-duplex game state sync."},
+];
+document.getElementById("profile-rows").innerHTML=PROFILES.map(r=>`
+  <div style="display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid #0A1020">
+    <div style="font-size:20px;flex-shrink:0;margin-top:1px">${r.icon}</div>
+    <div>
+      <div style="font-size:12px;color:#D1D5DB;font-weight:500;margin-bottom:2px">${r.u}</div>
+      <div style="font-size:11px;color:#60A5FA;margin-bottom:2px">→ ${r.rec}</div>
+      <div style="font-size:10px;color:#3A4E6E">${r.why}</div>
+    </div>
+  </div>`).join("");
+
+renderAll();
+</script>
+</body>
+</html>
