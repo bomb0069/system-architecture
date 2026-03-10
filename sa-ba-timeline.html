@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SA & BA — Evolution Timeline</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:ital,wght@0,400;0,600;1,400&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f0e8;
+    --surface: #fdfaf4;
+    --border: #d4c9b0;
+    --sa: #1a4a6b;
+    --ba: #8b2500;
+    --overlap: #4a3570;
+    --warn: #7a5c00;
+    --text: #1a1a14;
+    --muted: #7a7060;
+    --ink: #2a2a1e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Sarabun', sans-serif;
+    min-height: 100vh;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.5;
+  }
+
+  header {
+    border-bottom: 2px solid var(--ink);
+    padding: 48px 48px 36px;
+    max-width: 960px;
+    margin: 0 auto;
+  }
+
+  .header-kicker {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .header-kicker::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+    max-width: 200px;
+  }
+
+  h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(56px, 9vw, 112px);
+    line-height: 0.88;
+    letter-spacing: 1px;
+    color: var(--ink);
+    margin-bottom: 24px;
+  }
+
+  h1 em {
+    font-style: normal;
+    -webkit-text-stroke: 2px var(--ink);
+    color: transparent;
+  }
+
+  .subtitle {
+    max-width: 500px;
+    font-size: 14px;
+    line-height: 1.8;
+    color: var(--muted);
+    font-weight: 300;
+    margin-bottom: 28px;
+  }
+
+  .legend {
+    display: flex;
+    gap: 0;
+    flex-wrap: wrap;
+    border: 1px solid var(--border);
+    width: fit-content;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border-right: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--muted);
+  }
+
+  .legend-item:last-child { border-right: none; }
+
+  .legend-pip {
+    width: 8px; height: 8px;
+    flex-shrink: 0;
+  }
+
+  .timeline {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 40px 48px 80px;
+    position: relative;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: calc(48px + 100px + 32px);
+    top: 40px;
+    bottom: 80px;
+    width: 1px;
+    background: var(--border);
+  }
+
+  .era {
+    display: grid;
+    grid-template-columns: 100px 64px 1fr;
+    margin-bottom: 0;
+    opacity: 0;
+    animation: slideIn 0.4s forwards;
+  }
+
+  .era:nth-child(1) { animation-delay: 0.05s; }
+  .era:nth-child(2) { animation-delay: 0.10s; }
+  .era:nth-child(3) { animation-delay: 0.15s; }
+  .era:nth-child(4) { animation-delay: 0.20s; }
+  .era:nth-child(5) { animation-delay: 0.25s; }
+  .era:nth-child(6) { animation-delay: 0.30s; }
+  .era:nth-child(7) { animation-delay: 0.35s; }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .year-col {
+    padding-top: 28px;
+    text-align: right;
+  }
+
+  .year {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    display: block;
+    line-height: 1;
+  }
+
+  .year-sub {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    color: var(--muted);
+    margin-top: 3px;
+    display: block;
+    text-transform: uppercase;
+  }
+
+  .node-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 32px;
+  }
+
+  .node {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid;
+    background: var(--bg);
+    flex-shrink: 0;
+    z-index: 2;
+  }
+
+  .node-line {
+    width: 1px;
+    flex: 1;
+    background: var(--border);
+    min-height: 16px;
+    margin-top: 3px;
+  }
+
+  .content-col {
+    padding: 20px 0 20px 16px;
+    border-top: 1px solid var(--border);
+  }
+
+  .era-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    font-weight: 600;
+  }
+
+  .card {
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    background: var(--surface);
+    position: relative;
+    transition: transform 0.15s;
+  }
+
+  .card:hover { transform: translateX(3px); }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+  }
+
+  .card.sa::before  { background: var(--sa); }
+  .card.ba::before  { background: var(--ba); }
+  .card.both::before { background: var(--overlap); }
+  .card.neutral::before { background: var(--muted); }
+
+  .card-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 600;
+    margin-bottom: 5px;
+  }
+
+  .tag-sa      { color: var(--sa); }
+  .tag-ba      { color: var(--ba); }
+  .tag-both    { color: var(--overlap); }
+  .tag-neutral { color: var(--muted); }
+
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .card-body {
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--muted);
+    font-weight: 300;
+  }
+
+  .card-body strong { color: var(--ink); font-weight: 600; }
+
+  .diagram {
+    background: #f0ece2;
+    border: 1px solid var(--border);
+    padding: 14px 18px;
+    margin-bottom: 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    line-height: 1.9;
+    color: var(--muted);
+    white-space: pre;
+    overflow-x: auto;
+  }
+
+  .d-sa   { color: var(--sa);     font-weight: 600; }
+  .d-ba   { color: var(--ba);     font-weight: 600; }
+  .d-both { color: var(--overlap); font-weight: 600; }
+
+  /* Era colour themes */
+  .era-sa .year       { color: var(--sa); }
+  .era-sa .node       { border-color: var(--sa); }
+  .era-sa .era-label  { color: var(--sa); }
+
+  .era-ba .year       { color: var(--ba); }
+  .era-ba .node       { border-color: var(--ba); }
+  .era-ba .era-label  { color: var(--ba); }
+
+  .era-split .year      { color: var(--overlap); }
+  .era-split .node      { border-color: var(--overlap); }
+  .era-split .era-label { color: var(--overlap); }
+
+  .era-neutral .year      { color: var(--muted); }
+  .era-neutral .node      { border-color: var(--muted); }
+  .era-neutral .era-label { color: var(--muted); }
+
+  footer {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 32px 48px 60px;
+    border-top: 2px solid var(--ink);
+  }
+
+  .sources-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .source-list {
+    list-style: none;
+    display: grid;
+    gap: 8px;
+  }
+
+  .source-list li {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    color: var(--muted);
+    padding-left: 14px;
+    position: relative;
+  }
+
+  .source-list li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--border);
+  }
+
+  .source-list li strong { color: var(--ink); }
+
+  @media (max-width: 600px) {
+    header, .timeline, footer { padding-left: 20px; padding-right: 20px; }
+    .timeline::before { left: calc(20px + 80px + 24px); }
+    .era { grid-template-columns: 80px 48px 1fr; }
+    .year { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-kicker">Software Industry History</div>
+  <h1><em>SA</em> &<br>BA</h1>
+  <p class="subtitle">
+    ประวัติศาสตร์การแยกตัวของ Systems Analyst และ Business Analyst<br>
+    ในโลกของการพัฒนาซอฟต์แวร์ตั้งแต่ยุค 1950s จนถึงปัจจุบัน
+  </p>
+  <div class="legend">
+    <div class="legend-item">
+      <svg class="legend-pip" viewBox="0 0 8 8"><rect width="8" height="8" fill="#1a4a6b"/></svg>
+      Systems Analyst
+    </div>
+    <div class="legend-item">
+      <svg class="legend-pip" viewBox="0 0 8 8"><rect width="8" height="8" fill="#8b2500"/></svg>
+      Business Analyst
+    </div>
+    <div class="legend-item">
+      <svg class="legend-pip" viewBox="0 0 8 8"><rect width="8" height="8" fill="#4a3570"/></svg>
+      ทับซ้อน / แยกทาง
+    </div>
+    <div class="legend-item">
+      <svg class="legend-pip" viewBox="0 0 8 8"><rect width="8" height="8" fill="#7a7060"/></svg>
+      เหตุการณ์กลาง
+    </div>
+  </div>
+</header>
+
+<div class="timeline">
+
+  <!-- 1956–1963 -->
+  <div class="era era-sa">
+    <div class="year-col">
+      <span class="year">1956</span>
+      <span class="year-sub">กำเนิด</span>
+    </div>
+    <div class="node-col">
+      <div class="node"></div>
+      <div class="node-line"></div>
+    </div>
+    <div class="content-col">
+      <div class="era-label">// Origin of Systems Analysis</div>
+      <div class="card sa">
+        <div class="card-tag tag-sa">SA — Birth</div>
+        <div class="card-title">"Systems Analysis" ปรากฏครั้งแรกในโลก Computing</div>
+        <div class="card-body">
+          Herbert D. Benington นำเสนอ Phased Software Development ที่ <strong>Symposium on Advanced Programming Methods for Digital Computers ปี 1956</strong> — นับเป็นต้นกำเนิดของการคิดเชิงระบบในการพัฒนา Software
+        </div>
+      </div>
+      <div class="card sa">
+        <div class="card-tag tag-sa">SA — Named Profession</div>
+        <div class="card-title">New York Times ประกาศ: "Systems Analysis คืออาชีพใหม่" (1963)</div>
+        <div class="card-body">
+          บทความชื่อ <strong>"Systems Analysis New Profession"</strong> ในนิวยอร์กไทม์ส วันที่ 4 สิงหาคม 1963 บันทึกว่า SA ได้รับการยอมรับเป็นอาชีพในยุคนั้นแล้ว
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1967–1970 -->
+  <div class="era era-sa">
+    <div class="year-col">
+      <span class="year">1967</span>
+      <span class="year-sub">เติบโต</span>
+    </div>
+    <div class="node-col">
+      <div class="node"></div>
+      <div class="node-line"></div>
+    </div>
+    <div class="content-col">
+      <div class="era-label">// SA Boom</div>
+      <div class="card sa">
+        <div class="card-tag tag-sa">SA — Growth</div>
+        <div class="card-title">Programmer + SA เติบโตอย่างก้าวกระโดด</div>
+        <div class="card-body">
+          จำนวน Programmer และ Systems Analyst รวมกันเพิ่มจาก <strong>317,000 คนในปี 1967 เป็น 560,000 คนในปี 1970</strong> สะท้อนการเติบโตของ Computing ในองค์กรธุรกิจทั่วอเมริกา
+        </div>
+      </div>
+      <div class="card neutral">
+        <div class="card-tag tag-neutral">Milestone</div>
+        <div class="card-title">Royce 1970 Paper — ต้นกำเนิดที่เข้าใจผิดกันมาตลอด</div>
+        <div class="card-body">
+          Dr. Winston Royce ตีพิมพ์ "Managing the Development of Large Software Systems" — แต่ Royce <strong>ไม่ได้สนับสนุน Sequential Waterfall</strong> เขาระบุในบทความว่ามัน "risky and invites failure" และเสนอแนวทาง Iterative แทน คำว่า "Waterfall" ถูกใช้ครั้งแรกโดย Bell & Thayer ในปี <strong>1976</strong> ซึ่งอ้างถึงบทความของ Royce โดยตีความผิด
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1970s–1980s -->
+  <div class="era era-sa">
+    <div class="year-col">
+      <span class="year">1970s</span>
+      <span class="year-sub">Structured</span>
+    </div>
+    <div class="node-col">
+      <div class="node"></div>
+      <div class="node-line"></div>
+    </div>
+    <div class="content-col">
+      <div class="era-label">// Structured Analysis Era</div>
+      <div class="card sa">
+        <div class="card-tag tag-sa">SA — Tools</div>
+        <div class="card-title">Structured Analysis เกิด — DFD, ERD กลายเป็น Standard</div>
+        <div class="card-body">
+          ยุค 1970s–1980s SA ได้เครื่องมือ Formal เป็นของตัวเอง เช่น <strong>Data Flow Diagram (DFD)</strong> และ <strong>Entity Relationship Diagram (ERD)</strong> ทำให้งาน SA มีรูปแบบมาตรฐาน งาน SA ยังครอบคลุมทั้งด้าน Business และ Technical ในคนเดียว
+        </div>
+      </div>
+      <div class="card sa">
+        <div class="card-tag tag-sa">SA — Peak</div>
+        <div class="card-title">SA คือ "ศูนย์กลาง" ของทุก Project</div>
+        <div class="card-body">
+          SA ในยุคนี้คือ "part planner, part organizational consultant, part subject matter expert, part technology translator" — ทำหน้าที่ครบในคนเดียว ยังไม่มีการแยก BA ออกมาเป็นบทบาทเฉพาะแต่อย่างใด
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1990s -->
+  <div class="era era-split">
+    <div class="year-col">
+      <span class="year">1990s</span>
+      <span class="year-sub">แยกทาง</span>
+    </div>
+    <div class="node-col">
+      <div class="node"></div>
+      <div class="node-line"></div>
+    </div>
+    <div class="content-col">
+      <div class="era-label">// The Split Begins</div>
+      <div class="card both">
+        <div class="card-tag tag-both">SA → BA — Divergence</div>
+        <div class="card-title">SA แตกออกเป็นหลายบทบาท — BA เริ่มปรากฏ</div>
+        <div class="card-body">
+          ระบบซับซ้อนขึ้นมาก SA คนเดียวทำไม่ไหวอีกต่อไป งาน SA จึงแตกออกเป็น "Business Analyst", "Computer Systems Analyst", "Planning Analyst", "Risk Analyst", "Project Manager" ฯลฯ — <strong>BA เป็นหนึ่งในบทบาทที่แตกออกมาจาก SA โดยตรง</strong>
+        </div>
+      </div>
+
+      <div class="diagram"><span class="d-sa">SA เดิม (ทำทุกอย่างครบในคนเดียว)</span>
+        │
+        ├──► <span class="d-sa">Computer Systems Analyst</span>  เน้น Technical & Architecture
+        ├──► <span class="d-ba">Business Analyst</span>           เน้น Process & Requirements
+        ├──► Project Manager               เน้น Planning & Delivery
+        └──► Risk/Planning Analyst         เน้น Analysis เฉพาะด้าน</div>
+
+      <div class="card neutral">
+        <div class="card-tag tag-neutral">Milestone</div>
+        <div class="card-title">Agile Manifesto ลงนามปี 2001</div>
+        <div class="card-body">
+          Scrum และ XP เริ่มพัฒนาในช่วง 1994–1995 แต่ <strong>Agile Manifesto ลงนามอย่างเป็นทางการที่ Snowbird, Utah ในเดือนกุมภาพันธ์ 2001</strong> ทำให้ BA ที่เน้น Collaboration และ User Story ได้รับความสนใจมากขึ้น
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2003–2006 -->
+  <div class="era era-ba">
+    <div class="year-col">
+      <span class="year">2003</span>
+      <span class="year-sub">BA Official</span>
+    </div>
+    <div class="node-col">
+      <div class="node"></div>
+      <div class="node-line"></div>
+    </div>
+    <div class="content-col">
+      <div class="era-label">// BA Becomes a Profession</div>
+      <div class="card ba">
+        <div class="card-tag tag-ba">BA — Institution</div>
+        <div class="card-title">IIBA ก่อตั้งที่ Toronto, Canada (2003)</div>
+        <div class="card-body">
+          International Institute of Business Analysis ก่อตั้งขึ้น เริ่มพัฒนา BABOK ในปีเดียวกัน ถือเป็นจุดที่ BA ได้รับการรับรองเป็น <strong>Formal Profession</strong> แยกจาก SA อย่างเป็นทางการ
+        </div>
+      </div>
+      <div class="card ba">
+        <div class="card-tag tag-ba">BA — Standard</div>
+        <div class="card-title">BABOK v1.6 ออกมา — BA มี Body of Knowledge (2006)</div>
+        <div class="card-body">
+          BABOK v1.6 คือ First Major Release ออกปี 2006 พร้อมกับ <strong>CBAP Certification</strong> (Certified Business Analysis Professional) ทำให้ BA มี Standard และ Career Path เป็นของตัวเองอย่างชัดเจน
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2009–2015 -->
+  <div class="era era-ba">
+    <div class="year-col">
+      <span class="year">2009</span>
+      <span class="year-sub">Mature</span>
+    </div>
+    <div class="node-col">
+      <div class="node"></div>
+      <div class="node-line"></div>
+    </div>
+    <div class="content-col">
+      <div class="era-label">// BA Matures</div>
+      <div class="card ba">
+        <div class="card-tag tag-ba">BA — v2 & v3</div>
+        <div class="card-title">BABOK v2 (2009) → v3 (2015) — ขยายครอบคลุม Agile</div>
+        <div class="card-body">
+          BABOK v2 ออกปี 2009 เป็น Globally Recognized Standard<br>
+          BABOK v3 ออกปี 2015 ขยาย Scope ให้ครอบคลุม <strong>Agile, Business Process Management, Business Intelligence, Business Architecture</strong> — ยังคงเป็น Version ล่าสุดจนถึงปัจจุบัน
+        </div>
+      </div>
+      <div class="card both">
+        <div class="card-tag tag-both">SA + BA — Blur</div>
+        <div class="card-title">Agile ทำให้ขอบเขต SA/BA เริ่มพร่าเลือน</div>
+        <div class="card-body">
+          Agile Teams ขนาดเล็กทำให้คนเดียวต้องรับทั้งงาน SA และ BA บทบาท <strong>Product Owner</strong> ใน Scrum ทับซ้อนกับ BA มาก ชื่อตำแหน่งเริ่ม Blur เช่น "BA/SA", "Functional Analyst", "Business Systems Analyst"
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Present -->
+  <div class="era era-neutral">
+    <div class="year-col">
+      <span class="year">Now</span>
+      <span class="year-sub">ปัจจุบัน</span>
+    </div>
+    <div class="node-col">
+      <div class="node"></div>
+    </div>
+    <div class="content-col">
+      <div class="era-label">// Current State</div>
+      <div class="card neutral">
+        <div class="card-tag tag-neutral">Global</div>
+        <div class="card-title">Computer Systems Analyst ยังคงเป็น Occupation แยกจาก BA</div>
+        <div class="card-body">
+          U.S. Bureau of Labor Statistics ยังคงติดตาม "Computer Systems Analysts" แยกจาก Business Analyst โดย Median Wage อยู่ที่ <strong>$103,790 ต่อปี (ปี 2024)</strong> และคาดว่าจะเติบโต 9% ในช่วง 2024–2034
+        </div>
+      </div>
+      <div class="card neutral">
+        <div class="card-tag tag-neutral">Reality</div>
+        <div class="card-title">SA และ BA ยังทับซ้อนกันอย่างมีนัยสำคัญในทางปฏิบัติ</div>
+        <div class="card-body">
+          ในองค์กรขนาดกลางลงมา คนที่ใช้ชื่อ SA มักทำงาน BA ควบคู่ไปด้วย การแยกบทบาทชัดเจนพบในองค์กรที่มี Formal SDLC หรือ Enterprise ขนาดใหญ่เท่านั้น
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="sources-title">// Sources</div>
+  <ul class="source-list">
+    <li><strong>New York Times, Aug 4 1963</strong> — "Systems Analysis New Profession" (via Miami University CEC)</li>
+    <li><strong>Harvard Business Review, Jan/Feb 1968</strong> — Neal J. Dean, "The computer comes of age" — ตัวเลข SA/Programmer growth</li>
+    <li><strong>Winston W. Royce, 1970</strong> — "Managing the Development of Large Software Systems" IEEE WESCON</li>
+    <li><strong>Bell & Thayer, 1976</strong> — บทความที่ใช้คำว่า "Waterfall" เป็นครั้งแรก (via Wikipedia Waterfall model)</li>
+    <li><strong>Agile Alliance, Feb 2001</strong> — Agile Manifesto — agilemanifesto.org</li>
+    <li><strong>IIBA.org — History of IIBA</strong> — การก่อตั้งปี 2003 และ Timeline ของ BABOK</li>
+    <li><strong>CMS Wire, 2013</strong> — "Where Have All the Systems Analysts Gone?"</li>
+    <li><strong>U.S. Bureau of Labor Statistics (BLS), 2024</strong> — Occupational Outlook Handbook: Computer Systems Analysts</li>
+    <li><strong>modernanalyst.com</strong> — "A Short History of Systems Development"</li>
+  </ul>
+</footer>
+
+</body>
+</html>

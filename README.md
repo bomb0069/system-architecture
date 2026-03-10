@@ -15,3 +15,7 @@
 - [The History of Application Architecture](architecture-styles-history.html)
 - [The History of Database Technology](database-technology-history.html)
 - [The History of System Tier Architecture](tier-architecture-history.html)
+
+## System Analyst
+
+- [The History of System/Business Analyst](sa-ba-timeline.html)
