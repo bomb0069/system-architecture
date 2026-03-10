@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SA & BA — Interactive Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;600&family=Sarabun:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0d1117;
+  --surface: #161b22;
+  --surface2: #1c2128;
+  --border: #30363d;
+  --green: #3fb950;
+  --green-dim: #1a4a25;
+  --amber: #d29922;
+  --amber-dim: #3d2c00;
+  --blue: #58a6ff;
+  --blue-dim: #0d2a4a;
+  --purple: #bc8cff;
+  --red: #f85149;
+  --text: #e6edf3;
+  --muted: #7d8590;
+  --muted2: #484f58;
+  --sa: #58a6ff;
+  --ba: #ff7b72;
+  --overlap: #bc8cff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Sarabun', sans-serif;
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ── SIDEBAR ── */
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  z-index: 50;
+}
+
+.sidebar-logo {
+  padding: 24px 20px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.logo-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.logo-title .sa { color: var(--sa); }
+.logo-title .ba { color: var(--ba); }
+
+.logo-sub {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+.progress-bar {
+  height: 2px;
+  background: var(--border);
+  margin: 16px 20px 0;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--green);
+  border-radius: 2px;
+  transition: width 0.5s ease;
+  width: 0%;
+}
+
+.progress-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  padding: 6px 20px 16px;
+  letter-spacing: 1px;
+}
+
+nav { padding: 8px 0; flex: 1; }
+
+.nav-section {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--muted2);
+  padding: 12px 20px 6px;
+  text-transform: uppercase;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+}
+
+.nav-item:hover { color: var(--text); background: var(--surface2); }
+.nav-item.active { color: var(--green); border-left-color: var(--green); background: rgba(63,185,80,0.08); }
+.nav-item.done .nav-num { background: var(--green); color: var(--bg); }
+
+.nav-num {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  flex-shrink: 0;
+  transition: all 0.3s;
+}
+
+/* ── MAIN ── */
+.main {
+  margin-left: 240px;
+  flex: 1;
+  min-height: 100vh;
+}
+
+/* ── MODULE ── */
+.module {
+  display: none;
+  min-height: 100vh;
+  padding: 0;
+}
+
+.module.active { display: block; }
+
+.module-hero {
+  padding: 56px 60px 40px;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.module-hero::before {
+  content: attr(data-num);
+  position: absolute;
+  right: 40px; top: 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 160px;
+  font-weight: 900;
+  color: var(--border);
+  line-height: 1;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+.module-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.module-title {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 900;
+  line-height: 1.1;
+  margin-bottom: 16px;
+  max-width: 600px;
+}
+
+.module-desc {
+  font-size: 15px;
+  color: var(--muted);
+  line-height: 1.8;
+  max-width: 580px;
+  font-weight: 300;
+}
+
+.module-body {
+  padding: 40px 60px 60px;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 12px;
+  position: relative;
+  transition: border-color 0.2s, transform 0.15s;
+}
+
+.card:hover { border-color: var(--muted2); transform: translateY(-1px); }
+
+.card-accent {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 6px 0 0 6px;
+}
+
+.card h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  padding-left: 12px;
+}
+
+.card p, .card ul {
+  font-size: 13px;
+  line-height: 1.8;
+  color: var(--muted);
+  font-weight: 300;
+  padding-left: 12px;
+}
+
+.card ul { padding-left: 24px; }
+.card ul li { margin-bottom: 4px; }
+
+/* ── ACCORDION ── */
+.accordion { margin-bottom: 8px; }
+
+.accordion-header {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 14px 20px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+  font-weight: 600;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.accordion-header:hover { border-color: var(--muted2); background: var(--surface2); }
+.accordion-header.open { border-radius: 6px 6px 0 0; border-color: var(--green); color: var(--green); }
+
+.accordion-icon {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 16px;
+  color: var(--muted);
+  transition: transform 0.3s;
+}
+
+.accordion-header.open .accordion-icon { transform: rotate(45deg); color: var(--green); }
+
+.accordion-body {
+  display: none;
+  background: var(--surface2);
+  border: 1px solid var(--green);
+  border-top: none;
+  border-radius: 0 0 6px 6px;
+  padding: 20px 24px;
+  font-size: 13px;
+  line-height: 1.9;
+  color: var(--muted);
+  font-weight: 300;
+}
+
+.accordion-body strong { color: var(--text); font-weight: 600; }
+.accordion-body.open { display: block; }
+
+/* ── GRID ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+
+/* ── COMPARE TABLE ── */
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  margin: 16px 0;
+}
+
+.compare-table th {
+  background: var(--surface2);
+  padding: 12px 16px;
+  text-align: left;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 2px solid var(--border);
+}
+
+.compare-table th.sa-head { color: var(--sa); border-bottom-color: var(--sa); }
+.compare-table th.ba-head { color: var(--ba); border-bottom-color: var(--ba); }
+.compare-table th.arch-head { color: var(--purple); border-bottom-color: var(--purple); }
+
+.compare-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+.compare-table tr:hover td { background: var(--surface2); }
+.compare-table td:first-child { color: var(--text); font-weight: 600; font-size: 12px; }
+
+/* ── CALLOUT ── */
+.callout {
+  border-radius: 6px;
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: 13px;
+  line-height: 1.8;
+  display: flex;
+  gap: 12px;
+}
+
+.callout-icon { font-size: 18px; flex-shrink: 0; margin-top: 1px; }
+.callout-body strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+.callout.info { background: var(--blue-dim); border: 1px solid rgba(88,166,255,0.3); color: #8dcbff; }
+.callout.warn { background: var(--amber-dim); border: 1px solid rgba(210,153,34,0.3); color: #e3b341; }
+.callout.tip  { background: var(--green-dim); border: 1px solid rgba(63,185,80,0.3);  color: #7ee787; }
+
+/* ── DIAGRAM ── */
+.diagram {
+  background: #010409;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px 24px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  line-height: 2;
+  color: var(--muted);
+  margin: 16px 0;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.d-sa { color: var(--sa); }
+.d-ba { color: var(--ba); }
+.d-both { color: var(--overlap); }
+.d-green { color: var(--green); }
+.d-amber { color: var(--amber); }
+
+/* ── TIMELINE (module 5) ── */
+.tl-item {
+  display: grid;
+  grid-template-columns: 80px 24px 1fr;
+  gap: 0 16px;
+  margin-bottom: 4px;
+}
+
+.tl-year {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: right;
+  padding-top: 14px;
+  color: var(--muted);
+}
+
+.tl-node-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.tl-dot {
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  border: 2px solid;
+  background: var(--bg);
+  margin-top: 14px;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.tl-line {
+  width: 1px;
+  flex: 1;
+  background: var(--border);
+  margin-top: 3px;
+}
+
+.tl-content {
+  padding: 8px 0 16px 4px;
+}
+
+.tl-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.tl-title { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+
+.tl-body {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.tl-sa .tl-dot { border-color: var(--sa); }
+.tl-sa .tl-year { color: var(--sa); }
+.tl-sa .tl-tag { color: var(--sa); }
+.tl-ba .tl-dot { border-color: var(--ba); }
+.tl-ba .tl-year { color: var(--ba); }
+.tl-ba .tl-tag { color: var(--ba); }
+.tl-split .tl-dot { border-color: var(--overlap); }
+.tl-split .tl-year { color: var(--overlap); }
+.tl-split .tl-tag { color: var(--overlap); }
+.tl-arch .tl-dot { border-color: var(--green); }
+.tl-arch .tl-year { color: var(--green); }
+.tl-arch .tl-tag { color: var(--green); }
+.tl-neutral .tl-dot { border-color: var(--muted); }
+
+/* ── STANDARDS GRID ── */
+.std-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.std-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 18px 20px;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.std-card:hover { border-color: var(--muted2); transform: translateY(-2px); }
+
+.std-name {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.std-owner {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+
+.std-desc { font-size: 12px; color: var(--muted); line-height: 1.7; font-weight: 300; }
+
+.std-tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.std-tag {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 9px;
+  padding: 2px 8px;
+  border-radius: 20px;
+  border: 1px solid;
+  letter-spacing: 1px;
+}
+
+/* ── QUIZ ── */
+.quiz-wrapper { max-width: 680px; margin: 0 auto; }
+
+.quiz-q {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px 28px;
+  margin-bottom: 20px;
+  display: none;
+}
+
+.quiz-q.active { display: block; }
+
+.quiz-num {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  margin-bottom: 12px;
+}
+
+.quiz-question {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 20px;
+}
+
+.quiz-options { display: grid; gap: 8px; }
+
+.quiz-opt {
+  padding: 12px 16px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.15s;
+  background: var(--surface2);
+  line-height: 1.5;
+}
+
+.quiz-opt:hover:not(.answered) { border-color: var(--blue); color: var(--blue); }
+.quiz-opt.correct { border-color: var(--green); background: rgba(63,185,80,0.1); color: var(--green); }
+.quiz-opt.wrong   { border-color: var(--red);   background: rgba(248,81,73,0.1);  color: var(--red); }
+
+.quiz-feedback {
+  margin-top: 16px;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.7;
+  display: none;
+}
+
+.quiz-feedback.show { display: block; }
+.quiz-feedback.correct { background: rgba(63,185,80,0.1); border: 1px solid rgba(63,185,80,0.3); color: #7ee787; }
+.quiz-feedback.wrong   { background: rgba(248,81,73,0.1);  border: 1px solid rgba(248,81,73,0.3);  color: #ffa198; }
+
+.quiz-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.quiz-score {
+  text-align: center;
+  padding: 40px 20px;
+  display: none;
+}
+
+.quiz-score.show { display: block; }
+
+.score-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 72px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 8px;
+}
+
+.score-label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+/* ── BUTTONS ── */
+.btn {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  padding: 10px 20px;
+  border-radius: 4px;
+  border: 1px solid;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.btn-primary {
+  background: var(--green);
+  border-color: var(--green);
+  color: var(--bg);
+  font-weight: 600;
+}
+
+.btn-primary:hover { background: #52d763; }
+
+.btn-outline {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+}
+
+.btn-outline:hover { border-color: var(--muted); color: var(--text); }
+
+.btn-next {
+  background: transparent;
+  border-color: var(--green);
+  color: var(--green);
+}
+
+.btn-next:hover { background: rgba(63,185,80,0.1); }
+.btn-next:disabled { opacity: 0.3; cursor: not-allowed; border-color: var(--border); color: var(--muted); }
+
+/* ── MODULE NAV ── */
+.module-footer {
+  padding: 32px 60px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.module-footer-info {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  text-transform: uppercase;
+}
+
+/* ── SECTION TITLES ── */
+.section-title {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 16px;
+  margin-top: 32px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.section-title:first-child { margin-top: 0; }
+
+/* ── TAG PILLS ── */
+.pill {
+  display: inline-block;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 10px;
+  padding: 2px 10px;
+  border-radius: 20px;
+  border: 1px solid;
+  letter-spacing: 1px;
+  margin: 2px;
+}
+
+.pill-sa     { color: var(--sa);     border-color: rgba(88,166,255,0.4);  background: rgba(88,166,255,0.08); }
+.pill-ba     { color: var(--ba);     border-color: rgba(255,123,114,0.4); background: rgba(255,123,114,0.08); }
+.pill-green  { color: var(--green);  border-color: rgba(63,185,80,0.4);   background: rgba(63,185,80,0.08); }
+.pill-amber  { color: var(--amber);  border-color: rgba(210,153,34,0.4);  background: rgba(210,153,34,0.08); }
+.pill-purple { color: var(--purple); border-color: rgba(188,140,255,0.4); background: rgba(188,140,255,0.08); }
+
+/* ── INTERACTIVE SPLIT DIAGRAM ── */
+.split-diagram {
+  position: relative;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px;
+  margin: 16px 0;
+  overflow: hidden;
+}
+
+.split-root {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.split-box {
+  display: inline-block;
+  padding: 10px 24px;
+  border-radius: 4px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 2px solid var(--muted2);
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.split-box:hover { border-color: var(--amber); color: var(--amber); }
+.split-box.highlighted { border-color: var(--amber); color: var(--amber); background: rgba(210,153,34,0.1); }
+
+.split-branches {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.branch-box {
+  padding: 12px 14px;
+  border-radius: 4px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface2);
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  line-height: 1.4;
+}
+
+.branch-box .branch-title { font-weight: 600; margin-bottom: 4px; font-size: 11px; }
+.branch-box .branch-sub { font-family: 'IBM Plex Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1px; }
+
+.branch-box.sa  { border-color: rgba(88,166,255,0.3); }
+.branch-box.ba  { border-color: rgba(255,123,114,0.3); }
+.branch-box.pm  { border-color: rgba(63,185,80,0.3); }
+.branch-box.ra  { border-color: rgba(210,153,34,0.3); }
+
+.branch-box.sa:hover  { border-color: var(--sa);    color: var(--sa);    background: rgba(88,166,255,0.08); }
+.branch-box.ba:hover  { border-color: var(--ba);    color: var(--ba);    background: rgba(255,123,114,0.08); }
+.branch-box.pm:hover  { border-color: var(--green); color: var(--green); background: rgba(63,185,80,0.08); }
+.branch-box.ra:hover  { border-color: var(--amber); color: var(--amber); background: rgba(210,153,34,0.08); }
+
+.branch-detail {
+  margin-top: 16px;
+  padding: 14px 18px;
+  border-radius: 6px;
+  font-size: 13px;
+  line-height: 1.8;
+  display: none;
+  border: 1px solid;
+}
+
+.branch-detail.show { display: block; }
+.branch-detail.sa-detail { border-color: rgba(88,166,255,0.3); background: rgba(88,166,255,0.05); color: #8dcbff; }
+.branch-detail.ba-detail { border-color: rgba(255,123,114,0.3); background: rgba(255,123,114,0.05); color: #ffada8; }
+.branch-detail.pm-detail { border-color: rgba(63,185,80,0.3);   background: rgba(63,185,80,0.05);  color: #7ee787; }
+.branch-detail.ra-detail { border-color: rgba(210,153,34,0.3);  background: rgba(210,153,34,0.05); color: #e3b341; }
+
+.connector-line {
+  width: 1px;
+  height: 20px;
+  background: var(--border);
+  margin: 0 auto 4px;
+}
+
+.connector-h {
+  height: 1px;
+  background: var(--border);
+  margin: 0 0 4px;
+  position: relative;
+}
+
+/* ── CREDIBILITY METER ── */
+.cred-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.cred-label {
+  width: 180px;
+  font-size: 13px;
+  flex-shrink: 0;
+  font-weight: 600;
+}
+
+.cred-bar-bg {
+  flex: 1;
+  height: 6px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.cred-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 1s ease;
+  width: 0;
+}
+
+.cred-score {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 12px;
+  width: 40px;
+  text-align: right;
+  flex-shrink: 0;
+}
+
+.cred-note {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 4px 0 12px;
+  line-height: 1.6;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 4px;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .module-hero, .module-body, .module-footer { padding-left: 24px; padding-right: 24px; }
+  .grid-2, .grid-3, .split-branches { grid-template-columns: 1fr; }
+  .compare-table { font-size: 11px; }
+  .compare-table th, .compare-table td { padding: 8px 10px; }
+  .hamburger { display: flex; }
+}
+
+.hamburger {
+  display: none;
+  position: fixed;
+  top: 16px; left: 16px;
+  z-index: 60;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 10px;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hamburger span {
+  display: block;
+  width: 18px; height: 1px;
+  background: var(--text);
+}
+</style>
+</head>
+<body>
+
+<!-- Hamburger -->
+<button class="hamburger" onclick="document.querySelector('.sidebar').classList.toggle('open')" aria-label="menu">
+  <span></span><span></span><span></span>
+</button>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-title"><span class="sa">SA</span> & <span class="ba">BA</span></div>
+    <div class="logo-sub">Interactive Learning</div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-label" id="progressLabel">0 / 7 Modules</div>
+  </div>
+  <nav>
+    <div class="nav-section">Modules</div>
+    <a class="nav-item active" onclick="showModule(1)" href="#">
+      <div class="nav-num" id="navnum-1">1</div> SA คืออะไร
+    </a>
+    <a class="nav-item" onclick="showModule(2)" href="#">
+      <div class="nav-num" id="navnum-2">2</div> มาตรฐานที่ยึดถือ
+    </a>
+    <a class="nav-item" onclick="showModule(3)" href="#">
+      <div class="nav-num" id="navnum-3">3</div> SA vs BA vs Architect
+    </a>
+    <a class="nav-item" onclick="showModule(4)" href="#">
+      <div class="nav-num" id="navnum-4">4</div> <span style="color:var(--amber)">SA ในบริบทไทย</span>
+    </a>
+    <a class="nav-item" onclick="showModule(5)" href="#">
+      <div class="nav-num" id="navnum-5">5</div> ทำไมไม่มี SA BoK
+    </a>
+    <a class="nav-item" onclick="showModule(6)" href="#">
+      <div class="nav-num" id="navnum-6">6</div> ประวัติศาสตร์
+    </a>
+    <a class="nav-item" onclick="showModule(7)" href="#">
+      <div class="nav-num" id="navnum-7">7</div> ทดสอบความเข้าใจ
+    </a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+<!-- ═══════════════════════════════════════
+     MODULE 1 — SA คืออะไร
+═══════════════════════════════════════ -->
+<section class="module active" id="module-1">
+  <div class="module-hero" data-num="1">
+    <div class="module-tag">Module 01</div>
+    <h1 class="module-title">System Analyst<br>คืออะไร?</h1>
+    <p class="module-desc">SA คือ "สะพาน" ระหว่างโลก Business กับโลก Technology — แปลความต้องการของธุรกิจให้กลายเป็น Requirement ที่ Developer สร้างระบบได้จริง</p>
+  </div>
+
+  <div class="module-body">
+
+    <div class="section-title">// Core Definition</div>
+    <div class="callout info">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Systems Analyst (SA)</strong>
+        คนที่ใช้เทคนิคการวิเคราะห์และออกแบบเพื่อแก้ปัญหาธุรกิจด้วย IT — ทำหน้าที่เป็น Change Agent ที่ระบุว่าองค์กรต้องปรับปรุงอะไร ออกแบบระบบให้รองรับการเปลี่ยนแปลงนั้น และฝึกให้คนอื่นใช้ระบบได้
+      </div>
+    </div>
+
+    <div class="section-title">// หน้าที่หลัก 6 ด้าน</div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>1. ทำความเข้าใจธุรกิจ (Business Understanding)</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        ศึกษา Domain ของธุรกิจให้เข้าใจว่า Business ทำงานอย่างไร เข้าใจ <strong>Pain Point</strong> และเป้าหมายของแต่ละ Stakeholder วิเคราะห์ระบบเดิมที่มีอยู่ (As-Is) ว่ามีข้อจำกัดอะไรบ้าง
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>2. รวบรวมและวิเคราะห์ Requirement</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        จัด <strong>Workshop / Interview</strong> กับ Business Owner, End User, IT Team แยกแยะ Business Requirement vs Functional Requirement vs Non-Functional Requirement ตรวจสอบว่า Requirement ขัดแย้งกันหรือไม่ และ Prioritize
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>3. ออกแบบ Solution</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        ออกแบบ <strong>Process Flow ใหม่ (To-Be)</strong> ออกแบบ Data Flow, Entity Relationship, System Architecture ในระดับ High-level เลือกและเสนอแนวทาง Solution ที่เหมาะสม
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>4. เขียน Specification เอกสาร</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        <strong>BRD</strong> (Business Requirements Document) — สิ่งที่ Business ต้องการ<br>
+        <strong>FRS/SRS</strong> (Functional/System Requirements Specification) — สิ่งที่ระบบต้องทำ<br>
+        <strong>Use Case / User Story</strong> — อธิบาย Behavior จากมุมมองผู้ใช้<br>
+        <strong>Wireframe / Mockup</strong> — ภาพคร่าวๆ ของหน้าจอ
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>5. สนับสนุนทีม Development</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        ทำหน้าที่เป็น <strong>Single Point of Contact</strong> ระหว่าง Business กับ Dev/QA ตอบคำถาม Dev เมื่อ Requirement ไม่ชัดเจน Review Test Case กับ QA ว่าครอบคลุม Requirement หรือไม่
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>6. UAT Support & Go-Live</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        ช่วย Business ทำ <strong>UAT (User Acceptance Testing)</strong> บริหาร Defect แยกแยะว่าเป็น Bug หรือ Change Request ยืนยันว่าระบบตรงตาม Requirement ก่อน Go-Live และส่งมอบ Document ครบชุด
+      </div>
+    </div>
+
+    <div class="section-title">// กระบวนการทำงาน (Process Flow)</div>
+    <div class="diagram"><span class="d-green">1. Initiation</span>
+   └─ รับ Project Brief → ระบุ Stakeholder → วางแผน Requirement Gathering
+
+<span class="d-green">2. Requirement Gathering</span>
+   └─ Interview / Workshop / Observation → รวบรวม As-Is Process
+
+<span class="d-green">3. Requirement Analysis</span>
+   └─ วิเคราะห์ Gap (As-Is vs To-Be) → Prioritize → ตรวจหา Conflict
+
+<span class="d-green">4. Solution Design</span>
+   └─ ออกแบบ To-Be Process → Data Model (Logical) → Wireframe
+
+<span class="d-green">5. Documentation</span>
+   └─ เขียน BRD / FRS / Use Case → Review → Baseline Requirement
+
+<span class="d-green">6. Development Support</span>
+   └─ ตอบคำถาม Dev → บริหาร Change Request → ติดตาม Progress
+
+<span class="d-green">7. Testing Support</span>
+   └─ Review Test Case → ช่วยทำ UAT → บริหาร Defect List
+
+<span class="d-green">8. Go-Live & Closure</span>
+   └─ Sign-off → Training Material → ส่งมอบ Document ครบ</div>
+
+    <div class="section-title">// Skills ที่ SA ต้องมี</div>
+    <div class="grid-3">
+      <div class="card">
+        <div class="card-accent" style="background:var(--sa)"></div>
+        <h3>Soft Skills</h3>
+        <p>Communication, Facilitation, Critical Thinking, การเจรจาต่อรอง, การฟังอย่างตั้งใจ</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--green)"></div>
+        <h3>Analytical Skills</h3>
+        <p>วิเคราะห์ Process, Data Modeling, Root Cause Analysis, Systems Thinking</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--purple)"></div>
+        <h3>Technical Knowledge</h3>
+        <p>เข้าใจ Database, API, System Architecture เบื้องต้น, BPMN, UML</p>
+      </div>
+    </div>
+
+    <div class="callout tip">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-body">
+        <strong>กฎทองของ SA</strong>
+        SA ที่ดีต้อง "ถามคำถามที่ถูกต้อง" ไม่ใช่แค่จดสิ่งที่ Business พูด เพราะ Business มักบอก "วิธีแก้" แต่ SA ต้องหา "ปัญหาที่แท้จริง"
+      </div>
+    </div>
+  </div>
+
+  <div class="module-footer">
+    <span class="module-footer-info">Module 1 of 6</span>
+    <button class="btn btn-next" onclick="showModule(2)">Module ถัดไป →</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     MODULE 2 — มาตรฐาน
+═══════════════════════════════════════ -->
+<section class="module" id="module-2">
+  <div class="module-hero" data-num="2">
+    <div class="module-tag">Module 02</div>
+    <h1 class="module-title">มาตรฐานที่<br>SA ยึดถือ</h1>
+    <p class="module-desc">ไม่มีมาตรฐานเดียวที่ครอบคลุมทุกอย่างสำหรับ SA — ในทางปฏิบัติต้องผสมหลาย Framework ตามบริบท</p>
+  </div>
+
+  <div class="module-body">
+
+    <div class="section-title">// มาตรฐานหลัก</div>
+    <div class="std-grid">
+      <div class="std-card">
+        <div class="std-name" style="color:var(--ba)">BABOK v3</div>
+        <div class="std-owner">IIBA · 2015</div>
+        <div class="std-desc">Business Analysis Body of Knowledge — ถือว่าเป็น "Bible" ของสาย BA/SA ครอบคลุม 6 Knowledge Areas และ 30 Tasks</div>
+        <div class="std-tags">
+          <span class="pill pill-ba">Requirements</span>
+          <span class="pill pill-ba">Elicitation</span>
+          <span class="pill pill-ba">Strategy</span>
+        </div>
+      </div>
+      <div class="std-card">
+        <div class="std-name" style="color:var(--sa)">ISO/IEC/IEEE 29148</div>
+        <div class="std-owner">IEEE · 2018</div>
+        <div class="std-desc">มาตรฐานสำหรับ Requirements Engineering ทดแทน IEEE 830 บอกว่า Document ควรมีหน้าตาและเนื้อหาอะไรบ้าง</div>
+        <div class="std-tags">
+          <span class="pill pill-sa">Documentation</span>
+          <span class="pill pill-sa">Requirements</span>
+        </div>
+      </div>
+      <div class="std-card">
+        <div class="std-name" style="color:var(--green)">BPMN 2.0</div>
+        <div class="std-owner">OMG · Object Management Group</div>
+        <div class="std-desc">มาตรฐานสัญลักษณ์สำหรับวาด Process Flow Diagram ที่ทุกคนอ่านเข้าใจตรงกัน ทั้ง Business และ Developer</div>
+        <div class="std-tags">
+          <span class="pill pill-green">Process</span>
+          <span class="pill pill-green">Notation</span>
+        </div>
+      </div>
+      <div class="std-card">
+        <div class="std-name" style="color:var(--purple)">TOGAF</div>
+        <div class="std-owner">The Open Group</div>
+        <div class="std-desc">Enterprise Architecture Framework — ใช้ ADM (Architecture Development Method) เป็น Process หลัก เหมาะกับงาน SA ระดับ Enterprise</div>
+        <div class="std-tags">
+          <span class="pill pill-purple">Enterprise</span>
+          <span class="pill pill-purple">Architecture</span>
+        </div>
+      </div>
+      <div class="std-card">
+        <div class="std-name" style="color:var(--amber)">ISO/IEC 25010</div>
+        <div class="std-owner">ISO · Software Quality</div>
+        <div class="std-desc">Software Quality Model — ใช้เป็น Checklist สำหรับ Non-Functional Requirements ครอบคลุม 8 Quality Characteristics</div>
+        <div class="std-tags">
+          <span class="pill pill-amber">NFR</span>
+          <span class="pill pill-amber">Quality</span>
+        </div>
+      </div>
+      <div class="std-card">
+        <div class="std-name" style="color:var(--green)">Scrum Guide / SAFe</div>
+        <div class="std-owner">Schwaber & Sutherland</div>
+        <div class="std-desc">สำหรับทีมที่ทำงานแบบ Agile — SA มักทำหน้าที่ใกล้เคียง Product Owner เขียน User Story และบริหาร Backlog</div>
+        <div class="std-tags">
+          <span class="pill pill-green">Agile</span>
+          <span class="pill pill-green">User Story</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">// BABOK 6 Knowledge Areas</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Knowledge Area</th>
+          <th>เนื้อหาหลัก</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>Business Analysis Planning & Monitoring</td><td>วางแผนว่าจะทำ BA อย่างไร ใช้ Approach แบบไหน</td></tr>
+        <tr><td>Elicitation & Collaboration</td><td>เทคนิคการดึง Requirement จาก Stakeholder</td></tr>
+        <tr><td>Requirements Life Cycle Management</td><td>บริหาร Requirement ตั้งแต่ต้นจนจบ</td></tr>
+        <tr><td>Strategy Analysis</td><td>วิเคราะห์ปัญหา/โอกาส ก่อนเสนอ Solution</td></tr>
+        <tr><td>Requirements Analysis & Design Definition</td><td>วิเคราะห์และออกแบบ Solution</td></tr>
+        <tr><td>Solution Evaluation</td><td>ประเมินว่า Solution ที่ส่งมอบตรง Business Need จริงไหม</td></tr>
+      </tbody>
+    </table>
+
+    <div class="section-title">// ควรใช้มาตรฐานไหน?</div>
+    <table class="compare-table">
+      <thead>
+        <tr><th>สถานการณ์</th><th>มาตรฐานที่แนะนำ</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>ต้องการ Framework ครอบคลุมที่สุด</td><td><span class="pill pill-ba">BABOK v3</span></td></tr>
+        <tr><td>เน้นเขียน Requirement Document</td><td><span class="pill pill-sa">ISO/IEC/IEEE 29148</span></td></tr>
+        <tr><td>ทีมทำงานแบบ Agile</td><td><span class="pill pill-green">Scrum Guide + User Story</span></td></tr>
+        <tr><td>วาด Process ให้ทุกคนเข้าใจ</td><td><span class="pill pill-green">BPMN 2.0</span></td></tr>
+        <tr><td>ออกแบบ Enterprise System</td><td><span class="pill pill-purple">TOGAF</span></td></tr>
+        <tr><td>กำหนด NFR ให้ครบถ้วน</td><td><span class="pill pill-amber">ISO/IEC 25010</span></td></tr>
+      </tbody>
+    </table>
+
+    <div class="callout warn">
+      <div class="callout-icon">⚠️</div>
+      <div class="callout-body">
+        <strong>ข้อควรระวังเรื่อง BABOK</strong>
+        IIBA เป็นทั้งเจ้าของ BABOK และผู้ขาย Certification — รายงานสถิติที่ IIBA ออกเองเกี่ยวกับ BA มี Conflict of Interest ชัดเจน ควรมองตัวเลขจาก IIBA เป็น "Trend Indicator" เท่านั้น ไม่ใช่ข้อมูล Independent
+      </div>
+    </div>
+  </div>
+
+  <div class="module-footer">
+    <button class="btn btn-outline" onclick="showModule(1)">← ย้อนกลับ</button>
+    <button class="btn btn-next" onclick="showModule(3)">Module ถัดไป →</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     MODULE 3 — SA vs BA vs Architect
+═══════════════════════════════════════ -->
+<section class="module" id="module-3">
+  <div class="module-hero" data-num="3">
+    <div class="module-tag">Module 03</div>
+    <h1 class="module-title">SA vs BA<br>vs Architect</h1>
+    <p class="module-desc">ขอบเขตระหว่างสามบทบาทนี้ทับซ้อนกันมาก — แต่มีหลักการแยกได้ชัดเจนถ้าเข้าใจว่าแต่ละคนโฟกัสที่ What, Why หรือ How</p>
+  </div>
+
+  <div class="module-body">
+
+    <div class="section-title">// เปรียบเทียบ 3 บทบาท</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>ด้าน</th>
+          <th class="sa-head">System Analyst</th>
+          <th class="ba-head">Business Analyst</th>
+          <th class="arch-head">Solution Architect</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>โฟกัส</td>
+          <td>What & Why (System)</td>
+          <td>What & Why (Business)</td>
+          <td>What & How (High-level)</td>
+        </tr>
+        <tr>
+          <td>มุมมอง</td>
+          <td>Business + System</td>
+          <td>Business Process</td>
+          <td>Business + Technology</td>
+        </tr>
+        <tr>
+          <td>Output หลัก</td>
+          <td>BRD, FRS, Use Case, Data Model</td>
+          <td>BRD, Process Map, User Story</td>
+          <td>Architecture Diagram, ADR</td>
+        </tr>
+        <tr>
+          <td>Architecture</td>
+          <td>High-level เท่านั้น</td>
+          <td>ไม่เกี่ยวข้อง</td>
+          <td>เป็นงานหลัก</td>
+        </tr>
+        <tr>
+          <td>เทียบได้กับ</td>
+          <td>Bridge SA↔BA↔Dev</td>
+          <td>Voice of Business</td>
+          <td>Technical Decision Maker</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-title">// ประวัติ: Software Architect เกิดก่อนหรือหลัง SA/BA?</div>
+
+    <div class="callout info">
+      <div class="callout-icon">🏛️</div>
+      <div class="callout-body">
+        <strong>คำตอบ: เกิดหลัง SA แต่พร้อมๆ กับ BA (วัดที่ Job Title)</strong><br>
+        ถ้าวัดที่ <em>Concept</em> เกิดปี 1968 (หลัง SA 1956) — ถ้าวัดที่ <em>Job Title</em> เกิดปลาย 1990s–2001 ซึ่งพร้อมกับ BA ที่กำลังแยกตัวออก
+      </div>
+    </div>
+
+    <div class="diagram"><span style="color:var(--sa);font-weight:600">1956</span>   SA เกิด — ทำทุกอย่างรวมถึง Architecture ในคนเดียว
+<span style="color:var(--amber);font-weight:600">1968</span>   Dijkstra: "Software Architecture" เป็น Academic Concept ครั้งแรก
+<span style="color:var(--amber);font-weight:600">1972</span>   Parnas เพิ่มแนวคิด Information Hiding / Modularity
+<span style="color:var(--sa);font-weight:600">1970s–80s</span>  SA ยุค Peak — <span style="color:var(--sa)">SA ยังทำ Architecture งานด้วยตัวเอง</span>
+<span style="color:var(--purple);font-weight:600">1990s</span>  ระบบซับซ้อนขึ้น → SA เริ่มแตกออก → Architect เริ่มแยกตัว
+<span style="color:var(--green);font-weight:600">1994</span>   Gang of Four Design Patterns — ภาษากลางของ Architect เกิด
+<span style="color:var(--green);font-weight:600">1996</span>   Shaw & Garlan: Software Architecture เป็น Formal Discipline
+<span style="color:var(--green);font-weight:600">1999–2001</span> "Software Architect" กลายเป็น Job Title อย่างเป็นทางการ
+<span style="color:var(--green);font-weight:600">2000</span>   IEEE 1471-2000 — มาตรฐาน Software Architecture ฉบับแรกของโลก
+<span style="color:var(--ba);font-weight:600">2003</span>   IIBA ก่อตั้ง → BA เป็น Formal Profession แยกจาก SA ชัดเจน</div>
+
+    <div class="callout warn">
+      <div class="callout-icon">💡</div>
+      <div class="callout-body">
+        <strong>Insight สำคัญ</strong>
+        ก่อนที่ Software Architect จะเป็น Role แยก — <strong>SA คือคนทำ Architecture อยู่แล้ว</strong> ในยุค 1970s–80s นี่คือเหตุผลว่าทำไม SA ไทยปัจจุบันยังทำ Technical Design ด้วย มันไม่ใช่ "ผิดขนบ" แต่คือ Legacy ของยุคที่ Role ยังไม่แยก และทีมเล็กไม่มี Headcount พอสำหรับ Dedicated Architect
+      </div>
+    </div>
+
+    <div class="section-title">// Architecture — SA ทำแค่ไหน?</div>
+    <div class="grid-2">
+      <div>
+        <div class="callout tip">
+          <div class="callout-icon">✅</div>
+          <div class="callout-body">
+            <strong>SA ต้องทำ</strong>
+            Logical Architecture, Context Diagram / System Boundary, Data Architecture (Logical), Integration Architecture — กำหนด Pattern การเชื่อมต่อ เช่น REST API
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="callout warn">
+          <div class="callout-icon">🚫</div>
+          <div class="callout-body">
+            <strong>SA ไม่ต้องทำ</strong>
+            เลือก Technology Stack, ออกแบบ Infrastructure, กำหนด Code Pattern, ออกแบบ Database Schema ระดับ Physical
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">// 3 แบบที่พบในองค์กรจริง</div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>แบบที่ 1 — มี Solution Architect แยกต่างหาก (Enterprise ใหญ่)</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        <strong>SA</strong> → เขียน Requirement + High-level Context เท่านั้น<br>
+        <strong>Solution Architect</strong> → ออกแบบ Architecture เต็มรูปแบบ<br>
+        <strong>Software Architect</strong> → ลงรายละเอียด Code Pattern และ Technical Design<br><br>
+        พบใน Enterprise ขนาดใหญ่ที่มี Resource เพียงพอสำหรับ Specialist แยกย่อย
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>แบบที่ 2 — SA ทำ Architecture ด้วย (พบมากที่สุด)</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        <strong>SA</strong> → Requirement + Logical Architecture + Integration Design<br>
+        <strong>Dev/Tech Lead</strong> → Physical Design + Implementation<br><br>
+        พบใน SME และทีมขนาดกลาง — เป็นแบบที่พบมากที่สุดในตลาดไทย
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>แบบที่ 3 — SA คือ Product Owner ใน Agile</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        <strong>SA/PO</strong> → User Story + Acceptance Criteria + Backlog Management<br>
+        <strong>Tech Lead</strong> → Architecture Decision<br><br>
+        พบในทีม Startup หรือ Agile เต็มรูปแบบที่ไม่มี Formal Role ชัดเจน
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">📐</div>
+      <div class="callout-body">
+        <strong>กฎง่ายๆ ในการแบ่งขอบเขต (ตามตำราสากล)</strong>
+        ถ้า Architecture Decision นั้นส่งผลต่อ <strong>Requirement หรือ Scope</strong> → SA ต้องรู้และมีส่วนร่วม<br>
+        ถ้าเป็นแค่ <strong>Implementation Detail</strong> → ปล่อยให้ Architect และ Dev ตัดสินใจ<br><br>
+        ⚠️ แต่ในบริบทไทยอาจต่างออกไป — ดู Module ถัดไป
+      </div>
+    </div>
+  </div>
+
+  <div class="module-footer">
+    <button class="btn btn-outline" onclick="showModule(2)">← ย้อนกลับ</button>
+    <button class="btn btn-next" onclick="showModule(4)">Module ถัดไป →</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     MODULE 4 — SA ในบริบทไทย (NEW)
+═══════════════════════════════════════ -->
+<section class="module" id="module-4">
+  <div class="module-hero" data-num="4">
+    <div class="module-tag">Module 04 · Thai Context</div>
+    <h1 class="module-title">SA ในบริบท<br>เมืองไทย</h1>
+    <p class="module-desc">ในไทย SA มักเป็น Developer ที่เติบโตขึ้นมา — ทำให้ขอบเขตงานกว้างกว่า Textbook มากและทับซ้อนกับ Tech Lead อย่างมีนัยสำคัญ</p>
+  </div>
+
+  <div class="module-body">
+
+    <div class="section-title">// สิ่งที่เกิดขึ้นจริงในตลาดไทย</div>
+
+    <div class="callout warn">
+      <div class="callout-icon">🇹🇭</div>
+      <div class="callout-body">
+        <strong>SA ไทย ≠ SA ตามตำรา</strong>
+        Job Posting จริงจาก Jobsdb, RGF Thailand, TechTalkThai ระบุให้ SA ต้องรับผิดชอบ Software Detail Design (SDD), Database Design, Code Pattern — ซึ่งตาม Global Standard นั้นเป็นงานของ Technical Lead หรือ Solution Architect
+      </div>
+    </div>
+
+    <div class="section-title">// เปรียบเทียบ: SA ตามตำรา vs SA ในไทย</div>
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>ด้าน</th>
+          <th class="sa-head">SA ตาม Textbook</th>
+          <th class="arch-head">SA ในบริบทไทย</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Background</td>
+          <td>ไม่จำเป็นต้องมา Dev</td>
+          <td>มักเป็น Dev 3–8 ปีที่เลื่อนขึ้น</td>
+        </tr>
+        <tr>
+          <td>Requirement</td>
+          <td>✅ เป็นงานหลัก</td>
+          <td>✅ ยังทำ</td>
+        </tr>
+        <tr>
+          <td>High-level Architecture</td>
+          <td>✅ ทำได้</td>
+          <td>✅ ทำ</td>
+        </tr>
+        <tr>
+          <td>Detail Design (SDD)</td>
+          <td>❌ ไม่ใช่งาน SA</td>
+          <td>✅ มักรับผิดชอบ</td>
+        </tr>
+        <tr>
+          <td>Database Schema Design</td>
+          <td>❌ งาน DBA/Architect</td>
+          <td>✅ พบบ่อยมากใน JD ไทย</td>
+        </tr>
+        <tr>
+          <td>Code Pattern / Design Pattern</td>
+          <td>❌ งาน Software Architect</td>
+          <td>⚠️ พบใน Senior SA บางตำแหน่ง</td>
+        </tr>
+        <tr>
+          <td>Lead Dev Team</td>
+          <td>❌ ไม่ใช่งาน SA</td>
+          <td>⚠️ SA มักเป็น Lead กลายๆ ใต้ Dev Lead</td>
+        </tr>
+        <tr>
+          <td>รายงานต่อใคร</td>
+          <td>PM / Project Lead</td>
+          <td>Dev Lead หรือ Tech Lead โดยตรง</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="section-title">// หลักฐานจาก Job Market จริง</div>
+
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>RGF Thailand — "Technical Lead (System Analyst)" 80K–120K/เดือน</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        JD ระบุ Required Skills: <strong>Springboot, React, Docker, Kubernetes, MySQL/MSSQL/Oracle, REST API, SSL/TLS</strong> และ "Experience of design code" — นี่คือ Tech Stack ของ Senior Developer ไม่ใช่ BA ทั่วไป<br><br>
+        <span style="color:var(--muted);font-size:12px;">Source: rgf-hragent.asia/en/thailand (verified 2024)</span>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>TechTalkThai Jobs — SA ต้องสร้าง SRS <strong>และ</strong> SDD</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        JD ระบุ "responsible for creating Software Requirement Specification (SRS), <strong>Software Detail Design (SDD)</strong>" — SDD เป็น Document ที่บอก Implementation ระดับ Module ซึ่งตามมาตรฐานสากลไม่ใช่งาน SA<br><br>
+        <span style="color:var(--muted);font-size:12px;">Source: jobs.techtalkthai.com (verified)</span>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>Glassdoor Thailand — SA ต้อง "Design database ได้"</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        Job listing ระบุคุณสมบัติ "มีประสบการณ์ในการทำงานด้าน System Analysis, Design and Development อย่างน้อย 3 ปี <strong>(Design database ได้)</strong>" — Database Design ใส่ไว้ใน SA Requirement โดยตรง<br><br>
+        <span style="color:var(--muted);font-size:12px;">Source: glassdoor.com/Job/thailand (verified)</span>
+      </div>
+    </div>
+
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>JobsDB Thailand — SA + Developer Background เป็น Norm</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        หลาย Listing ระบุ "Background in IT field is preferable such as C#, .Net, JAVA, NodeJS, React — Experience in Business Analysis/System Analyst <strong>and</strong> Developer" — บริษัทส่วนหนึ่งมอง SA กับ Dev Background เป็นสิ่งที่ต้องมีพร้อมกัน<br><br>
+        <span style="color:var(--muted);font-size:12px;">Source: th.jobsdb.com (verified Jan 2026)</span>
+      </div>
+    </div>
+
+    <div class="section-title">// ทำไมถึงเป็นแบบนี้?</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-accent" style="background:var(--amber)"></div>
+        <h3>ทีม Dev มักไม่ใหญ่พอ</h3>
+        <p>บริษัท SME และ Outsource ในไทยส่วนใหญ่ไม่มี Headcount แยก Solution Architect, SA, Tech Lead ไว้คนละคน — คนที่ฉลาดที่สุดต้องทำทุกอย่าง</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--amber)"></div>
+        <h3>Career Path ของ Dev ในไทย</h3>
+        <p>เส้นทางที่ชัดเจนที่สุดในไทยคือ Developer → Senior Dev → SA/Tech Lead → PM ทำให้ SA มักมี Coding Background มาก่อน</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--amber)"></div>
+        <h3>ค่าแรงและ Efficiency</h3>
+        <p>การจ้าง SA ที่ทำ Detail Design ได้ด้วยช่วยลด Handoff ระหว่าง Role ซึ่งสำคัญมากในทีมเล็กที่ต้อง Deliver เร็ว</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--amber)"></div>
+        <h3>วัฒนธรรมองค์กรไทย</h3>
+        <p>การที่ SA "อยู่ใต้" Dev Lead แต่ทำหน้าที่นำ Dev ทีมในทางปฏิบัติ สะท้อน Hierarchy ที่ยังนิยมมี Title Seniority ชัดเจน</p>
+      </div>
+    </div>
+
+    <div class="section-title">// SA ไทย ทำอะไรเพิ่มจากตำรา?</div>
+    <div class="diagram"><span class="d-green">= Textbook SA (ทุกที่ทำ)</span>
+   Requirement Gathering / Elicitation
+   BRD / FRS / Use Case
+   Logical Architecture / Context Diagram
+   UAT Support
+
+<span class="d-amber">+ Thai SA Extension (พบบ่อยในไทย)</span>
+   Software Detail Design (SDD)
+   Database Schema Design (Physical)
+   เลือก / Validate Design Pattern ร่วมกับ Dev Lead
+   Lead Developer 2–5 คน (กลายๆ)
+   Code Review บางส่วน
+
+<span class="d-ba">⚠ บางตำแหน่งเพิ่มเติม (Senior SA ไทย)</span>
+   กำหนด Coding Standard
+   Estimate Story Point / Dev Effort
+   ตัดสินใจ Tech Stack ร่วมกับ Dev Lead</div>
+
+    <div class="callout tip">
+      <div class="callout-icon">🎯</div>
+      <div class="callout-body">
+        <strong>ข้อสรุปที่ซื่อสัตย์</strong>
+        การที่ SA ไทยทำงานกว้างกว่าตำรา <strong>ไม่ใช่เรื่องผิด</strong> — เป็นการ Adapt ตามบริบทตลาด แต่ควรรู้ว่าสิ่งที่ทำเกินนั้นคืออะไร เพื่อ Negotiate Scope ได้ถูกต้อง และไม่ Undervalue ตัวเองเมื่อต้องเจรจา Job Offer หรือ Promotion
+      </div>
+    </div>
+
+  </div>
+
+  <div class="module-footer">
+    <button class="btn btn-outline" onclick="showModule(3)">← ย้อนกลับ</button>
+    <button class="btn btn-next" onclick="showModule(5)">Module ถัดไป →</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     MODULE 5 — ทำไมไม่มี SA BoK
+═══════════════════════════════════════ -->
+<section class="module" id="module-5">
+  <div class="module-hero" data-num="5">
+    <div class="module-tag">Module 05</div>
+    <h1 class="module-title">ทำไม SA<br>ไม่มี BoK?</h1>
+    <p class="module-desc">BA มี BABOK, PM มี PMBOK, SE มี SWEBOK — แต่ SA ไม่มี "SA BoK" ที่เทียบเท่า เหตุผลนั้นน่าสนใจมาก</p>
+  </div>
+
+  <div class="module-body">
+
+    <div class="section-title">// ทำไมถึงไม่มี?</div>
+    <div class="diagram"><span class="d-ba">BA (IIBA/BABOK)</span>        เจ้าของชัดเจน — IIBA
+        ↘
+         <span class="d-amber">SA</span> ◄── อยู่ตรงกลาง ไม่มีเจ้าภาพชัดเจน
+        ↗
+<span class="d-sa">SE (INCOSE/SEBoK)</span>       เจ้าของชัดเจน — INCOSE + IEEE</div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-accent" style="background:var(--red)"></div>
+        <h3>ชื่อตำแหน่งไม่ Standard</h3>
+        <p>บางองค์กรเรียก SA, บางที่เรียก BA, Business Systems Analyst, Functional Analyst — คนละชื่อแต่งานเหมือนกัน ยากจะกำหนดขอบเขตชัดเจน</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--red)"></div>
+        <h3>Scope ทับซ้อนมาก</h3>
+        <p>งาน SA ทับกับ BA, Solution Architect, Product Owner จนแยกออกจากกันยาก IIBA ดึง BA ออกไป INCOSE ดึง SE ออกไป ที่เหลือตรงกลางไม่มีใครอ้างสิทธิ์</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--red)"></div>
+        <h3>ไม่มีองค์กรกลางที่แข็งแกร่งพอ</h3>
+        <p>ไม่มี Professional Body ที่ Focus เฉพาะ SA มีอำนาจและทรัพยากรพอที่จะสร้างและ Maintain Standard ระดับนั้น</p>
+      </div>
+      <div class="card">
+        <div class="card-accent" style="background:var(--red)"></div>
+        <h3>Market ไม่ใหญ่พอ</h3>
+        <p>Certification ขายได้ยากกว่า CBAP หรือ PMP เพราะ Identity ของ SA ไม่ชัด ทำให้ ROI ในการสร้าง Standard ต่ำเกินไป</p>
+      </div>
+    </div>
+
+    <div class="section-title">// สิ่งที่ใกล้เคียงที่สุดที่มีอยู่</div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>SEBoK — Systems Engineering Body of Knowledge</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        <strong>เจ้าของ:</strong> INCOSE (International Council on Systems Engineering) + IEEE<br><br>
+        เน้น Systems Engineering ซึ่งใหญ่กว่า SA มาก ครอบคลุม Hardware, Software, Process ทั้งหมด เหมาะกับ SA ที่ทำงานระดับ Enterprise หรือ Critical Systems<br><br>
+        <strong>ข้อดี:</strong> เป็น Open Access อ่านได้ฟรีที่ sebokwiki.org และ IEEE เป็น Co-owner ทำให้มี Academic Peer Review มากกว่า BABOK
+      </div>
+    </div>
+    <div class="accordion">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>SWEBOK — Software Engineering Body of Knowledge</span>
+        <span class="accordion-icon">+</span>
+      </div>
+      <div class="accordion-body">
+        <strong>เจ้าของ:</strong> IEEE Computer Society<br><br>
+        ครอบคลุม Requirements Engineering ซึ่งเป็นส่วนหนึ่งของงาน SA โดยตรง เน้น Technical มากกว่า Business เป็นมาตรฐาน ISO ด้วย (ISO/IEC TR 19759)
+      </div>
+    </div>
+
+    <div class="section-title">// SA ควรผสมอะไรบ้าง?</div>
+    <div class="diagram"><span class="d-ba">BABOK</span>    ──► Requirement Elicitation & Life Cycle
+<span class="d-sa">SWEBOK</span>    ──► Requirements Engineering (Technical)
+<span class="d-sa">SEBoK</span>     ──► Systems Thinking & Architecture
+<span class="d-green">BPMN 2.0</span>  ──► Process Modeling (สัญลักษณ์มาตรฐาน)
+<span class="d-amber">ISO 29148</span> ──► Requirements Documentation Standard
+<span class="d-amber">ISO 25010</span> ──► Non-Functional Requirements Checklist</div>
+
+    <div class="callout tip">
+      <div class="callout-icon">🔮</div>
+      <div class="callout-body">
+        <strong>ข้อดีของการไม่มี Single Standard</strong>
+        SA ที่ดีคือคนที่ "เลือกใช้ Framework ได้ถูกกับบริบท" ไม่ใช่คนที่ทำตาม Checklist ของ BoK ใดอันหนึ่งอย่างตายตัว ความยืดหยุ่นนี้อาจเป็นจุดแข็งของ SA มากกว่าจุดอ่อน
+      </div>
+    </div>
+  </div>
+
+  <div class="module-footer">
+    <button class="btn btn-outline" onclick="showModule(4)">← ย้อนกลับ</button>
+    <button class="btn btn-next" onclick="showModule(6)">Module ถัดไป →</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     MODULE 6 — ประวัติศาสตร์
+═══════════════════════════════════════ -->
+<section class="module" id="module-6">
+  <div class="module-hero" data-num="6">
+    <div class="module-tag">Module 06</div>
+    <h1 class="module-title">SA มาก่อน BA<br>และ Architect</h1>
+    <p class="module-desc">SA เกิดในยุค 1956 ครองตลาดกว่า 30 ปี ทั้ง BA และ Software Architect เป็นบทบาทที่แตกออกมาจาก SA เมื่อระบบซับซ้อนจนคนเดียวทำไม่ไหว</p>
+  </div>
+
+  <div class="module-body">
+
+    <div class="section-title">// Timeline ที่ตรวจสอบแล้ว</div>
+
+    <div class="tl-item tl-sa">
+      <div class="tl-year">1956</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">SA — Birth · New York Times, 1963</div>
+        <div class="tl-title">"Systems Analysis" ปรากฏครั้งแรก</div>
+        <div class="tl-body">Herbert D. Benington นำเสนอ Phased Software Development ที่ Symposium on Advanced Programming Methods for Digital Computers — นับเป็นต้นกำเนิดการคิดเชิงระบบใน Computing</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-sa">
+      <div class="tl-year">1967</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">SA — Growth · Harvard Business Review 1968</div>
+        <div class="tl-title">SA เติบโตอย่างก้าวกระโดด</div>
+        <div class="tl-body">จำนวน Programmer + SA เพิ่มจาก 317,000 คน (1967) เป็น 560,000 คน (1970) สะท้อนการระเบิดตัวของ Computing ในองค์กรธุรกิจ</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-neutral">
+      <div class="tl-year">1970</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">Milestone · Royce 1970 / IEEE WESCON</div>
+        <div class="tl-title">Royce Paper — เข้าใจผิดกันมา 50 ปี</div>
+        <div class="tl-body">Royce ตีพิมพ์บทความที่ถูกเรียกว่าต้นกำเนิด Waterfall — แต่ Royce เองไม่ได้สนับสนุน Sequential Waterfall และไม่ได้ใช้คำนี้เลย คำว่า "Waterfall" ถูกใช้ครั้งแรกโดย Bell & Thayer ในปี 1976</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-arch">
+      <div class="tl-year">1968–72</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">Software Architecture — Concept · Dijkstra / Parnas</div>
+        <div class="tl-title">"Software Architecture" เป็น Academic Concept ครั้งแรก</div>
+        <div class="tl-body">Edsger Dijkstra (1968) วางรากฐานแนวคิด Structured Software และ David Parnas (1972) เพิ่มแนวคิด Information Hiding และ Modularity — ยังเป็นแค่ Research Concept ยังไม่มี Job Title "Architect" ในยุคนี้ <strong>SA คือคนที่ทำงาน Architecture อยู่แล้ว</strong></div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-sa">
+      <div class="tl-year">1970s–80s</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">SA — Peak · CMS Wire / modernanalyst.com</div>
+        <div class="tl-title">ยุครุ่งเรืองสูงสุดของ SA</div>
+        <div class="tl-body">DFD, ERD กลายเป็นเครื่องมือมาตรฐาน SA ทำหน้าที่ครบในคนเดียว — part planner, part consultant, part subject matter expert, part technology translator ยังไม่มีคำว่า "Business Analyst" ในสาย Software</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-split">
+      <div class="tl-year">1990s</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">SA → BA · CMS Wire / modernanalyst.com</div>
+        <div class="tl-title">SA แตกออกเป็นหลายบทบาท</div>
+        <div class="tl-body">ระบบซับซ้อนขึ้น ERP เข้ามา SA แตกเป็น Business Analyst, Computer Systems Analyst, Project Manager, Risk Analyst — BA เป็นหนึ่งในผลที่แตกออกมาจาก SA โดยตรง และ <strong>Software Architect</strong> เริ่มแยกออกเป็น Role เฉพาะในช่วงนี้เช่นกัน</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-arch">
+      <div class="tl-year">1994</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">Software Architecture — Patterns · Gang of Four</div>
+        <div class="tl-title">Design Patterns (1994) — ภาษากลางของ Architect เกิดขึ้น</div>
+        <div class="tl-body">หนังสือ "Design Patterns: Elements of Reusable Object-Oriented Software" โดย Gang of Four เปิดทางให้ Architect มีภาษากลางในการสื่อสาร Architecture Decisions ตามมาด้วย Martin Fowler "Patterns of Enterprise Application Architecture" (2002)</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-arch">
+      <div class="tl-year">1996</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">Software Architecture — Discipline · Shaw & Garlan, CMU</div>
+        <div class="tl-title">Shaw & Garlan: Software Architecture เป็น Formal Discipline</div>
+        <div class="tl-body">Mary Shaw และ David Garlan แห่ง Carnegie Mellon เขียนหนังสือที่กำหนดนิยาม Software Architecture อย่างเป็น Formal Discipline ครั้งแรก — แนะนำแนวคิด Components, Connectors, และ Architectural Styles</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-arch">
+      <div class="tl-year">1999–2001</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">Software Architecture — Job Title · IEEE 1471-2000</div>
+        <div class="tl-title">"Software Architect" กลายเป็น Job Title + IEEE 1471 Standard</div>
+        <div class="tl-body">OOP แพร่หลาย → Application ใหญ่ขึ้น → ต้องการคน High-level Design โดยเฉพาะ "Software Architect" เริ่มปรากฏใน Job Posting อย่างเป็นทางการ พร้อมกับ <strong>IEEE 1471-2000</strong> มาตรฐาน Software Architecture ฉบับแรกของโลก (ต่อมาเป็น ISO/IEC 42010)</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-neutral">
+      <div class="tl-year">2001</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">Milestone · Agile Alliance</div>
+        <div class="tl-title">Agile Manifesto ลงนาม (ที่ Snowbird, Utah)</div>
+        <div class="tl-body">Scrum/XP เริ่มพัฒนาช่วง 1994–1995 แต่ Agile Manifesto ลงนามอย่างเป็นทางการในกุมภาพันธ์ 2001 ทำให้บทบาทที่คุยกับ Business ได้รับความสนใจมากขึ้น</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-ba">
+      <div class="tl-year">2003</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">BA — Official · IIBA.org</div>
+        <div class="tl-title">IIBA ก่อตั้ง — BA เป็นอาชีพอย่างเป็นทางการ</div>
+        <div class="tl-body">International Institute of Business Analysis ก่อตั้งที่ Toronto, Canada — เริ่มพัฒนา BABOK และ CBAP Certification ทำให้ BA มี Identity แยกจาก SA อย่างเป็นทางการ</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-ba">
+      <div class="tl-year">2006–2015</div>
+      <div class="tl-node-col"><div class="tl-dot"></div><div class="tl-line"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">BA — Mature · IIBA.org</div>
+        <div class="tl-title">BABOK v1.6 (2006) → v2 (2009) → v3 (2015)</div>
+        <div class="tl-body">BA มี Standard ครบชุด BABOK v3 ขยายครอบคลุม Agile, Business Intelligence, Business Architecture — ยังคงเป็น Version ล่าสุดจนถึงปัจจุบัน</div>
+      </div>
+    </div>
+
+    <div class="tl-item tl-neutral">
+      <div class="tl-year">Now</div>
+      <div class="tl-node-col"><div class="tl-dot"></div></div>
+      <div class="tl-content">
+        <div class="tl-tag">Current · BLS.gov 2024</div>
+        <div class="tl-title">SA, BA และ Architect ยังทับซ้อนกันมากในทางปฏิบัติ</div>
+        <div class="tl-body">BLS ยังติดตาม Computer Systems Analyst แยกจาก BA (Median Wage $103,790/ปี, เติบโต 9% ในช่วง 2024–2034) — ในทีมขนาดกลาง SA มักทำ Architecture ด้วย และ Software Architect บางคนก็ทำ SA งานควบคู่ DraftKings Engineering: <em>"Software Architecture is a function, not a rank"</em></div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <div class="callout-icon">📌</div>
+      <div class="callout-body">
+        <strong>สรุปคำตอบ: ใครมาก่อน?</strong>
+        SA เกิดก่อนในยุค 1956 — ทั้ง BA และ Software Architect เป็นบทบาทที่แยกออกมาจาก SA ทั้งคู่ในช่วง 1990s–2001 งานที่ BA และ Architect ทำนั้น <strong>SA เคยทำทั้งหมดนั้นมาตลอดก่อน</strong> ที่จะมีการแยกบทบาทเมื่อระบบซับซ้อนเกินกว่าคนเดียวจะรับได้
+      </div>
+    </div>
+  </div>
+
+  <div class="module-footer">
+    <button class="btn btn-outline" onclick="showModule(5)">← ย้อนกลับ</button>
+    <button class="btn btn-next" onclick="showModule(7)">ทดสอบความเข้าใจ →</button>
+  </div>
+</section>
+
+<!-- ═══════════════════════════════════════
+     MODULE 7 — QUIZ
+═══════════════════════════════════════ -->
+<section class="module" id="module-7">
+  <div class="module-hero" data-num="7">
+    <div class="module-tag">Module 07</div>
+    <h1 class="module-title">ทดสอบ<br>ความเข้าใจ</h1>
+    <p class="module-desc">11 คำถามจากทุก Module รวมบริบทไทยและประวัติ Software Architect — ดูว่าคุณเข้าใจ SA, BA & Architect แค่ไหน</p>
+  </div>
+
+  <div class="module-body">
+    <div class="quiz-wrapper">
+
+      <!-- Q1 -->
+      <div class="quiz-q active" id="q1">
+        <div class="quiz-num">คำถามที่ 01 / 10</div>
+        <div class="quiz-question">SA มีบทบาทหลักคืออะไรในกระบวนการพัฒนา Software?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 1)">เขียนโค้ดและ Implement ระบบ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 1)">เป็นสะพานระหว่าง Business กับ Developer แปลง Requirement ให้เป็น Specification</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 1)">บริหารโครงการและควบคุม Timeline</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 1)">ออกแบบ Infrastructure และ DevOps</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb1-correct">✅ ถูกต้อง! SA คือ "สะพาน" ระหว่างโลก Business กับโลก Technology — แปลความต้องการของธุรกิจให้กลายเป็น Requirement ที่ Developer สร้างระบบได้จริง</div>
+        <div class="quiz-feedback wrong" id="fb1-wrong">❌ ไม่ถูก — SA ไม่ได้เขียนโค้ดหรือบริหารโครงการ แต่ทำหน้าที่เป็นตัวกลางที่แปล Business Requirement ให้เป็น Technical Specification</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next1" onclick="nextQuestion(2)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="quiz-q" id="q2">
+        <div class="quiz-num">คำถามที่ 02 / 10</div>
+        <div class="quiz-question">BABOK ถูกพัฒนาโดยองค์กรใด และออก Version แรกเมื่อปีใด?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 2)">IEEE — ปี 2000</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 2)">PMI — ปี 2004</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 2)">IIBA — First Major Release ปี 2006</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 2)">ISO — ปี 2010</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb2-correct">✅ ถูกต้อง! IIBA (International Institute of Business Analysis) ก่อตั้งปี 2003 และออก BABOK v1.6 (First Major Release) ในปี 2006 พร้อมกับ CBAP Certification</div>
+        <div class="quiz-feedback wrong" id="fb2-wrong">❌ ไม่ถูก — BABOK พัฒนาโดย IIBA (International Institute of Business Analysis) ที่ก่อตั้งปี 2003 First Major Release คือ v1.6 ปี 2006</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next2" onclick="nextQuestion(3)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="quiz-q" id="q3">
+        <div class="quiz-num">คำถามที่ 03 / 10</div>
+        <div class="quiz-question">ข้อใดคือปัญหาหลักของรายงาน "Global State of Business Analysis" ที่ IIBA ออกเอง?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 3)">ข้อมูลเก่าเกินไป ไม่ทันสมัย</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 3)">IIBA มี Conflict of Interest เพราะเป็นทั้งเจ้าของ Standard และผู้ขาย Certification และกลุ่มตัวอย่างเป็นสมาชิก IIBA เอง</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 3)">ตัวเลขน้อยเกินไป ไม่มีนัยสำคัญ</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 3)">ไม่ได้รับการรับรองจาก ISO</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb3-correct">✅ ถูกต้อง! นี่คือตัวอย่างของ Sampling Bias + Conflict of Interest — เหมือนถามสมาชิก Gym ว่า "การออกกำลังกายสำคัญไหม?" ผลย่อมออกมาในทิศทางเดียว</div>
+        <div class="quiz-feedback wrong" id="fb3-wrong">❌ ปัญหาหลักคือ Conflict of Interest — IIBA ขาย Certification ของ BA เอง แล้วมาสำรวจว่า BA สำคัญแค่ไหน + กลุ่มตัวอย่างเป็นแค่สมาชิก IIBA ไม่ใช่ตัวแทนทั่วไป</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next3" onclick="nextQuestion(4)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q4 — Thai Context -->
+      <div class="quiz-q" id="q4">
+        <div class="quiz-num">คำถามที่ 04 / 10</div>
+        <div class="quiz-question">SA ในบริบทไทยส่วนใหญ่มักมี Background มาจากที่ไหน?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 4)">Business Administration หรือ Finance</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 4)">Developer ที่มีประสบการณ์และเลื่อนขึ้นมา มักมีความรู้ Technical ลึก</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 4)">Project Manager ที่ผันมาทำ Analysis</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 4)">จบ MBA โดยเฉพาะ ไม่ต้องมี Technical Background</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb4-correct">✅ ถูกต้อง! Job Market ไทยยืนยันผ่าน Job Posting จริงว่า SA ส่วนใหญ่คาดหวัง Developer Background — Career Path ในไทยคือ Dev → Senior Dev → SA/Tech Lead</div>
+        <div class="quiz-feedback wrong" id="fb4-wrong">❌ ใน Job Market ไทย SA ส่วนใหญ่มาจาก Developer — JD หลายแห่งระบุ "Experience in BA/SA and Developer" หรือต้องการ Background ใน Java, .Net, React โดยตรง</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next4" onclick="nextQuestion(5)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q5 — Thai Context -->
+      <div class="quiz-q" id="q5">
+        <div class="quiz-num">คำถามที่ 05 / 10</div>
+        <div class="quiz-question">งานใดที่ SA ไทยมักทำ แต่ตาม Global Standard ไม่ใช่ขอบเขตของ SA?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 5)">เขียน BRD และ FRS</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 5)">ทำ UAT ร่วมกับ Business</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 5)">ออกแบบ Database Schema และสร้าง Software Detail Design (SDD)</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 5)">วาด Context Diagram และ Use Case</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb5-correct">✅ ถูกต้อง! Database Schema Design และ SDD ตามตำรา Global Standard เป็นงานของ DBA, Software Architect, หรือ Tech Lead — แต่ใน Job Posting ไทยระบุไว้ใน SA Requirement โดยตรง</div>
+        <div class="quiz-feedback wrong" id="fb5-wrong">❌ BRD, FRS, UAT, Context Diagram, Use Case ล้วนเป็นงานหลักของ SA ตามมาตรฐานสากล — สิ่งที่เกินขอบเขต SA ตามตำราคือ Database Schema Design และ SDD ซึ่งพบบ่อยใน SA JD ของไทย</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next5" onclick="nextQuestion(6)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="quiz-q" id="q6">
+        <div class="quiz-num">คำถามที่ 06 / 10</div>
+        <div class="quiz-question">SA ควรทำ Architecture ในระดับใด (ตาม Global Standard)?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 6)">Physical Architecture — ลงถึง Database Schema และ Server Config</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 6)">Logical Architecture — Context Diagram, System Boundary, Integration Pattern ระดับ High-level</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 6)">SA ไม่ควรยุ่งเกี่ยวกับ Architecture เลย</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 6)">ทุกระดับเท่ากับ Solution Architect</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb6-correct">✅ ถูกต้อง! SA ทำ Logical Architecture เท่านั้น — กำหนดว่าระบบมี Component อะไร ทำงานร่วมกันอย่างไร Data ไหลจากไหนไปไหน แต่ไม่ลงลึกถึง Technology Stack หรือ Physical Implementation (แม้ในไทยจะพบว่า SA ทำด้วยก็ตาม)</div>
+        <div class="quiz-feedback wrong" id="fb6-wrong">❌ ตาม Global Standard SA ทำ Logical Architecture ระดับ High-level เท่านั้น — Context Diagram, System Boundary, Integration Architecture ส่วน Physical Design เป็นงานของ Solution Architect และ Dev</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next6" onclick="nextQuestion(7)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="quiz-q" id="q7">
+        <div class="quiz-num">คำถามที่ 07 / 10</div>
+        <div class="quiz-question">ทำไม SA ถึงไม่มี Body of Knowledge เป็นของตัวเอง?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 7)">เพราะ SA เป็นอาชีพที่ใหม่เกินไปยังไม่มี Standard</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 7)">เพราะ SA ไม่ต้องการ Standard ใดๆ ในการทำงาน</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 7)">เพราะ Scope ของ SA ทับซ้อนกับหลายสาขา ไม่มีองค์กรกลางที่อ้างความเป็นเจ้าของได้ชัดเจน และ Market ไม่ใหญ่พอสำหรับ Dedicated BoK</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 7)">เพราะ BABOK ครอบคลุมงาน SA ทั้งหมดอยู่แล้ว</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb7-correct">✅ ถูกต้อง! SA อยู่ตรงกลางระหว่าง BA (IIBA/BABOK) และ SE (INCOSE/SEBoK) IIBA ดึง BA ออกไป INCOSE ดึง SE ออกไป ที่เหลือตรงกลางไม่มีใครอ้างสิทธิ์</div>
+        <div class="quiz-feedback wrong" id="fb7-wrong">❌ เหตุผลหลักคือ SA อยู่ตรงกลางระหว่างหลายสาขา ชื่อตำแหน่งไม่ Standard Scope ทับซ้อน และไม่มีองค์กรกลางที่มีอำนาจเพียงพอที่จะสร้าง SA BoK</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next7" onclick="nextQuestion(8)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="quiz-q" id="q8">
+        <div class="quiz-num">คำถามที่ 08 / 10</div>
+        <div class="quiz-question">Agile Manifesto ลงนามอย่างเป็นทางการในปีใด?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 8)">ปี 1994</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 8)">ปี 1999</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 8)">ปี 2001</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 8)">ปี 2005</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb8-correct">✅ ถูกต้อง! Agile Manifesto ลงนามที่ Snowbird, Utah ในเดือนกุมภาพันธ์ 2001 — Scrum และ XP เริ่มพัฒนาช่วง 1994–1995 แต่นั่นไม่ใช่ Agile Manifesto</div>
+        <div class="quiz-feedback wrong" id="fb8-wrong">❌ Agile Manifesto ลงนามปี 2001 ที่ Snowbird, Utah — ปี 1994 คือช่วงที่ Scrum และ XP เริ่มพัฒนา ไม่ใช่ Agile Manifesto</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next8" onclick="nextQuestion(9)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="quiz-q" id="q9">
+        <div class="quiz-num">คำถามที่ 09 / 10</div>
+        <div class="quiz-question">ใครเกิดก่อนระหว่าง SA กับ BA ในโลกของ Software Development?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 9)">SA เกิดก่อน ตั้งแต่ยุค 1956 — BA แตกออกมาจาก SA ในยุค 1990s</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 9)">BA เกิดก่อน แล้ว SA แยกออกมาเพื่อเน้น Technical</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 9)">เกิดพร้อมกันในยุค 1970s</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 9)">ทั้งสองเกิดหลัง Agile Manifesto ปี 2001</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb9-correct">✅ ถูกต้อง! SA เป็นอาชีพที่ New York Times รายงานว่าเป็น "New Profession" ในปี 1963 — BA เป็นสิ่งที่แตกออกมาจาก SA เมื่องานซับซ้อนจนคนเดียวทำไม่ไหวในยุค 1990s</div>
+        <div class="quiz-feedback wrong" id="fb9-wrong">❌ SA มาก่อนเสมอ — New York Times ประกาศว่า SA เป็น "New Profession" ในปี 1963 BA แตกออกมาจาก SA ในยุค 1990s เมื่อระบบซับซ้อนขึ้นจนคนเดียวทำไม่ไหว</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next9" onclick="nextQuestion(10)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q10 -->
+      <div class="quiz-q" id="q10">
+        <div class="quiz-num">คำถามที่ 10 / 10</div>
+        <div class="quiz-question">ISO/IEC 25010 ถูกใช้เพื่ออะไรในงานของ SA?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 10)">ใช้วาด Process Flow Diagram</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 10)">ใช้เป็น Framework สำหรับ Elicitation</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 10)">ใช้เป็น Checklist สำหรับ Non-Functional Requirements ครอบคลุม 8 Quality Characteristics เช่น Performance, Security, Maintainability</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 10)">ใช้กำหนด Architecture ระดับ Enterprise</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb10-correct">✅ ถูกต้อง! ISO 25010 เป็น Software Quality Model — SA ใช้มันเพื่อตรวจสอบว่า Requirement ไม่ได้มีแค่ "ระบบต้องทำอะไร" แต่ยังครอบคลุม "ระบบต้องดีแค่ไหน" ใน 8 มิติ</div>
+        <div class="quiz-feedback wrong" id="fb10-wrong">❌ ISO 25010 คือ Software Quality Model ใช้เป็น Checklist สำหรับ Non-Functional Requirements — Performance, Security, Usability, Reliability, Maintainability, Compatibility, Portability, Functional Suitability</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-next" id="next10" onclick="nextQuestion(11)" disabled>ถัดไป →</button>
+        </div>
+      </div>
+
+      <!-- Q11 — Architect History -->
+      <div class="quiz-q" id="q11">
+        <div class="quiz-num">คำถามที่ 11 / 11</div>
+        <div class="quiz-question">ใครถูกต้องที่สุดเกี่ยวกับประวัติของ Software Architect?</div>
+        <div class="quiz-options">
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 11)">Software Architect เกิดก่อน SA เพราะ Edsger Dijkstra วาง Concept ไว้ตั้งแต่ปี 1968</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 11)">Software Architect เป็น Job Title มาตั้งแต่ยุค 1970s พร้อมกับ Structured Analysis</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, true, 11)">Concept เกิดปี 1968 แต่ Job Title เพิ่งปรากฏช่วง 1999–2001 — ก่อนหน้านั้น SA คือคนที่ทำ Architecture งานอยู่แล้ว</div>
+          <div class="quiz-opt" onclick="answerQuiz(this, false, 11)">Software Architect เกิดพร้อมกัน IIBA ปี 2003 เพราะ TOGAF ออกมาในช่วงเดียวกัน</div>
+        </div>
+        <div class="quiz-feedback correct" id="fb11-correct">✅ ถูกต้อง! นี่คือประเด็นสำคัญ — Dijkstra วาง Concept ปี 1968 แต่ยังไม่มี Job Title ในยุคนั้น SA ทำ Architecture เองมาตลอด จนกว่า OOP + ระบบซับซ้อนขึ้นในช่วง 1990s ทำให้ต้องแยก Role ออกมาเป็น Software Architect อย่างเป็นทางการในช่วง 1999–2001</div>
+        <div class="quiz-feedback wrong" id="fb11-wrong">❌ ความจริงคือ Concept ของ Software Architecture เกิดปี 1968 (Dijkstra) แต่ "Software Architect" ในฐานะ Job Title เพิ่งปรากฏช่วง 1999–2001 ก่อนหน้านั้น SA คือคนที่รับผิดชอบงาน Architecture ด้วยตัวเอง</div>
+        <div class="quiz-nav">
+          <span></span>
+          <button class="btn btn-primary" id="next11" onclick="showScore()" disabled>ดูผลคะแนน 🎯</button>
+        </div>
+      </div>
+
+      <!-- Score -->
+      <div class="quiz-score" id="quizScore">
+        <div class="score-num" id="scoreNum" style="color:var(--green)">0/10</div>
+        <div class="score-label">คะแนนของคุณ</div>
+        <div id="scoreMsg" style="font-size:14px;color:var(--muted);margin-bottom:28px;line-height:1.8;max-width:400px;margin-left:auto;margin-right:auto;"></div>
+        <button class="btn btn-primary" onclick="resetQuiz()">ลองใหม่อีกครั้ง</button>
+        &nbsp;&nbsp;
+        <button class="btn btn-outline" onclick="showModule(1)">กลับไปทบทวน</button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="module-footer">
+    <button class="btn btn-outline" onclick="showModule(6)">← ย้อนกลับ</button>
+    <span class="module-footer-info">Module 7 of 7</span>
+  </div>
+</section>
+
+</main>
+
+<script>
+// ── STATE ──
+let currentModule = 1;
+let quizScore = 0;
+let totalQ = 11;
+const visited = new Set([1]);
+
+// ── MODULE NAV ──
+function showModule(n) {
+  document.querySelectorAll('.module').forEach(m => m.classList.remove('active'));
+  document.getElementById('module-' + n).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach((item, i) => {
+    item.classList.toggle('active', i === n - 1);
+  });
+  visited.add(n);
+  currentModule = n;
+  updateProgress();
+  window.scrollTo(0, 0);
+  // Close mobile sidebar
+  document.querySelector('.sidebar').classList.remove('open');
+}
+
+function updateProgress() {
+  const pct = Math.round((visited.size / 7) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = visited.size + ' / 7 Modules';
+  visited.forEach(v => {
+    const el = document.getElementById('navnum-' + v);
+    if (el) el.style.background = 'var(--green)', el.style.color = 'var(--bg)';
+  });
+}
+
+// ── ACCORDION ──
+function toggleAccordion(header) {
+  const body = header.nextElementSibling;
+  const isOpen = header.classList.contains('open');
+  // Close all
+  document.querySelectorAll('.accordion-header.open').forEach(h => {
+    h.classList.remove('open');
+    h.nextElementSibling.classList.remove('open');
+  });
+  if (!isOpen) {
+    header.classList.add('open');
+    body.classList.add('open');
+  }
+}
+
+// ── QUIZ ──
+function answerQuiz(el, correct, qNum) {
+  if (el.classList.contains('answered')) return;
+  const parent = el.closest('.quiz-q');
+  // Mark all as answered
+  parent.querySelectorAll('.quiz-opt').forEach(o => o.classList.add('answered'));
+  el.classList.add(correct ? 'correct' : 'wrong');
+  if (correct) {
+    quizScore++;
+    parent.querySelector('.quiz-feedback.correct').classList.add('show');
+  } else {
+    // Mark correct
+    const opts = parent.querySelectorAll('.quiz-opt');
+    opts.forEach(o => {
+      if (o.onclick && o.onclick.toString().includes('true')) {
+        o.classList.add('correct');
+      }
+    });
+    parent.querySelector('.quiz-feedback.wrong').classList.add('show');
+  }
+  document.getElementById('next' + qNum).disabled = false;
+}
+
+function nextQuestion(n) {
+  document.getElementById('q' + (n - 1)).classList.remove('active');
+  document.getElementById('q' + n).classList.add('active');
+}
+
+function showScore() {
+  document.querySelectorAll('.quiz-q').forEach(q => q.classList.remove('active'));
+  const scoreEl = document.getElementById('quizScore');
+  scoreEl.classList.add('show');
+  document.getElementById('scoreNum').textContent = quizScore + '/' + totalQ;
+  const msgs = [
+    [11, 11, '🏆 Perfect! คุณเข้าใจ SA, BA และ Software Architect ทั้งมิติสากลและบริบทไทยอย่างลึกซึ้ง — พร้อมนำไปใช้งานจริงและสอนคนอื่นได้เลย'],
+    [9, 10, '🎯 ดีมาก! ความเข้าใจส่วนใหญ่ถูกต้อง ลองทบทวน Module ที่พลาดอีกครั้ง'],
+    [6, 8,  '📚 พอใช้ได้ มีบางส่วนที่ยังต้องทำความเข้าใจเพิ่ม โดยเฉพาะบริบทไทยและประวัติ Architect'],
+    [0, 5,  '💪 ยังมีช่องว่างอีกมาก แนะนำให้กลับไปทบทวนตั้งแต่ต้น ไม่ต้องรีบ ค่อยๆ อ่าน']
+  ];
+  const msg = msgs.find(([min, max]) => quizScore >= min && quizScore <= max);
+  document.getElementById('scoreMsg').textContent = msg ? msg[2] : '';
+  const col = quizScore >= 10 ? 'var(--green)' : quizScore >= 7 ? 'var(--amber)' : 'var(--red)';
+  document.getElementById('scoreNum').style.color = col;
+  visited.add(7);
+  updateProgress();
+}
+
+function resetQuiz() {
+  quizScore = 0;
+  document.getElementById('quizScore').classList.remove('show');
+  document.querySelectorAll('.quiz-q').forEach(q => {
+    q.classList.remove('active');
+    q.querySelectorAll('.quiz-opt').forEach(o => {
+      o.classList.remove('answered', 'correct', 'wrong');
+    });
+    q.querySelectorAll('.quiz-feedback').forEach(f => f.classList.remove('show'));
+  });
+  document.querySelectorAll('[id^="next"]').forEach(b => b.disabled = true);
+  document.getElementById('q1').classList.add('active');
+}
+</script>
+
+</body>
+</html>

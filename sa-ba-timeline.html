@@ -12,6 +12,7 @@
     --border: #d4c9b0;
     --sa: #1a4a6b;
     --ba: #8b2500;
+    --arch: #1a5c3a;
     --overlap: #4a3570;
     --warn: #7a5c00;
     --text: #1a1a14;
@@ -236,6 +237,7 @@
 
   .card.sa::before  { background: var(--sa); }
   .card.ba::before  { background: var(--ba); }
+  .card.arch::before { background: var(--arch); }
   .card.both::before { background: var(--overlap); }
   .card.neutral::before { background: var(--muted); }
 
@@ -250,6 +252,7 @@
 
   .tag-sa      { color: var(--sa); }
   .tag-ba      { color: var(--ba); }
+  .tag-arch    { color: var(--arch); }
   .tag-both    { color: var(--overlap); }
   .tag-neutral { color: var(--muted); }
 
@@ -285,6 +288,7 @@
 
   .d-sa   { color: var(--sa);     font-weight: 600; }
   .d-ba   { color: var(--ba);     font-weight: 600; }
+  .d-arch { color: var(--arch);   font-weight: 600; }
   .d-both { color: var(--overlap); font-weight: 600; }
 
   /* Era colour themes */
@@ -295,6 +299,10 @@
   .era-ba .year       { color: var(--ba); }
   .era-ba .node       { border-color: var(--ba); }
   .era-ba .era-label  { color: var(--ba); }
+
+  .era-arch .year      { color: var(--arch); }
+  .era-arch .node      { border-color: var(--arch); }
+  .era-arch .era-label { color: var(--arch); }
 
   .era-split .year      { color: var(--overlap); }
   .era-split .node      { border-color: var(--overlap); }
@@ -356,9 +364,9 @@
 
 <header>
   <div class="header-kicker">Software Industry History</div>
-  <h1><em>SA</em> &<br>BA</h1>
+  <h1><em>SA</em>, BA<br>& Architect</h1>
   <p class="subtitle">
-    ประวัติศาสตร์การแยกตัวของ Systems Analyst และ Business Analyst<br>
+    ประวัติศาสตร์การแยกตัวของ Systems Analyst, Business Analyst และ Software Architect<br>
     ในโลกของการพัฒนาซอฟต์แวร์ตั้งแต่ยุค 1950s จนถึงปัจจุบัน
   </p>
   <div class="legend">
@@ -369,6 +377,10 @@
     <div class="legend-item">
       <svg class="legend-pip" viewBox="0 0 8 8"><rect width="8" height="8" fill="#8b2500"/></svg>
       Business Analyst
+    </div>
+    <div class="legend-item">
+      <svg class="legend-pip" viewBox="0 0 8 8"><rect width="8" height="8" fill="#1a5c3a"/></svg>
+      Software Architect
     </div>
     <div class="legend-item">
       <svg class="legend-pip" viewBox="0 0 8 8"><rect width="8" height="8" fill="#4a3570"/></svg>
@@ -467,6 +479,13 @@
           SA ในยุคนี้คือ "part planner, part organizational consultant, part subject matter expert, part technology translator" — ทำหน้าที่ครบในคนเดียว ยังไม่มีการแยก BA ออกมาเป็นบทบาทเฉพาะแต่อย่างใด
         </div>
       </div>
+      <div class="card arch">
+        <div class="card-tag tag-arch">Software Architecture — Concept Born</div>
+        <div class="card-title">Dijkstra (1968) & Parnas (1972) วางรากฐาน "Software Architecture"</div>
+        <div class="card-body">
+          แนวคิด Software Architecture เกิดจากงานวิจัยของ <strong>Edsger Dijkstra ปี 1968</strong> และ <strong>David Parnas ต้นยุค 1970s</strong> — แต่ยังเป็นแค่ Academic Concept ยังไม่ใช่ Job Title ในช่วงนี้ <strong>SA คือคนที่ทำ Architecture งานด้วย</strong> ในยุค 1970s–80s งาน Architecture ยังเป็นส่วนหนึ่งของ SA โดยตรง
+        </div>
+      </div>
     </div>
   </div>
 
@@ -494,6 +513,7 @@
         │
         ├──► <span class="d-sa">Computer Systems Analyst</span>  เน้น Technical & Architecture
         ├──► <span class="d-ba">Business Analyst</span>           เน้น Process & Requirements
+        ├──► <span class="d-arch">Software Architect</span>        เน้น High-level Design Decisions  ← เกิดช่วงนี้
         ├──► Project Manager               เน้น Planning & Delivery
         └──► Risk/Planning Analyst         เน้น Analysis เฉพาะด้าน</div>
 
@@ -502,6 +522,73 @@
         <div class="card-title">Agile Manifesto ลงนามปี 2001</div>
         <div class="card-body">
           Scrum และ XP เริ่มพัฒนาในช่วง 1994–1995 แต่ <strong>Agile Manifesto ลงนามอย่างเป็นทางการที่ Snowbird, Utah ในเดือนกุมภาพันธ์ 2001</strong> ทำให้ BA ที่เน้น Collaboration และ User Story ได้รับความสนใจมากขึ้น
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1996 — Software Architecture formalized -->
+  <div class="era era-arch">
+    <div class="year-col">
+      <span class="year">1996</span>
+      <span class="year-sub">Arch Discipline</span>
+    </div>
+    <div class="node-col">
+      <div class="node"></div>
+      <div class="node-line"></div>
+    </div>
+    <div class="content-col">
+      <div class="era-label">// Software Architecture as Discipline</div>
+      <div class="card arch">
+        <div class="card-tag tag-arch">Architecture — Academic</div>
+        <div class="card-title">Shaw & Garlan: "Software Architecture: Perspectives on an Emerging Discipline" (1996)</div>
+        <div class="card-body">
+          Mary Shaw และ David Garlan แห่ง Carnegie Mellon เขียนหนังสือที่กำหนดนิยาม Software Architecture อย่างเป็น Formal Discipline ครั้งแรก — แนะนำแนวคิด <strong>Components, Connectors, และ Architectural Styles</strong> ที่ยังใช้อยู่จนถึงปัจจุบัน ยุค 1990s ยังมี Research เข้มข้นเรื่อง Architecture Description Languages (ADL) และ IEEE 1471 Standard เริ่มร่างในปีนี้
+        </div>
+      </div>
+      <div class="card arch">
+        <div class="card-tag tag-arch">Architecture — Patterns</div>
+        <div class="card-title">Design Patterns (1994) + Enterprise Patterns (2002) — ภาษากลางของ Architect</div>
+        <div class="card-body">
+          หนังสือ <strong>"Design Patterns: Elements of Reusable Object-Oriented Software"</strong> โดย Gang of Four (1994) เปิดทาง Architect ให้มีภาษากลางในการสื่อสาร และ Martin Fowler ตามมาด้วย <strong>"Patterns of Enterprise Application Architecture" (2002)</strong> ซึ่งกลายเป็น Reference หลักของ Software Architect รุ่นแรก
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 1999–2001 — Software Architect as Job Title -->
+  <div class="era era-arch">
+    <div class="year-col">
+      <span class="year">1999</span>
+      <span class="year-sub">Arch Role</span>
+    </div>
+    <div class="node-col">
+      <div class="node"></div>
+      <div class="node-line"></div>
+    </div>
+    <div class="content-col">
+      <div class="era-label">// "Software Architect" — Job Title is Born</div>
+      <div class="card arch">
+        <div class="card-tag tag-arch">Architecture — Job Title</div>
+        <div class="card-title">"Software Architect" กลายเป็น Job Title อย่างเป็นทางการ (ปลาย 1990s–2001)</div>
+        <div class="card-body">
+          OOP แพร่หลาย → Application ใหญ่และซับซ้อนขึ้นมาก → ต้องการคนที่ทำ High-level Design Decisions โดยเฉพาะ Wikipedia ระบุว่า <strong>"แนวคิด Software Architect เริ่มเป็นที่ยอมรับเมื่อ OOP กำลังเป็นที่นิยมในช่วงปลาย 1990s และต้น 2000s"</strong> Terminology และ Certification ที่เป็นที่ยอมรับปรากฏขึ้นในช่วงต้น 21st Century
+        </div>
+      </div>
+      <div class="card arch">
+        <div class="card-tag tag-arch">Architecture — IEEE Standard</div>
+        <div class="card-title">IEEE 1471-2000 — มาตรฐาน Software Architecture ฉบับแรกของโลก</div>
+        <div class="card-body">
+          <strong>IEEE 1471-2000</strong> "Recommended Practice for Architecture Description of Software-Intensive Systems" คือ Formal Standard ฉบับแรกในด้าน Software Architecture ออกปี 2000 ต่อมาถูก Adopt โดย ISO เป็น <strong>ISO/IEC 42010:2007</strong> และ Update เป็น ISO/IEC/IEEE 42010:2011 ซึ่งยังคงใช้อยู่ในปัจจุบัน
+        </div>
+      </div>
+      <div class="card neutral">
+        <div class="card-tag tag-neutral">เปรียบเทียบ</div>
+        <div class="card-title">เกิดก่อนหรือหลัง SA/BA? — คำตอบที่ซับซ้อน</div>
+        <div class="card-body">
+          <strong>Concept:</strong> Software Architecture (1968) เกิดหลัง SA (1956) แต่ก่อน BA แยกตัว (1990s)<br>
+          <strong>Job Title:</strong> "Software Architect" (1999–2001) เกิดพร้อมกับ BA ที่กำลังแยกตัวออก<br>
+          <strong>สรุป:</strong> ในยุค 1970–80s <em>SA ทำงาน Architecture ด้วย</em> — Software Architect คือส่วนหนึ่งของงาน SA ที่ถูกแยกออกมาเป็น Role เฉพาะในภายหลัง เช่นเดียวกับ BA
         </div>
       </div>
     </div>
@@ -589,6 +676,14 @@
         <div class="card-title">SA และ BA ยังทับซ้อนกันอย่างมีนัยสำคัญในทางปฏิบัติ</div>
         <div class="card-body">
           ในองค์กรขนาดกลางลงมา คนที่ใช้ชื่อ SA มักทำงาน BA ควบคู่ไปด้วย การแยกบทบาทชัดเจนพบในองค์กรที่มี Formal SDLC หรือ Enterprise ขนาดใหญ่เท่านั้น
+        </div>
+      </div>
+      <div class="card arch">
+        <div class="card-tag tag-arch">Architecture — Now</div>
+        <div class="card-title">SA / Software Architect / Principal Engineer — ขอบเขตยังพร่าในทางปฏิบัติ</div>
+        <div class="card-body">
+          ในทีมขนาดกลาง Software Architect มักเป็น Senior Dev ที่ทำ High-level Design ควบคู่กับ Coding บางองค์กรใช้ชื่อ <strong>Principal Engineer</strong> หรือ <strong>Staff Engineer</strong> แทน — DraftKings Engineering ระบุว่า "Software Architecture is a function, not a rank" คนที่ทำ Architectural Thinking จริงๆ อาจมีชื่อตำแหน่งหลายแบบ<br><br>
+          ในบริบทไทย <strong>SA มักรับงาน Architect บางส่วน</strong> เพราะทีมไม่ใหญ่พอที่จะมี Dedicated Architect แยก
         </div>
       </div>
     </div>
