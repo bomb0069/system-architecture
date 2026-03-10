@@ -21,3 +21,5 @@
 - [The History of System/Business Analyst](sa-ba-timeline.html)
 - [ISO 25010 Quality Attributes](iso25010_quality_attribute.html)
 - [Toy-R-Not-Us v2 — 4+1 Architecture Views](toy_4plus1_architecture.html)
+- [ISO 25010 — Slide Presentation](iso25010_presentation.html)
+- [Toy-R-Not-Us v2 — 4+1 Architecture Presentation](toy_4plus1_presentation.html)
