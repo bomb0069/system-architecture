@@ -1,0 +1,2252 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toy-R-Not-Us v2 — 4+1 Architecture Views</title>
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Noto+Sans+Thai:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink: #0a0f1e;
+  --ink2: #0f1830;
+  --ink3: #141f3a;
+  --line: rgba(96,165,250,0.15);
+  --line2: rgba(96,165,250,0.3);
+  --blue: #3b82f6;
+  --blue-l: #60a5fa;
+  --blue-ll: #93c5fd;
+  --cyan: #06b6d4;
+  --teal: #14b8a6;
+  --green: #22c55e;
+  --amber: #f59e0b;
+  --orange: #f97316;
+  --rose: #f43f5e;
+  --violet: #8b5cf6;
+  --text: #e2e8f0;
+  --text-d: #94a3b8;
+  --text-m: #4a5568;
+  --fh: 'Oxanium', sans-serif;
+  --fb: 'Noto Sans Thai', sans-serif;
+  --fm: 'JetBrains Mono', monospace;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--ink);color:var(--text);font-family:var(--fb);min-height:100vh;overflow-x:hidden}
+
+/* Grid bg */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.04) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(59,130,246,0.04) 1px,transparent 1px);
+  background-size:40px 40px;
+  pointer-events:none;z-index:0;
+}
+
+/* HEADER */
+header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(10,15,30,0.92);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line2);
+  padding:0 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  height:56px;
+}
+.h-logo{font-family:var(--fh);font-weight:800;font-size:1rem;letter-spacing:.06em}
+.h-logo em{color:var(--amber);font-style:normal}
+.h-logo span{color:var(--blue-l)}
+.h-sub{font-family:var(--fm);font-size:.65rem;color:var(--text-m);letter-spacing:.1em;text-transform:uppercase}
+.h-badge{
+  font-family:var(--fm);font-size:.62rem;
+  background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.3);
+  color:var(--amber);padding:3px 10px;border-radius:999px;letter-spacing:.05em;
+}
+
+/* VIEW TABS */
+.view-tabs{
+  display:flex;
+  background:var(--ink2);
+  border-bottom:1px solid var(--line);
+  overflow-x:auto;padding:0 1rem;
+  position:sticky;top:56px;z-index:150;
+}
+.vtab{
+  display:flex;align-items:center;gap:.5rem;
+  padding:.75rem 1.2rem;
+  font-family:var(--fh);font-size:.72rem;font-weight:600;
+  color:var(--text-m);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;
+  white-space:nowrap;transition:all .15s;letter-spacing:.04em;
+  text-transform:uppercase;
+}
+.vtab:hover{color:var(--text-d)}
+.vtab.active{color:var(--blue-l);border-bottom-color:var(--blue)}
+.vtab .vnum{
+  font-size:.55rem;
+  background:rgba(59,130,246,.12);
+  border:1px solid rgba(59,130,246,.2);
+  color:var(--text-m);
+  padding:1px 5px;border-radius:3px;
+}
+.vtab.active .vnum{background:rgba(59,130,246,.2);color:var(--blue-l)}
+
+/* CONTENT */
+.view-content{position:relative;z-index:1;padding:1.5rem;max-width:1400px;margin:0 auto}
+.view-panel{display:none;animation:fadeUp .2s ease}
+.view-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* INTRO STRIP */
+.intro-strip{
+  display:flex;gap:1rem;align-items:flex-start;
+  padding:1rem 1.2rem;
+  background:var(--ink2);
+  border:1px solid var(--line);
+  border-left:3px solid;
+  border-radius:8px;
+  margin-bottom:1.5rem;
+  font-size:.8rem;color:var(--text-d);line-height:1.6;
+}
+.intro-strip .is-icon{font-size:1.4rem;flex-shrink:0;margin-top:1px}
+.intro-strip strong{font-family:var(--fh);font-size:.72rem;letter-spacing:.05em;display:block;margin-bottom:.2rem}
+
+/* TWO-COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+@media(max-width:900px){.two-col,.three-col{grid-template-columns:1fr}}
+
+/* CARD */
+.card{
+  background:var(--ink2);border:1px solid var(--line);
+  border-radius:10px;padding:1rem;
+}
+.card-title{
+  font-family:var(--fh);font-size:.75rem;font-weight:700;
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:.75rem;
+  display:flex;align-items:center;gap:.4rem;
+}
+.card-title::after{content:'';flex:1;height:1px;background:var(--line)}
+
+/* ── LOGICAL VIEW ── */
+.domain-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(160px,1fr));
+  gap:.6rem;margin-bottom:1rem;
+}
+.domain-card{
+  background:var(--ink3);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:.75rem;
+  cursor:pointer;
+  transition:all .15s;
+}
+.domain-card:hover{border-color:var(--line2);transform:translateY(-2px)}
+.dc-head{
+  display:flex;align-items:center;gap:.4rem;
+  margin-bottom:.5rem;
+}
+.dc-icon{font-size:1rem}
+.dc-name{font-family:var(--fh);font-size:.72rem;font-weight:700}
+.dc-type{font-family:var(--fm);font-size:.55rem;color:var(--text-m);margin-bottom:.4rem}
+.dc-attrs{display:flex;flex-direction:column;gap:2px}
+.dc-attr{
+  font-family:var(--fm);font-size:.6rem;
+  color:var(--text-d);
+  padding:1px 0;
+  border-bottom:1px solid rgba(255,255,255,.04);
+  display:flex;gap:.3rem;align-items:center;
+}
+.dc-attr .at{color:var(--cyan);flex-shrink:0}
+.dc-attr .typ{color:var(--text-m);margin-left:auto;font-size:.55rem}
+.dc-key{color:var(--amber)!important}
+.dc-rel{
+  margin-top:.5rem;
+  display:flex;flex-direction:column;gap:2px;
+}
+.rel-item{
+  font-family:var(--fm);font-size:.57rem;
+  color:var(--violet);
+  display:flex;align-items:center;gap:.3rem;
+}
+
+/* relation arrows */
+.rel-diagram{
+  background:var(--ink3);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:1rem;
+  overflow-x:auto;
+}
+
+/* ── PROCESS VIEW ── */
+.seq-container{background:var(--ink3);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seq-actors{
+  display:flex;
+  background:var(--ink2);
+  border-bottom:1px solid var(--line2);
+  gap:0;
+}
+.seq-actor{
+  flex:1;text-align:center;
+  padding:.6rem .3rem;
+  font-family:var(--fh);font-size:.6rem;font-weight:700;
+  letter-spacing:.04em;
+  border-right:1px solid var(--line);
+}
+.seq-actor:last-child{border-right:none}
+.seq-body{padding:0;position:relative}
+.seq-lifelines{
+  position:absolute;top:0;left:0;right:0;bottom:0;
+  display:flex;pointer-events:none;
+}
+.seq-ll{flex:1;border-right:1px dashed rgba(96,165,250,.1)}
+.seq-ll:last-child{border-right:none}
+.seq-msg{
+  position:relative;z-index:1;
+  display:flex;align-items:center;
+  padding:0;
+  min-height:36px;
+}
+.seq-msg.group-start{
+  margin-top:.5rem;
+  border-top:1px solid rgba(96,165,250,.1);
+}
+.seq-label{
+  position:absolute;
+  background:var(--ink);
+  border:1px solid;
+  border-radius:4px;
+  padding:2px 6px;
+  font-family:var(--fm);font-size:.58rem;
+  white-space:nowrap;
+  transform:translateX(-50%);
+  z-index:2;
+}
+.seq-arrow{
+  position:absolute;
+  height:1px;
+  top:50%;
+}
+.seq-note{
+  position:absolute;
+  background:rgba(245,158,11,.08);
+  border:1px solid rgba(245,158,11,.2);
+  border-radius:4px;
+  padding:2px 6px;
+  font-family:var(--fm);font-size:.57rem;
+  color:var(--amber);
+  right:.5rem;
+  transform:translateY(-50%);
+  top:50%;
+  z-index:3;
+}
+
+/* ── DEVELOPMENT VIEW ── */
+.pkg-tree{display:flex;flex-direction:column;gap:.4rem}
+.pkg-node{
+  border-left:2px solid;
+  padding:.4rem .6rem;
+  margin-left:1rem;
+  border-radius:0 6px 6px 0;
+}
+.pkg-node.root{margin-left:0;border-radius:6px;border-left-width:3px}
+.pkg-name{font-family:var(--fh);font-size:.72rem;font-weight:700;margin-bottom:.2rem}
+.pkg-desc{font-size:.68rem;color:var(--text-d);line-height:1.4}
+.pkg-files{display:flex;flex-wrap:wrap;gap:.25rem;margin-top:.35rem}
+.pkg-file{
+  font-family:var(--fm);font-size:.58rem;
+  background:rgba(255,255,255,.04);
+  border:1px solid rgba(255,255,255,.08);
+  color:var(--text-m);
+  padding:1px 6px;border-radius:3px;
+}
+.dep-badge{
+  font-family:var(--fm);font-size:.58rem;
+  padding:1px 6px;border-radius:3px;
+  display:inline-flex;align-items:center;gap:.25rem;
+  margin-top:.3rem;
+}
+.dep-ext{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.25);color:var(--orange)}
+.dep-int{background:rgba(59,130,246,.08);border:1px solid rgba(59,130,246,.15);color:var(--blue-l)}
+
+/* ── PHYSICAL VIEW ── */
+.infra-diagram{position:relative}
+.infra-layer{
+  border:1px solid;
+  border-radius:10px;
+  padding:.75rem 1rem;
+  margin-bottom:.6rem;
+  position:relative;
+}
+.infra-layer-label{
+  font-family:var(--fh);font-size:.6rem;font-weight:700;
+  letter-spacing:.1em;text-transform:uppercase;
+  position:absolute;top:-9px;left:12px;
+  padding:0 6px;
+  background:var(--ink);
+}
+.infra-nodes{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.inode{
+  display:flex;flex-direction:column;align-items:center;
+  gap:.25rem;text-align:center;
+  padding:.5rem .75rem;
+  background:var(--ink3);
+  border:1px solid;
+  border-radius:8px;
+  min-width:80px;
+  transition:all .15s;
+  cursor:default;
+}
+.inode:hover{transform:translateY(-2px)}
+.inode-icon{font-size:1.2rem}
+.inode-name{font-family:var(--fh);font-size:.6rem;font-weight:700;line-height:1.2}
+.inode-spec{font-family:var(--fm);font-size:.55rem;color:var(--text-m);margin-top:2px}
+.inode-count{
+  font-family:var(--fm);font-size:.55rem;
+  background:rgba(34,197,94,.12);
+  border:1px solid rgba(34,197,94,.25);
+  color:var(--green);
+  padding:1px 5px;border-radius:3px;
+}
+.inode-alert{
+  font-family:var(--fm);font-size:.55rem;
+  background:rgba(245,158,11,.12);
+  border:1px solid rgba(245,158,11,.25);
+  color:var(--amber);
+  padding:1px 5px;border-radius:3px;
+}
+.infra-arrow{
+  text-align:center;font-size:.7rem;color:var(--text-m);
+  margin:.1rem 0;line-height:1;
+}
+
+/* ── SCENARIO VIEW ── */
+.uc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:.75rem;margin-bottom:1.5rem}
+.uc-card{
+  background:var(--ink2);
+  border:1px solid var(--line);
+  border-radius:10px;
+  overflow:hidden;
+  cursor:pointer;
+  transition:all .15s;
+}
+.uc-card:hover{border-color:var(--line2);transform:translateY(-2px)}
+.uc-header{
+  padding:.75rem 1rem;
+  display:flex;align-items:center;gap:.6rem;
+  border-bottom:1px solid var(--line);
+}
+.uc-num{
+  font-family:var(--fm);font-size:.65rem;
+  background:rgba(255,255,255,.06);
+  padding:2px 7px;border-radius:4px;
+  color:var(--text-m);
+}
+.uc-title{font-family:var(--fh);font-size:.78rem;font-weight:700}
+.uc-body{padding:.75rem 1rem}
+.uc-actor{font-family:var(--fm);font-size:.62rem;color:var(--cyan);margin-bottom:.4rem}
+.uc-steps{display:flex;flex-direction:column;gap:.25rem}
+.uc-step{
+  display:flex;gap:.5rem;align-items:flex-start;
+  font-size:.72rem;color:var(--text-d);line-height:1.4;
+}
+.uc-step-num{
+  font-family:var(--fm);font-size:.58rem;
+  background:rgba(59,130,246,.1);color:var(--blue-l);
+  width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin-top:1px;
+}
+.uc-qa{
+  display:flex;flex-wrap:wrap;gap:.25rem;
+  margin-top:.6rem;padding-top:.5rem;
+  border-top:1px solid var(--line);
+}
+.qa-tag{
+  font-family:var(--fm);font-size:.57rem;
+  padding:1px 6px;border-radius:3px;
+  border:1px solid;
+}
+
+/* STAT STRIP */
+.stat-strip{
+  display:flex;gap:.75rem;flex-wrap:wrap;
+  margin-bottom:1.5rem;
+}
+.stat-box{
+  background:var(--ink2);border:1px solid var(--line);
+  border-radius:8px;padding:.75rem 1rem;
+  display:flex;flex-direction:column;gap:.15rem;
+  flex:1;min-width:120px;
+}
+.stat-val{font-family:var(--fh);font-size:1.2rem;font-weight:800}
+.stat-lbl{font-family:var(--fm);font-size:.6rem;color:var(--text-m);letter-spacing:.06em;text-transform:uppercase}
+.stat-sub{font-size:.65rem;color:var(--text-d)}
+
+/* FLOW DIAGRAM simple */
+.flow-wrap{overflow-x:auto}
+.flow-diag{
+  display:flex;align-items:center;gap:0;
+  padding:1rem;
+  min-width:max-content;
+}
+.flow-box{
+  border:1px solid;
+  border-radius:6px;
+  padding:.4rem .7rem;
+  font-family:var(--fh);font-size:.62rem;font-weight:700;
+  text-align:center;min-width:90px;
+  white-space:nowrap;
+}
+.flow-diamond{
+  border:1px solid;
+  padding:.4rem .7rem;
+  font-family:var(--fh);font-size:.58rem;
+  text-align:center;
+  transform:rotate(45deg);
+  width:64px;height:64px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.flow-diamond span{transform:rotate(-45deg);display:block;font-size:.55rem;text-align:center;line-height:1.2}
+.flow-arr{
+  font-size:.8rem;color:var(--text-m);
+  padding:0 .2rem;flex-shrink:0;
+}
+.flow-arr-d{
+  display:flex;flex-direction:column;align-items:center;
+  font-size:.8rem;color:var(--text-m);
+  padding:0 .2rem;flex-shrink:0;
+}
+
+/* notify methods */
+.method-list{display:flex;flex-direction:column;gap:.4rem}
+.method-row{
+  display:flex;align-items:center;gap:.75rem;
+  padding:.5rem .75rem;
+  background:var(--ink3);border:1px solid var(--line);border-radius:6px;
+}
+.method-icon{font-size:.9rem;flex-shrink:0}
+.method-name{font-family:var(--fh);font-size:.68rem;font-weight:700;flex-shrink:0;width:90px}
+.method-detail{font-size:.68rem;color:var(--text-d);line-height:1.4;flex:1}
+
+/* PERF PANEL */
+.perf-panel{
+  background:var(--ink3);border:1px solid var(--line);
+  border-radius:8px;padding:.75rem 1rem;margin-top:.75rem;
+}
+.perf-title{
+  font-family:var(--fh);font-size:.68rem;font-weight:700;
+  color:var(--amber);margin-bottom:.5rem;
+}
+.perf-bar-wrap{display:flex;flex-direction:column;gap:.4rem}
+.perf-bar-row{display:flex;align-items:center;gap:.6rem;font-size:.65rem}
+.perf-bar-label{width:130px;color:var(--text-d);flex-shrink:0;font-family:var(--fm);font-size:.6rem}
+.perf-bar-bg{flex:1;background:rgba(255,255,255,.04);border-radius:999px;height:8px;overflow:hidden}
+.perf-bar-fill{height:100%;border-radius:999px;transition:width .5s ease}
+.perf-val{width:70px;text-align:right;font-family:var(--fm);font-size:.6rem;color:var(--text-d)}
+
+/* scrollbar */
+::-webkit-scrollbar{width:4px;height:4px}
+::-webkit-scrollbar-track{background:var(--ink)}
+::-webkit-scrollbar-thumb{background:var(--ink3);border-radius:2px}
+
+/* tooltip */
+.tooltip{position:relative}
+.tooltip:hover .tip-content{display:block}
+.tip-content{
+  display:none;position:absolute;z-index:999;
+  top:calc(100% + 4px);left:50%;transform:translateX(-50%);
+  background:var(--ink2);border:1px solid var(--line2);
+  border-radius:6px;padding:.5rem .7rem;
+  font-size:.68rem;color:var(--text-d);
+  white-space:nowrap;
+  box-shadow:0 8px 24px rgba(0,0,0,.4);
+  line-height:1.5;
+}
+
+.note-box{
+  background:rgba(245,158,11,.06);
+  border:1px solid rgba(245,158,11,.2);
+  border-radius:6px;padding:.75rem 1rem;
+  font-size:.75rem;color:var(--text-d);line-height:1.6;
+  margin-top:.75rem;
+}
+.note-box strong{color:var(--amber);font-family:var(--fh)}
+
+[data-theme="light"] {
+  --ink: #f8fafc; --ink2: #ffffff; --ink3: #f1f5f9;
+  --line: rgba(59,130,246,.15); --line2: rgba(59,130,246,.3);
+  --text: #0f172a; --text-d: #334155; --text-m: #64748b;
+  --blue: #2563eb; --blue-l: #1d4ed8; --blue-ll: #1e40af;
+  --cyan: #0891b2; --teal: #0d9488; --green: #16a34a;
+  --amber: #d97706; --orange: #ea6c0a; --rose: #e11d48;
+  --violet: #7c3aed;
+}
+[data-theme="light"] body { background: var(--ink); }
+[data-theme="light"] header { background: #1e3a8a !important; }
+[data-theme="light"] .view-tabs { background: #ffffff !important; box-shadow: 0 1px 4px rgba(0,0,0,.06); border-bottom-color: rgba(59,130,246,.2); }
+[data-theme="light"] .vtab { color: #64748b; }
+[data-theme="light"] .vtab.active { background: rgba(219,234,254,.8); color: #1d4ed8; }
+[data-theme="light"] .view-panel { background: #f8fafc; }
+[data-theme="light"] .card { background: #ffffff !important; border-color: rgba(59,130,246,.15) !important; }
+[data-theme="light"] .intro-strip { background: rgba(241,245,249,.9) !important; color: #334155; }
+[data-theme="light"] .dc-head { background: rgba(241,245,249,.9) !important; }
+[data-theme="light"] table th { background: #e8eef8 !important; color: #64748b !important; }
+[data-theme="light"] table td { color: #334155 !important; }
+[data-theme="light"] .inode { background: #ffffff !important; border-color: rgba(59,130,246,.2) !important; }
+[data-theme="light"] svg[style*="background"] { background: #ffffff !important; }
+[data-theme="light"] ::-webkit-scrollbar-track { background: #f1f5f9; }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div class="h-logo"><em>Toy-R-Not-Us</em> <span>v2.0</span></div>
+    <div class="h-sub">4+1 Architectural Views</div>
+  </div>
+  <div class="h-badge">Kruchten 1995</div>
+  <button id="theme-btn" onclick="toggleTheme()" style="margin-left:auto;display:flex;align-items:center;gap:.3rem;padding:.25rem .75rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.25);border-radius:6px;font-family:var(--fh);font-size:.6rem;font-weight:700;letter-spacing:.05em;color:rgba(255,255,255,.9);cursor:pointer;transition:all .15s;">☀ Light</button>
+</header>
+
+<!-- VIEW TABS -->
+<div class="view-tabs" id="viewTabs">
+  <div class="vtab active" onclick="showView('overview')" id="tab-overview">
+    <span>🗺</span> Overview <span class="vnum">4+1</span>
+  </div>
+  <div class="vtab" onclick="showView('scenario')" id="tab-scenario">
+    <span>▶</span> Scenarios <span class="vnum">+1</span>
+  </div>
+  <div class="vtab" onclick="showView('logical')" id="tab-logical">
+    <span>🔷</span> Logical View <span class="vnum">1</span>
+  </div>
+  <div class="vtab" onclick="showView('process')" id="tab-process">
+    <span>⚙</span> Process View <span class="vnum">2</span>
+  </div>
+  <div class="vtab" onclick="showView('development')" id="tab-development">
+    <span>📦</span> Development View <span class="vnum">3</span>
+  </div>
+  <div class="vtab" onclick="showView('physical')" id="tab-physical">
+    <span>🖥</span> Physical View <span class="vnum">4</span>
+  </div>
+</div>
+
+<div class="view-content">
+
+<!-- ══════════════════════════════════════════
+     SCENARIOS VIEW (+1)
+═══════════════════════════════════════════ -->
+<div class="view-panel active" id="view-overview">
+  <div class="intro-strip" style="border-left-color:var(--amber)">
+    <div class="is-icon">🗺</div>
+    <div>
+      <strong style="color:var(--amber)">4+1 Architectural View Model — Philippe Kruchten (1995)</strong>
+      แนวคิดที่ใช้ describe architecture จาก <strong>5 มุมมอง</strong> ที่ตอบคนละกลุ่ม stakeholder —
+      ไม่มี view เดียวที่บอกทุกอย่างได้ครบ architecture ที่ดีต้องสมเหตุสมผลในทุก view พร้อมกัน
+    </div>
+  </div>
+
+  <!-- ── THE 5 VIEWS VISUAL ── -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="card-title" style="color:var(--amber)">5 Views ของ Architecture</div>
+    <div style="overflow-x:auto">
+    <svg viewBox="0 0 860 340" width="100%" style="min-width:600px" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ov-arr" markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L7,3z" fill="#60a5fa" opacity=".6"/>
+        </marker>
+      </defs>
+
+      <!-- Center: Scenarios -->
+      <ellipse cx="430" cy="170" rx="110" ry="58" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="2"/>
+      <text x="430" y="162" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="13" font-weight="800" fill="#f59e0b">Scenarios (+1)</text>
+      <text x="430" y="177" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="9" fill="#94a3b8">Use Cases · User Stories</text>
+      <text x="430" y="190" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#64748b">ทุก View ต้องสอดคล้อง</text>
+
+      <!-- Logical (top-left) -->
+      <rect x="40" y="22" width="160" height="76" rx="9" fill="rgba(59,130,246,0.12)" stroke="#3b82f6" stroke-width="1.8"/>
+      <text x="120" y="48" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="12" font-weight="700" fill="#60a5fa">🔷 Logical View</text>
+      <text x="120" y="63" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#94a3b8">Functionality · Domain</text>
+      <text x="120" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#64748b">Class · Component · State</text>
+      <text x="120" y="88" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#3b82f6">→ Analyst · Architect</text>
+
+      <!-- Process (top-right) -->
+      <rect x="660" y="22" width="160" height="76" rx="9" fill="rgba(34,197,94,0.1)" stroke="#22c55e" stroke-width="1.8"/>
+      <text x="740" y="48" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="12" font-weight="700" fill="#22c55e">⚙ Process View</text>
+      <text x="740" y="63" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#94a3b8">Concurrency · Runtime</text>
+      <text x="740" y="76" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#64748b">Sequence · Activity</text>
+      <text x="740" y="88" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#22c55e">→ SRE · Performance</text>
+
+      <!-- Development (bottom-left) -->
+      <rect x="40" y="242" width="160" height="76" rx="9" fill="rgba(139,92,246,0.1)" stroke="#8b5cf6" stroke-width="1.8"/>
+      <text x="120" y="268" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="12" font-weight="700" fill="#a855f7">📦 Development</text>
+      <text x="120" y="283" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#94a3b8">Software Org · Code</text>
+      <text x="120" y="296" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#64748b">Package · Dependency</text>
+      <text x="120" y="308" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#8b5cf6">→ Developer · Tech Lead</text>
+
+      <!-- Physical (bottom-right) -->
+      <rect x="660" y="242" width="160" height="76" rx="9" fill="rgba(249,115,22,0.1)" stroke="#f97316" stroke-width="1.8"/>
+      <text x="740" y="268" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="12" font-weight="700" fill="#f97316">🖥 Physical View</text>
+      <text x="740" y="283" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8.5" fill="#94a3b8">Infrastructure · Deploy</text>
+      <text x="740" y="296" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#64748b">Deployment · Network</text>
+      <text x="740" y="308" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#f97316">→ DevOps · SRE</text>
+
+      <!-- Arrows: Views → Scenarios (all point to center) -->
+      <!-- Logical → Scenarios -->
+      <path d="M200,78 Q290,110 324,145" stroke="#3b82f6" stroke-width="1.2" fill="none" marker-end="url(#ov-arr)" opacity=".5"/>
+      <!-- Process → Scenarios -->
+      <path d="M660,78 Q570,110 536,145" stroke="#22c55e" stroke-width="1.2" fill="none" marker-end="url(#ov-arr)" opacity=".5"/>
+      <!-- Development → Scenarios -->
+      <path d="M200,262 Q290,232 324,200" stroke="#8b5cf6" stroke-width="1.2" fill="none" marker-end="url(#ov-arr)" opacity=".5"/>
+      <!-- Physical → Scenarios -->
+      <path d="M660,262 Q570,232 536,200" stroke="#f97316" stroke-width="1.2" fill="none" marker-end="url(#ov-arr)" opacity=".5"/>
+
+      <!-- Logical ↔ Process (top) -->
+      <path d="M200,55 L660,55" stroke="rgba(96,165,250,0.2)" stroke-width="1" fill="none" stroke-dasharray="4,3"/>
+      <!-- Development ↔ Physical (bottom) -->
+      <path d="M200,285 L660,285" stroke="rgba(96,165,250,0.2)" stroke-width="1" fill="none" stroke-dasharray="4,3"/>
+      <!-- Logical ↔ Development (left) -->
+      <path d="M120,98 L120,242" stroke="rgba(96,165,250,0.2)" stroke-width="1" fill="none" stroke-dasharray="4,3"/>
+      <!-- Process ↔ Physical (right) -->
+      <path d="M740,98 L740,242" stroke="rgba(96,165,250,0.2)" stroke-width="1" fill="none" stroke-dasharray="4,3"/>
+    </svg>
+    </div>
+  </div>
+
+  <!-- ── PROCESS FLOW ── -->
+  <div class="card" style="margin-bottom:1rem">
+    <div class="card-title" style="color:var(--blue-l)">🔄 กระบวนการทำงานกับ 4+1 Views (Iterative Process)</div>
+
+    <div style="font-size:.75rem;color:var(--text-d);line-height:1.7;margin-bottom:1rem">
+      ไม่มี one-size-fits-all — โปรเจกต์ส่วนใหญ่เริ่มจาก <strong style="color:var(--amber)">Scenarios</strong> หรือ
+      <strong style="color:var(--blue-l)">Logical</strong> ก่อน แล้วค่อย parallel กับ
+      <strong style="color:var(--green)">Process + Development</strong> และสุดท้าย <strong style="color:var(--orange)">Physical</strong> —
+      แต่ระหว่างทาง <strong>ย้อนกลับมาปรับ</strong> view ก่อนหน้าได้เสมอเมื่อได้ข้อมูลเพิ่ม
+    </div>
+
+    <!-- Flow diagram -->
+    <div style="overflow-x:auto">
+    <svg viewBox="0 0 880 220" width="100%" style="min-width:660px" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="pf-b" markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#60a5fa"/></marker>
+        <marker id="pf-g" markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#22c55e"/></marker>
+        <marker id="pf-gr" markerWidth="7" markerHeight="6" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L7,3z" fill="#64748b"/></marker>
+      </defs>
+
+      <!-- Phase boxes -->
+      <!-- Phase 1: Scenarios (x=20) -->
+      <rect x="10" y="60" width="135" height="88" rx="8" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="2"/>
+      <text x="77" y="84" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="11" font-weight="800" fill="#f59e0b">① Scenarios</text>
+      <text x="77" y="99" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">ระบุ Use Cases</text>
+      <text x="77" y="111" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">User Stories</text>
+      <text x="77" y="123" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Quality Scenarios</text>
+      <text x="77" y="137" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#f59e0b">→ Analyst · BA</text>
+
+      <!-- arrow 1→2 -->
+      <line x1="145" y1="104" x2="175" y2="104" stroke="#60a5fa" stroke-width="1.8" marker-end="url(#pf-b)"/>
+
+      <!-- Phase 2: Logical (x=175) -->
+      <rect x="175" y="60" width="135" height="88" rx="8" fill="rgba(59,130,246,0.12)" stroke="#3b82f6" stroke-width="2"/>
+      <text x="242" y="84" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="11" font-weight="800" fill="#60a5fa">② Logical</text>
+      <text x="242" y="99" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Domain Model</text>
+      <text x="242" y="111" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Class / Component</text>
+      <text x="242" y="123" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">State Machine</text>
+      <text x="242" y="137" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#60a5fa">→ Architect · Dev</text>
+
+      <!-- arrow 2→3 -->
+      <line x1="310" y1="104" x2="340" y2="104" stroke="#60a5fa" stroke-width="1.8" marker-end="url(#pf-b)"/>
+
+      <!-- Phase 3: Process + Development (parallel, x=340) -->
+      <rect x="340" y="35" width="190" height="175" rx="8" fill="rgba(255,255,255,0.02)" stroke="rgba(96,165,250,0.2)" stroke-width="1.5" stroke-dasharray="5,3"/>
+      <text x="435" y="28" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#64748b">parallel / concurrent</text>
+
+      <rect x="350" y="42" width="160" height="76" rx="7" fill="rgba(34,197,94,0.1)" stroke="#22c55e" stroke-width="1.8"/>
+      <text x="430" y="63" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="11" font-weight="700" fill="#22c55e">③a Process</text>
+      <text x="430" y="77" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Sequence · Flow</text>
+      <text x="430" y="89" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Runtime behavior</text>
+      <text x="430" y="109" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#22c55e">→ SRE · Perf Eng</text>
+
+      <rect x="350" y="130" width="160" height="70" rx="7" fill="rgba(139,92,246,0.1)" stroke="#8b5cf6" stroke-width="1.8"/>
+      <text x="430" y="151" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="11" font-weight="700" fill="#a855f7">③b Development</text>
+      <text x="430" y="165" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Module structure</text>
+      <text x="430" y="177" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Package · Dependency</text>
+      <text x="430" y="192" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#8b5cf6">→ Developer · Lead</text>
+
+      <!-- arrow 3→4 -->
+      <line x1="530" y1="104" x2="570" y2="104" stroke="#60a5fa" stroke-width="1.8" marker-end="url(#pf-b)"/>
+
+      <!-- Phase 4: Physical (x=570) -->
+      <rect x="570" y="60" width="135" height="88" rx="8" fill="rgba(249,115,22,0.1)" stroke="#f97316" stroke-width="2"/>
+      <text x="637" y="84" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="11" font-weight="800" fill="#f97316">④ Physical</text>
+      <text x="637" y="99" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Infra topology</text>
+      <text x="637" y="111" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Deployment · Scale</text>
+      <text x="637" y="123" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">HA / DR design</text>
+      <text x="637" y="137" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#f97316">→ DevOps · SRE</text>
+
+      <!-- arrow 4→5 -->
+      <line x1="705" y1="104" x2="735" y2="104" stroke="#22c55e" stroke-width="1.8" marker-end="url(#pf-g)"/>
+
+      <!-- Phase 5: Validate -->
+      <rect x="735" y="60" width="130" height="88" rx="8" fill="rgba(34,197,94,0.08)" stroke="#22c55e" stroke-width="1.5" stroke-dasharray="6,2"/>
+      <text x="800" y="84" text-anchor="middle" font-family="Oxanium,sans-serif" font-size="11" font-weight="700" fill="#22c55e">⑤ Validate</text>
+      <text x="800" y="99" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">ทุก View ตอบ</text>
+      <text x="800" y="111" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#94a3b8">Scenarios ได้ไหม?</text>
+      <text x="800" y="123" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#22c55e">QA requirements</text>
+      <text x="800" y="137" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="7.5" fill="#22c55e">satisfied?</text>
+
+      <!-- Feedback loop: Validate → Scenarios (bottom arc) -->
+      <path d="M800,148 Q800,195 430,195 Q200,195 77,195 Q50,195 77,148" stroke="#64748b" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#pf-gr)"/>
+      <text x="430" y="210" text-anchor="middle" font-family="JetBrains Mono,monospace" font-size="8" fill="#64748b">iterate — ย้อนกลับแก้ได้ทุก view เมื่อได้ข้อมูลเพิ่ม</text>
+
+      <!-- Constraint lines between views inside parallel block -->
+      <line x1="430" y1="118" x2="430" y2="130" stroke="rgba(255,255,255,.15)" stroke-width="1" stroke-dasharray="3,2"/>
+    </svg>
+    </div>
+
+    <!-- Step explanations -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:.6rem;margin-top:1rem">
+      <div style="background:var(--ink3);border:1px solid rgba(245,158,11,.2);border-radius:7px;padding:.7rem">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--amber);margin-bottom:.35rem">① Scenarios — จุดเริ่มต้น</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6">เก็บ Use Cases, User Stories, Quality Scenarios จาก stakeholders — เป็น <strong style="color:var(--text)">input</strong> ของทุก view และเป็น <strong style="color:var(--text)">test criteria</strong> สุดท้าย ถ้า architecture ตอบทุก scenario ได้ = architecture ใช้ได้</div>
+      </div>
+      <div style="background:var(--ink3);border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:.7rem">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--blue-l);margin-bottom:.35rem">② Logical — กำหนด "อะไร"</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6">ออกแบบ domain model, entities, relationships, responsibilities — ตอบคำถาม <em>"ระบบประกอบด้วยอะไร ทำหน้าที่อะไร?"</em> มักทำก่อนเพราะ Process และ Development ต้องอ้างอิง</div>
+      </div>
+      <div style="background:var(--ink3);border:1px solid rgba(34,197,94,.2);border-radius:7px;padding:.7rem">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--green);margin-bottom:.35rem">③a Process — กำหนด "อย่างไร" (runtime)</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6">Sequence diagrams, activity flows, concurrent processes — ตอบ <em>"ใครคุยกับใคร ลำดับไหน?"</em> มักทำ parallel กับ Development เพราะมีผลต่อกัน</div>
+      </div>
+      <div style="background:var(--ink3);border:1px solid rgba(139,92,246,.2);border-radius:7px;padding:.7rem">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--violet);margin-bottom:.35rem">③b Development — กำหนด "อย่างไร" (code)</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6">Package structure, module boundaries, dependency rules — ตอบ <em>"code จัดอยู่ที่ไหน ขึ้นกับอะไรได้?"</em> กำหนด constraint ให้ developer ทีมโปรเจกต์ใหญ่ต้องทำชัดก่อน code</div>
+      </div>
+      <div style="background:var(--ink3);border:1px solid rgba(249,115,22,.2);border-radius:7px;padding:.7rem">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--orange);margin-bottom:.35rem">④ Physical — กำหนด "ที่ไหน + เท่าไหร่"</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6">Infrastructure topology, deployment, scaling, HA/DR — ทำหลังสุดเพราะต้องรู้ว่า software structure เป็นอย่างไรก่อน จึงจะรู้ว่าต้องการ infra แบบไหน</div>
+      </div>
+      <div style="background:var(--ink3);border:1px solid rgba(34,197,94,.15);border-radius:7px;padding:.7rem;border-style:dashed">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--green);margin-bottom:.35rem">⑤ Validate & Iterate</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6">ตรวจว่าทุก view ตอบ scenarios ได้ครบไหม ถ้าไม่ — ย้อนกลับแก้ view ที่เกี่ยวข้อง ไม่ใช่แค่แก้ physical อย่างเดียว เป็น <strong style="color:var(--text)">living document</strong></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── STAKEHOLDER TABLE ── -->
+  <div class="two-col" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="card-title" style="color:var(--teal)">👥 Stakeholder → View Mapping</div>
+      <div style="display:flex;flex-direction:column;gap:.35rem">
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:.5rem;align-items:start;padding:.45rem .6rem;background:var(--ink3);border-radius:6px;border:1px solid var(--line)">
+          <div style="font-family:var(--fm);font-size:.62rem;color:var(--amber)">End User / BA</div>
+          <div style="font-size:.68rem;color:var(--text-d)"><span style="color:var(--amber);font-weight:700">Scenarios</span> — ระบบทำสิ่งที่ฉันต้องการได้ไหม?</div>
+        </div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:.5rem;align-items:start;padding:.45rem .6rem;background:var(--ink3);border-radius:6px;border:1px solid var(--line)">
+          <div style="font-family:var(--fm);font-size:.62rem;color:var(--blue-l)">Architect</div>
+          <div style="font-size:.68rem;color:var(--text-d)"><span style="color:var(--blue-l);font-weight:700">ทั้ง 4+1</span> — architecture ตอบ QA requirements ได้ไหม?</div>
+        </div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:.5rem;align-items:start;padding:.45rem .6rem;background:var(--ink3);border-radius:6px;border:1px solid var(--line)">
+          <div style="font-family:var(--fm);font-size:.62rem;color:var(--violet)">Developer</div>
+          <div style="font-size:.68rem;color:var(--text-d)"><span style="color:var(--violet);font-weight:700">Development</span> — ควร organize code อย่างไร?</div>
+        </div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:.5rem;align-items:start;padding:.45rem .6rem;background:var(--ink3);border-radius:6px;border:1px solid var(--line)">
+          <div style="font-family:var(--fm);font-size:.62rem;color:var(--green)">SRE / DevOps</div>
+          <div style="font-size:.68rem;color:var(--text-d)"><span style="color:var(--green);font-weight:700">Physical + Process</span> — deploy อย่างไร? runtime เป็นแบบไหน?</div>
+        </div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:.5rem;align-items:start;padding:.45rem .6rem;background:var(--ink3);border-radius:6px;border:1px solid var(--line)">
+          <div style="font-family:var(--fm);font-size:.62rem;color:var(--rose)">Security Eng</div>
+          <div style="font-size:.68rem;color:var(--text-d)"><span style="color:var(--rose);font-weight:700">Logical + Physical</span> — security boundary อยู่ที่ไหน?</div>
+        </div>
+        <div style="display:grid;grid-template-columns:130px 1fr;gap:.5rem;align-items:start;padding:.45rem .6rem;background:var(--ink3);border-radius:6px;border:1px solid var(--line)">
+          <div style="font-family:var(--fm);font-size:.62rem;color:var(--teal)">QA / Tester</div>
+          <div style="font-size:.68rem;color:var(--text-d)"><span style="color:var(--teal);font-weight:700">Scenarios + Process</span> — test cases ครอบคลุม scenario ไหน?</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- QA Mapping matrix -->
+    <div class="card">
+      <div class="card-title" style="color:var(--orange)">📐 QA → View Primary Mapping</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:.62rem">
+          <thead>
+            <tr>
+              <th style="background:var(--ink3);border:1px solid var(--line);padding:.35rem .5rem;text-align:left;font-family:var(--fh);font-size:.58rem;color:var(--text-m)">QA</th>
+              <th style="background:rgba(59,130,246,.1);border:1px solid var(--line);padding:.35rem .4rem;text-align:center;font-size:.65rem">🔷</th>
+              <th style="background:rgba(34,197,94,.08);border:1px solid var(--line);padding:.35rem .4rem;text-align:center;font-size:.65rem">⚙</th>
+              <th style="background:rgba(139,92,246,.08);border:1px solid var(--line);padding:.35rem .4rem;text-align:center;font-size:.65rem">📦</th>
+              <th style="background:rgba(249,115,22,.08);border:1px solid var(--line);padding:.35rem .4rem;text-align:center;font-size:.65rem">🖥</th>
+              <th style="background:rgba(245,158,11,.08);border:1px solid var(--line);padding:.35rem .4rem;text-align:center;font-size:.65rem">▶</th>
+            </tr>
+          </thead>
+          <tbody id="qaMatrixBody"></tbody>
+        </table>
+        <div style="display:flex;gap:.75rem;margin-top:.4rem;font-family:var(--fm);font-size:.58rem;color:var(--text-m)">
+          <span style="color:var(--orange)">●</span><span>PRIMARY</span>
+          <span style="color:var(--blue-l);opacity:.7">◉</span><span>SECONDARY</span>
+          <span style="opacity:.35">○</span><span>MINOR</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3 KEY PRINCIPLES ── -->
+  <div class="card">
+    <div class="card-title" style="color:var(--blue-l)">💡 3 หลักการสำคัญของ 4+1 Model</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem">
+      <div style="padding:.75rem;background:var(--ink3);border:1px solid rgba(59,130,246,.2);border-radius:8px">
+        <div style="font-family:var(--fh);font-size:.75rem;font-weight:700;color:var(--blue-l);margin-bottom:.4rem">1. Concern Separation</div>
+        <div style="font-size:.72rem;color:var(--text-d);line-height:1.6">แต่ละ View ตอบคนละคำถาม — อย่าพยายามใส่ทุกอย่างใน diagram เดียว ถ้า diagram ตอบ 2 คำถามพร้อมกัน แสดงว่าควรแยกเป็น 2 view</div>
+      </div>
+      <div style="padding:.75rem;background:var(--ink3);border:1px solid rgba(245,158,11,.2);border-radius:8px">
+        <div style="font-family:var(--fh);font-size:.75rem;font-weight:700;color:var(--amber);margin-bottom:.4rem">2. Scenario Traceability</div>
+        <div style="font-size:.72rem;color:var(--text-d);line-height:1.6">ทุก design decision ใน 4 views ต้องสืบย้อนกลับไปถึง Scenario ได้ ถ้า design ไม่มี Scenario รองรับ = อาจเป็น over-engineering</div>
+      </div>
+      <div style="padding:.75rem;background:var(--ink3);border:1px solid rgba(34,197,94,.2);border-radius:8px">
+        <div style="font-family:var(--fh);font-size:.75rem;font-weight:700;color:var(--green);margin-bottom:.4rem">3. Consistency Across Views</div>
+        <div style="font-size:.72rem;color:var(--text-d);line-height:1.6">Entity ใน Logical ต้องปรากฏใน Process ถูกต้อง, Module ใน Development ต้องปรากฏใน Physical ถูกต้อง — inconsistency คือ signal ว่า architecture ยังไม่สมบูรณ์</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="view-panel" id="view-scenario">
+  <div class="intro-strip" style="border-left-color:var(--amber)">
+    <div class="is-icon">▶</div>
+    <div>
+      <strong style="color:var(--amber)">SCENARIOS (+1) — Use Cases & User Stories</strong>
+      กำหนดสถานการณ์การใช้งานจริงที่ขับเคลื่อนทุก View ให้สอดคล้องกัน
+      แต่ละ Scenario คือ "test case" ของ Architecture — ถ้า Architecture ตอบ Scenario ได้ทั้งหมด แสดงว่า design ถูกต้อง
+    </div>
+  </div>
+
+  <div class="stat-strip">
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--blue-l)">50,000</div>
+      <div class="stat-lbl">Orders/day (Weekday)</div>
+      <div class="stat-sub">จ.–ศ. ช่วงปกติ</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--amber)">80,000</div>
+      <div class="stat-lbl">Orders/day (Weekend)</div>
+      <div class="stat-sub">ส.–อา. ช่วงปกติ</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--rose)">200,000</div>
+      <div class="stat-lbl">Orders/day (Weekday Peak)</div>
+      <div class="stat-sub">หลัง v2.0 เปิด ×4</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--rose)">400,000</div>
+      <div class="stat-lbl">Orders/day (Weekend Peak)</div>
+      <div class="stat-sub">หลัง v2.0 เปิด ×5</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-val" style="color:var(--green)">180</div>
+      <div class="stat-lbl">Days</div>
+      <div class="stat-sub">ระยะเวลาพัฒนา</div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1rem">
+    <div class="card-title" style="color:var(--amber)">🛒 Shopping Cart Flow (จาก Flowchart)</div>
+    <div class="flow-wrap">
+      <div class="flow-diag">
+        <div class="flow-box" style="border-color:var(--blue);color:var(--blue-l);background:rgba(59,130,246,.08)">Select Toys</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-box" style="border-color:var(--teal);color:var(--teal);background:rgba(20,184,166,.08)">Add to Cart</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-box" style="border-color:var(--violet);color:var(--violet);background:rgba(139,92,246,.08)">Calculate Total</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-diamond" style="border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.08)"><span>More Toys?</span></div>
+        <div class="flow-arr">→ No →</div>
+        <div class="flow-box" style="border-color:var(--orange);color:var(--orange);background:rgba(249,115,22,.08)">Add Shipping Charges</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-box" style="border-color:var(--blue-l);color:var(--blue-ll);background:rgba(59,130,246,.06)">Enter Shipping Info</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-box" style="border-color:var(--green);color:var(--green);background:rgba(34,197,94,.08)">Verify & Pay</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-box" style="border-color:var(--teal);color:var(--teal);background:rgba(20,184,166,.08)">Create Shipping Label</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-box" style="border-color:var(--violet);color:var(--violet);background:rgba(139,92,246,.08)">Update Inventory</div>
+        <div class="flow-arr">→</div>
+        <div class="flow-box" style="border-color:var(--amber);color:var(--amber);background:rgba(245,158,11,.12);border-radius:999px">Exit to Home</div>
+      </div>
+    </div>
+    <div style="font-size:.65rem;color:var(--text-m);margin-top:.4rem;font-family:var(--fm)">* ลูกศร Yes จาก More Toys? วนกลับไป Select Toys</div>
+  </div>
+
+  <div class="card-title" style="color:var(--blue-l);margin-bottom:.75rem">USE CASES</div>
+  <div class="uc-grid">
+
+    <div class="uc-card" style="border-left:3px solid var(--blue)">
+      <div class="uc-header">
+        <span class="uc-num">UC-01</span>
+        <span class="uc-title">Browse & Add to Cart</span>
+      </div>
+      <div class="uc-body">
+        <div class="uc-actor">👤 Actor: ลูกค้า (Guest / Logged-in)</div>
+        <div class="uc-steps">
+          <div class="uc-step"><div class="uc-step-num">1</div>ค้นหาสินค้าด้วยชื่อ หรือเลือกจากหน้ารายการ</div>
+          <div class="uc-step"><div class="uc-step-num">2</div>ดูรายละเอียดสินค้า ราคา จำนวนคงเหลือ</div>
+          <div class="uc-step"><div class="uc-step-num">3</div>เพิ่มสินค้าลง Cart ระบุจำนวน</div>
+          <div class="uc-step"><div class="uc-step-num">4</div>ดู Cart ปรับจำนวน / ลบสินค้า</div>
+          <div class="uc-step"><div class="uc-step-num">5</div>ระบบคำนวณยอดรวมแบบ real-time</div>
+        </div>
+        <div class="uc-qa">
+          <span class="qa-tag" style="border-color:rgba(59,130,246,.3);color:var(--blue-l)">Performance</span>
+          <span class="qa-tag" style="border-color:rgba(20,184,166,.3);color:var(--teal)">Functional</span>
+          <span class="qa-tag" style="border-color:rgba(245,158,11,.3);color:var(--amber)">Scalability</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-card" style="border-left:3px solid var(--green)">
+      <div class="uc-header">
+        <span class="uc-num">UC-02</span>
+        <span class="uc-title">Checkout & Payment</span>
+      </div>
+      <div class="uc-body">
+        <div class="uc-actor">👤 Actor: ลูกค้า (Logged-in)</div>
+        <div class="uc-steps">
+          <div class="uc-step"><div class="uc-step-num">1</div>เลือกวิธีจัดส่ง: Kerry / Lineman (BKK) / EMS</div>
+          <div class="uc-step"><div class="uc-step-num">2</div>ระบบแสดงราคาค่าส่งตามวิธีที่เลือก</div>
+          <div class="uc-step"><div class="uc-step-num">3</div>เลือกช่องทางชำระ: Line Pay / Visa / Mastercard / Debit</div>
+          <div class="uc-step"><div class="uc-step-num">4</div>กรอก Payment Info → ยืนยันคำสั่งซื้อ</div>
+          <div class="uc-step"><div class="uc-step-num">5</div>ระบบสร้าง Order, ตัด Inventory, แจ้งเตือน</div>
+        </div>
+        <div class="uc-qa">
+          <span class="qa-tag" style="border-color:rgba(239,68,68,.3);color:var(--rose)">Security</span>
+          <span class="qa-tag" style="border-color:rgba(59,130,246,.3);color:var(--blue-l)">Reliability</span>
+          <span class="qa-tag" style="border-color:rgba(20,184,166,.3);color:var(--teal)">Functional</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-card" style="border-left:3px solid var(--violet)">
+      <div class="uc-header">
+        <span class="uc-num">UC-03</span>
+        <span class="uc-title">Order Notification & Tracking</span>
+      </div>
+      <div class="uc-body">
+        <div class="uc-actor">👤 Actor: ลูกค้า + 🤖 System</div>
+        <div class="uc-steps">
+          <div class="uc-step"><div class="uc-step-num">1</div>หลัง confirm order ลูกค้าเลือกรับการแจ้งเตือนหรือไม่</div>
+          <div class="uc-step"><div class="uc-step-num">2</div>เลือกช่องทาง: Email / SMS / In-app (เลือกได้มากกว่า 1)</div>
+          <div class="uc-step"><div class="uc-step-num">3</div>ระบบส่ง notification เมื่อ Order ยืนยันแล้ว</div>
+          <div class="uc-step"><div class="uc-step-num">4</div>ลูกค้าได้รับข้อมูลจัดส่งพร้อมเลข tracking</div>
+        </div>
+        <div class="uc-qa">
+          <span class="qa-tag" style="border-color:rgba(59,130,246,.3);color:var(--blue-l)">Availability</span>
+          <span class="qa-tag" style="border-color:rgba(139,92,246,.3);color:var(--violet)">Compatibility</span>
+          <span class="qa-tag" style="border-color:rgba(20,184,166,.3);color:var(--teal)">Functional</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-card" style="border-left:3px solid var(--amber)">
+      <div class="uc-header">
+        <span class="uc-num">UC-04</span>
+        <span class="uc-title">Loyalty Points (ฝ่ายตลาด)</span>
+      </div>
+      <div class="uc-body">
+        <div class="uc-actor">👤 Actor: ลูกค้า + 🏢 Marketing</div>
+        <div class="uc-steps">
+          <div class="uc-step"><div class="uc-step-num">1</div>ซื้อสินค้า 100 บาท = 1 แต้ม (1 แต้ม = 1 บาท)</div>
+          <div class="uc-step"><div class="uc-step-num">2</div>แต้มมีอายุ 180 วัน นับตั้งแต่วันที่ได้รับอนุมัติ</div>
+          <div class="uc-step"><div class="uc-step-num">3</div>แต้มอนุมัติเมื่อยืนยันรับสินค้า (วันที่ 1 ของอายุ 180 วัน)</div>
+          <div class="uc-step"><div class="uc-step-num">4</div>ลูกค้าดูแต้มและนำไปใช้ลดราคาได้</div>
+        </div>
+        <div class="uc-qa">
+          <span class="qa-tag" style="border-color:rgba(20,184,166,.3);color:var(--teal)">Functional</span>
+          <span class="qa-tag" style="border-color:rgba(59,130,246,.3);color:var(--blue-l)">Reliability</span>
+          <span class="qa-tag" style="border-color:rgba(245,158,11,.3);color:var(--amber)">Maintainability</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-card" style="border-left:3px solid var(--rose)">
+      <div class="uc-header">
+        <span class="uc-num">UC-05</span>
+        <span class="uc-title">Inventory Management</span>
+      </div>
+      <div class="uc-body">
+        <div class="uc-actor">🤖 Actor: System (Automated)</div>
+        <div class="uc-steps">
+          <div class="uc-step"><div class="uc-step-num">1</div>เมื่อ Order confirm ระบบสร้าง shipping label</div>
+          <div class="uc-step"><div class="uc-step-num">2</div>ระบบตัด stock ใน Inventory Program</div>
+          <div class="uc-step"><div class="uc-step-num">3</div>ส่งข้อมูลไปยังระบบจัดส่งพาร์ทเนอร์</div>
+          <div class="uc-step"><div class="uc-step-num">4</div>อัปเดต order status → กลับสู่หน้าหลัก</div>
+        </div>
+        <div class="uc-qa">
+          <span class="qa-tag" style="border-color:rgba(20,184,166,.3);color:var(--teal)">Functional</span>
+          <span class="qa-tag" style="border-color:rgba(139,92,246,.3);color:var(--violet)">Compatibility</span>
+          <span class="qa-tag" style="border-color:rgba(59,130,246,.3);color:var(--blue-l)">Reliability</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="uc-card" style="border-left:3px solid var(--cyan)">
+      <div class="uc-header">
+        <span class="uc-num">UC-06</span>
+        <span class="uc-title">Peak Load Handling</span>
+      </div>
+      <div class="uc-body">
+        <div class="uc-actor">🌐 Actor: System (Quality Scenario)</div>
+        <div class="uc-steps">
+          <div class="uc-step"><div class="uc-step-num">1</div>หลัง v2.0 launch ช่วง จ.–ศ. load เพิ่ม ×4 = 200K orders/day</div>
+          <div class="uc-step"><div class="uc-step-num">2</div>หลัง v2.0 launch ช่วง ส.–อา. load เพิ่ม ×5 = 400K orders/day</div>
+          <div class="uc-step"><div class="uc-step-num">3</div>ระบบต้อง scale out รองรับโดยไม่ล่ม</div>
+          <div class="uc-step"><div class="uc-step-num">4</div>Response time ต้องอยู่ในเกณฑ์ที่กำหนด</div>
+        </div>
+        <div class="uc-qa">
+          <span class="qa-tag" style="border-color:rgba(245,158,11,.3);color:var(--amber)">Scalability</span>
+          <span class="qa-tag" style="border-color:rgba(59,130,246,.3);color:var(--blue-l)">Availability</span>
+          <span class="qa-tag" style="border-color:rgba(249,115,22,.3);color:var(--orange)">Performance</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     LOGICAL VIEW
+═══════════════════════════════════════════ -->
+<div class="view-panel" id="view-logical">
+  <div class="intro-strip" style="border-left-color:var(--blue)">
+    <div class="is-icon">🔷</div>
+    <div>
+      <strong style="color:var(--blue-l)">LOGICAL VIEW — Domain Model & Component Responsibilities</strong>
+      มองจากมุม Analyst / Developer — ระบบประกอบด้วย entity อะไรบ้าง? แต่ละ entity มี attribute และ relationship กับ entity อื่นอย่างไร?
+      เป็น blueprint ของ "ความรับผิดชอบ" ของแต่ละส่วนในระบบ
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:1rem">
+    <div class="card">
+      <div class="card-title" style="color:var(--blue-l)">🏷 Core Domain Entities</div>
+      <div class="domain-grid">
+        <div class="domain-card" style="border-color:rgba(59,130,246,.3)">
+          <div class="dc-head"><span class="dc-icon">👤</span><span class="dc-name" style="color:var(--blue-l)">Customer</span></div>
+          <div class="dc-type">Entity · Identity Aggregate</div>
+          <div class="dc-attrs">
+            <div class="dc-attr"><span class="at dc-key">customerId</span><span class="typ">UUID</span></div>
+            <div class="dc-attr"><span class="at">name</span><span class="typ">String</span></div>
+            <div class="dc-attr"><span class="at">email</span><span class="typ">String</span></div>
+            <div class="dc-attr"><span class="at">phone</span><span class="typ">String</span></div>
+            <div class="dc-attr"><span class="at">notifPref</span><span class="typ">[]Channel</span></div>
+          </div>
+          <div class="dc-rel">
+            <div class="rel-item">◈ has 1 LoyaltyAccount</div>
+            <div class="rel-item">◈ has many Orders</div>
+            <div class="rel-item">◈ has 1 active Cart</div>
+          </div>
+        </div>
+
+        <div class="domain-card" style="border-color:rgba(20,184,166,.3)">
+          <div class="dc-head"><span class="dc-icon">🛒</span><span class="dc-name" style="color:var(--teal)">ShoppingCart</span></div>
+          <div class="dc-type">Aggregate Root</div>
+          <div class="dc-attrs">
+            <div class="dc-attr"><span class="at dc-key">cartId</span><span class="typ">UUID</span></div>
+            <div class="dc-attr"><span class="at">customerId</span><span class="typ">UUID</span></div>
+            <div class="dc-attr"><span class="at">items</span><span class="typ">[]CartItem</span></div>
+            <div class="dc-attr"><span class="at">totalAmount</span><span class="typ">Decimal</span></div>
+            <div class="dc-attr"><span class="at">createdAt</span><span class="typ">DateTime</span></div>
+          </div>
+          <div class="dc-rel">
+            <div class="rel-item">◈ contains many CartItems</div>
+            <div class="rel-item">◈ converts to Order</div>
+          </div>
+        </div>
+
+        <div class="domain-card" style="border-color:rgba(139,92,246,.3)">
+          <div class="dc-head"><span class="dc-icon">📦</span><span class="dc-name" style="color:var(--violet)">Product</span></div>
+          <div class="dc-type">Entity</div>
+          <div class="dc-attrs">
+            <div class="dc-attr"><span class="at dc-key">productId</span><span class="typ">UUID</span></div>
+            <div class="dc-attr"><span class="at">name</span><span class="typ">String</span></div>
+            <div class="dc-attr"><span class="at">price</span><span class="typ">Decimal</span></div>
+            <div class="dc-attr"><span class="at">stockQty</span><span class="typ">Int</span></div>
+            <div class="dc-attr"><span class="at">category</span><span class="typ">String</span></div>
+          </div>
+          <div class="dc-rel">
+            <div class="rel-item">◈ referenced by CartItem</div>
+            <div class="rel-item">◈ managed by Inventory</div>
+          </div>
+        </div>
+
+        <div class="domain-card" style="border-color:rgba(249,115,22,.3)">
+          <div class="dc-head"><span class="dc-icon">🧾</span><span class="dc-name" style="color:var(--orange)">Order</span></div>
+          <div class="dc-type">Aggregate Root</div>
+          <div class="dc-attrs">
+            <div class="dc-attr"><span class="at dc-key">orderId</span><span class="typ">UUID</span></div>
+            <div class="dc-attr"><span class="at">status</span><span class="typ">OrderStatus</span></div>
+            <div class="dc-attr"><span class="at">items</span><span class="typ">[]OrderItem</span></div>
+            <div class="dc-attr"><span class="at">shippingMethod</span><span class="typ">Enum</span></div>
+            <div class="dc-attr"><span class="at">totalAmount</span><span class="typ">Decimal</span></div>
+          </div>
+          <div class="dc-rel">
+            <div class="rel-item">◈ has 1 Payment</div>
+            <div class="rel-item">◈ has 1 Shipment</div>
+            <div class="rel-item">◈ triggers Notification</div>
+          </div>
+        </div>
+
+        <div class="domain-card" style="border-color:rgba(34,197,94,.3)">
+          <div class="dc-head"><span class="dc-icon">💳</span><span class="dc-name" style="color:var(--green)">Payment</span></div>
+          <div class="dc-type">Entity</div>
+          <div class="dc-attrs">
+            <div class="dc-attr"><span class="at dc-key">paymentId</span><span class="typ">UUID</span></div>
+            <div class="dc-attr"><span class="at">method</span><span class="typ">PayMethod</span></div>
+            <div class="dc-attr"><span class="at">amount</span><span class="typ">Decimal</span></div>
+            <div class="dc-attr"><span class="at">status</span><span class="typ">PayStatus</span></div>
+            <div class="dc-attr"><span class="at">paidAt</span><span class="typ">DateTime</span></div>
+          </div>
+          <div class="dc-rel">
+            <div class="rel-item">◈ belongs to Order</div>
+            <div class="rel-item">◈ calls PaymentGateway</div>
+          </div>
+        </div>
+
+        <div class="domain-card" style="border-color:rgba(6,182,212,.3)">
+          <div class="dc-head"><span class="dc-icon">🚚</span><span class="dc-name" style="color:var(--cyan)">Shipment</span></div>
+          <div class="dc-type">Entity</div>
+          <div class="dc-attrs">
+            <div class="dc-attr"><span class="at dc-key">shipmentId</span><span class="typ">UUID</span></div>
+            <div class="dc-attr"><span class="at">carrier</span><span class="typ">Enum</span></div>
+            <div class="dc-attr"><span class="at">trackingNo</span><span class="typ">String</span></div>
+            <div class="dc-attr"><span class="at">address</span><span class="typ">Address</span></div>
+            <div class="dc-attr"><span class="at">shippingFee</span><span class="typ">Decimal</span></div>
+          </div>
+          <div class="dc-rel">
+            <div class="rel-item">◈ belongs to Order</div>
+            <div class="rel-item">◈ calls CarrierAPI</div>
+          </div>
+        </div>
+
+        <div class="domain-card" style="border-color:rgba(245,158,11,.3)">
+          <div class="dc-head"><span class="dc-icon">⭐</span><span class="dc-name" style="color:var(--amber)">LoyaltyAccount</span></div>
+          <div class="dc-type">Aggregate Root</div>
+          <div class="dc-attrs">
+            <div class="dc-attr"><span class="at dc-key">accountId</span><span class="typ">UUID</span></div>
+            <div class="dc-attr"><span class="at">balance</span><span class="typ">Int (แต้ม)</span></div>
+            <div class="dc-attr"><span class="at">transactions</span><span class="typ">[]PointTx</span></div>
+          </div>
+          <div class="dc-rel">
+            <div class="rel-item">◈ belongs to Customer</div>
+            <div class="rel-item">◈ earned from Order</div>
+          </div>
+        </div>
+
+        <div class="domain-card" style="border-color:rgba(239,68,68,.3)">
+          <div class="dc-head"><span class="dc-icon">🔔</span><span class="dc-name" style="color:var(--rose)">Notification</span></div>
+          <div class="dc-type">Value Object / Event</div>
+          <div class="dc-attrs">
+            <div class="dc-attr"><span class="at">channel</span><span class="typ">Email|SMS|App</span></div>
+            <div class="dc-attr"><span class="at">template</span><span class="typ">String</span></div>
+            <div class="dc-attr"><span class="at">sentAt</span><span class="typ">DateTime</span></div>
+            <div class="dc-attr"><span class="at">status</span><span class="typ">Delivered</span></div>
+          </div>
+          <div class="dc-rel">
+            <div class="rel-item">◈ triggered by Order events</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:1rem">
+      <div class="card">
+        <div class="card-title" style="color:var(--amber)">📊 Enum Definitions</div>
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.6rem .8rem">
+            <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--orange);margin-bottom:.3rem">ShippingMethod</div>
+            <div style="display:flex;flex-wrap:wrap;gap:.25rem">
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:var(--orange);padding:1px 6px;border-radius:3px">KERRY</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:var(--orange);padding:1px 6px;border-radius:3px">LINEMAN_BKK</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);color:var(--orange);padding:1px 6px;border-radius:3px">EMS</span>
+            </div>
+          </div>
+          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.6rem .8rem">
+            <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--green);margin-bottom:.3rem">PaymentMethod</div>
+            <div style="display:flex;flex-wrap:wrap;gap:.25rem">
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:3px">LINE_PAY</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:3px">VISA</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:3px">MASTERCARD</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:3px">DEBIT_KBANK</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:3px">DEBIT_THAI</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:3px">DEBIT_BBL</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:3px">DEBIT_KTB</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);color:var(--green);padding:1px 6px;border-radius:3px">DEBIT_BAY</span>
+            </div>
+          </div>
+          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.6rem .8rem">
+            <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--violet);margin-bottom:.3rem">NotificationChannel</div>
+            <div style="display:flex;flex-wrap:wrap;gap:.25rem">
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);color:var(--violet);padding:1px 6px;border-radius:3px">EMAIL</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);color:var(--violet);padding:1px 6px;border-radius:3px">SMS</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);color:var(--violet);padding:1px 6px;border-radius:3px">IN_APP</span>
+            </div>
+            <div style="font-family:var(--fm);font-size:.58rem;color:var(--text-m);margin-top:.35rem">* ลูกค้าเลือกได้มากกว่า 1 ช่องทาง</div>
+          </div>
+          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.6rem .8rem">
+            <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--rose);margin-bottom:.3rem">OrderStatus</div>
+            <div style="display:flex;flex-wrap:wrap;gap:.25rem">
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.2);color:var(--rose);padding:1px 6px;border-radius:3px">PENDING</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.2);color:var(--rose);padding:1px 6px;border-radius:3px">CONFIRMED</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.2);color:var(--rose);padding:1px 6px;border-radius:3px">SHIPPED</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.2);color:var(--rose);padding:1px 6px;border-radius:3px">DELIVERED</span>
+              <span style="font-family:var(--fm);font-size:.6rem;background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.2);color:var(--rose);padding:1px 6px;border-radius:3px">CANCELLED</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:var(--amber)">⭐ Loyalty Point Rules</div>
+        <div style="display:flex;flex-direction:column;gap:.4rem">
+          <div style="display:flex;gap:.6rem;padding:.5rem;background:var(--ink3);border:1px solid var(--line);border-radius:6px;align-items:flex-start">
+            <span style="font-size:.9rem">💰</span>
+            <div style="font-size:.72rem;color:var(--text-d)"><strong style="color:var(--amber)">Earn Rate:</strong> ทุก 100 บาท = 1 แต้ม (1 แต้ม = 1 บาทส่วนลด)</div>
+          </div>
+          <div style="display:flex;gap:.6rem;padding:.5rem;background:var(--ink3);border:1px solid var(--line);border-radius:6px;align-items:flex-start">
+            <span style="font-size:.9rem">⏱</span>
+            <div style="font-size:.72rem;color:var(--text-d)"><strong style="color:var(--amber)">Expiry:</strong> 180 วัน นับตั้งแต่ <em>วันที่ยืนยันรับสินค้า</em></div>
+          </div>
+          <div style="display:flex;gap:.6rem;padding:.5rem;background:var(--ink3);border:1px solid var(--line);border-radius:6px;align-items:flex-start">
+            <span style="font-size:.9rem">✅</span>
+            <div style="font-size:.72rem;color:var(--text-d)"><strong style="color:var(--amber)">Approval:</strong> แต้มเริ่มนับวันที่ลูกค้ากด "ยืนยันรับสินค้า"</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── LOYALTY POINT STATE DIAGRAM ── -->
+  <div class="card" style="margin-top:1rem">
+    <div class="card-title" style="color:var(--amber)">⭐ Loyalty Point — Full State Diagram (Extended)</div>
+
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem">
+      <div style="font-size:.75rem;color:var(--text-d);line-height:1.7;flex:1;min-width:260px">
+        Requirement ให้มาระบุแค่ Happy Path — แต่ในระบบจริงต้องออกแบบ state ให้ครอบคลุม
+        ทุกสถานการณ์ที่อาจเกิดขึ้น ทั้งฝั่งลูกค้าและระบบ
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:.35rem;align-items:flex-start">
+        <span style="font-family:var(--fm);font-size:.6rem;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.3);color:var(--amber);padding:2px 8px;border-radius:4px">● ACTIVE states</span>
+        <span style="font-family:var(--fm);font-size:.6rem;background:rgba(100,116,139,.12);border:1px solid rgba(100,116,139,.3);color:var(--text-m);padding:2px 8px;border-radius:4px">● TERMINAL states</span>
+        <span style="font-family:var(--fm);font-size:.6rem;background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.3);color:var(--blue-l);padding:2px 8px;border-radius:4px">→ transitions</span>
+        <span style="font-family:var(--fm);font-size:.6rem;background:rgba(239,68,68,.12);border:1px solid rgba(239,68,68,.3);color:var(--rose);padding:2px 8px;border-radius:4px">→ error/edge cases</span>
+      </div>
+    </div>
+
+    <!-- SVG STATE DIAGRAM -->
+    <div style="overflow-x:auto;background:var(--ink3);border:1px solid var(--line);border-radius:10px;padding:1.5rem">
+    <svg viewBox="0 0 960 640" width="100%" style="min-width:740px;font-family:'JetBrains Mono',monospace" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <marker id="a-b" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#60a5fa"/></marker>
+    <marker id="a-g" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#22c55e"/></marker>
+    <marker id="a-r" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#f43f5e"/></marker>
+    <marker id="a-a" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#f59e0b"/></marker>
+    <marker id="a-gr" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3z" fill="#64748b"/></marker>
+  </defs>
+
+  <!--
+    GRID LAYOUT  (cx, cy, w=box width, h=50)
+    Col1 x=110: REFUSED_DELIVERY, AUTO_FORFEITED, VOIDED
+    Col2 x=310: START, PENDING_DELIVERY
+    Col3 x=568: CONFIRMED_RECEIPT, ACTIVE, EXPIRED, LOCKED
+    Col4 x=799: PARTIALLY_REDEEMED, FULLY_REDEEMED, REVERSED
+
+    Row y:  35=START  115=row1  240=row2  360=row3  475=row4
+
+    Box edges used for arrows:
+      REFUSED  : rect(31,90,158,50)   L=31  R=189  T=90  B=140  cx=110 cy=115
+      PENDING  : rect(229,90,162,50)  L=229 R=391  T=90  B=140  cx=310 cy=115
+      CONFIRMED: rect(483,90,170,50)  L=483 R=653  T=90  B=140  cx=568 cy=115
+      AUTO     : rect(31,215,158,50)  L=31  R=189  T=215 B=265  cx=110 cy=240
+      ACTIVE   : rect(493,215,150,50) L=493 R=643  T=215 B=265  cx=568 cy=240
+      PARTIAL  : rect(712,215,175,50) L=712 R=887  T=215 B=265  cx=799 cy=240
+      VOIDED   : rect(36,335,148,50)  L=36  R=184  T=335 B=385  cx=110 cy=360
+      EXPIRED  : rect(494,335,148,50) L=494 R=642  T=335 B=385  cx=568 cy=360
+      FULLY    : rect(719,335,160,50) L=719 R=879  T=335 B=385  cx=799 cy=360
+      LOCKED   : rect(493,450,150,50) L=493 R=643  T=450 B=500  cx=568 cy=475
+      REVERSED : rect(719,450,160,50) L=719 R=879  T=450 B=500  cx=799 cy=475
+  -->
+
+  <!-- ======= STATE BOXES ======= -->
+
+  <!-- REFUSED_DELIVERY  cx=110 cy=115 -->
+  <rect x="31" y="90" width="158" height="50" rx="7" fill="rgba(244,63,94,0.1)" stroke="#f43f5e" stroke-width="1.8"/>
+  <text x="110" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#f43f5e">REFUSED_DELIVERY</text>
+  <text x="110" y="124" text-anchor="middle" font-size="8" fill="#94a3b8">ลูกค้าปฏิเสธรับสินค้า</text>
+  <text x="110" y="135" text-anchor="middle" font-size="7" fill="#64748b">ณ จุดส่งสินค้า</text>
+
+  <!-- PENDING_DELIVERY  cx=310 cy=115 -->
+  <rect x="229" y="90" width="162" height="50" rx="7" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="1.8"/>
+  <text x="310" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#f59e0b">PENDING_DELIVERY</text>
+  <text x="310" y="124" text-anchor="middle" font-size="8" fill="#94a3b8">รอลูกค้ายืนยันรับสินค้า</text>
+  <text x="310" y="135" text-anchor="middle" font-size="7" fill="#64748b">แต้มถูกสร้าง ยังใช้ไม่ได้</text>
+
+  <!-- CONFIRMED_RECEIPT  cx=568 cy=115 -->
+  <rect x="483" y="90" width="170" height="50" rx="7" fill="rgba(34,197,94,0.1)" stroke="#22c55e" stroke-width="1.8"/>
+  <text x="568" y="110" text-anchor="middle" font-size="10" font-weight="700" fill="#22c55e">CONFIRMED_RECEIPT</text>
+  <text x="568" y="124" text-anchor="middle" font-size="8" fill="#94a3b8">ลูกค้ากดยืนยันรับสินค้า</text>
+  <text x="568" y="135" text-anchor="middle" font-size="7" fill="#64748b">เริ่มนับ 180 วัน</text>
+
+  <!-- AUTO_FORFEITED  cx=110 cy=240  DASHED -->
+  <rect x="31" y="215" width="158" height="50" rx="7" fill="rgba(245,158,11,0.08)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="5,3"/>
+  <text x="110" y="235" text-anchor="middle" font-size="10" font-weight="700" fill="#f59e0b">AUTO_FORFEITED</text>
+  <text x="110" y="249" text-anchor="middle" font-size="8" fill="#94a3b8">ไม่กดยืนยันใน X วัน</text>
+  <text x="110" y="260" text-anchor="middle" font-size="7" fill="#64748b">cron auto-expire  ⬛ terminal</text>
+
+  <!-- ACTIVE  cx=568 cy=240 -->
+  <rect x="493" y="215" width="150" height="50" rx="7" fill="rgba(34,197,94,0.15)" stroke="#22c55e" stroke-width="2.2"/>
+  <text x="568" y="235" text-anchor="middle" font-size="11" font-weight="700" fill="#22c55e">ACTIVE</text>
+  <text x="568" y="249" text-anchor="middle" font-size="8" fill="#94a3b8">แต้มใช้งานได้  countdown 180 วัน</text>
+  <text x="568" y="260" text-anchor="middle" font-size="7" fill="#f59e0b">★ HAPPY PATH</text>
+
+  <!-- PARTIALLY_REDEEMED  cx=799 cy=240 -->
+  <rect x="712" y="215" width="175" height="50" rx="7" fill="rgba(96,165,250,0.12)" stroke="#60a5fa" stroke-width="1.8"/>
+  <text x="799" y="235" text-anchor="middle" font-size="9.5" font-weight="700" fill="#60a5fa">PARTIALLY_REDEEMED</text>
+  <text x="799" y="249" text-anchor="middle" font-size="8" fill="#94a3b8">ใช้แต้มไปบางส่วน</text>
+  <text x="799" y="260" text-anchor="middle" font-size="7" fill="#64748b">balance ลดลง  clock ยังเดิน</text>
+
+  <!-- VOIDED  cx=110 cy=360  TERMINAL -->
+  <rect x="36" y="335" width="148" height="50" rx="7" fill="rgba(30,41,59,0.6)" stroke="#475569" stroke-width="1.5"/>
+  <text x="110" y="355" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">VOIDED</text>
+  <text x="110" y="369" text-anchor="middle" font-size="8" fill="#64748b">order ยกเลิก / คืนสินค้า</text>
+  <text x="110" y="380" text-anchor="middle" font-size="7" fill="#475569">⬛ terminal state</text>
+
+  <!-- EXPIRED  cx=568 cy=360  TERMINAL -->
+  <rect x="494" y="335" width="148" height="50" rx="7" fill="rgba(30,41,59,0.6)" stroke="#475569" stroke-width="1.5"/>
+  <text x="568" y="355" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">EXPIRED</text>
+  <text x="568" y="369" text-anchor="middle" font-size="8" fill="#64748b">แต้มหมดอายุ (180 วัน)</text>
+  <text x="568" y="380" text-anchor="middle" font-size="7" fill="#475569">⬛ terminal state</text>
+
+  <!-- FULLY_REDEEMED  cx=799 cy=360  TERMINAL -->
+  <rect x="719" y="335" width="160" height="50" rx="7" fill="rgba(30,41,59,0.6)" stroke="#475569" stroke-width="1.5"/>
+  <text x="799" y="355" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">FULLY_REDEEMED</text>
+  <text x="799" y="369" text-anchor="middle" font-size="8" fill="#64748b">ใช้แต้มหมดแล้ว</text>
+  <text x="799" y="380" text-anchor="middle" font-size="7" fill="#22c55e">✓ completed  ⬛ terminal</text>
+
+  <!-- LOCKED  cx=568 cy=475  DASHED -->
+  <rect x="493" y="450" width="150" height="50" rx="7" fill="rgba(244,63,94,0.1)" stroke="#f43f5e" stroke-width="1.8" stroke-dasharray="6,2"/>
+  <text x="568" y="470" text-anchor="middle" font-size="11" font-weight="700" fill="#f43f5e">LOCKED</text>
+  <text x="568" y="484" text-anchor="middle" font-size="8" fill="#94a3b8">ระงับแต้มชั่วคราว</text>
+  <text x="568" y="495" text-anchor="middle" font-size="7" fill="#64748b">อยู่ระหว่างพิจารณาคืนสินค้า</text>
+
+  <!-- REVERSED  cx=799 cy=475  TERMINAL -->
+  <rect x="719" y="450" width="160" height="50" rx="7" fill="rgba(30,41,59,0.6)" stroke="#475569" stroke-width="1.5"/>
+  <text x="799" y="470" text-anchor="middle" font-size="10" font-weight="700" fill="#64748b">REVERSED</text>
+  <text x="799" y="484" text-anchor="middle" font-size="8" fill="#64748b">ยึดแต้มคืน (return approved)</text>
+  <text x="799" y="495" text-anchor="middle" font-size="7" fill="#475569">⬛ terminal state</text>
+
+  <!-- START node -->
+  <circle cx="310" cy="36" r="13" fill="none" stroke="#3b82f6" stroke-width="2"/>
+  <circle cx="310" cy="36" r="6" fill="#3b82f6"/>
+  <text x="310" y="60" text-anchor="middle" font-size="8" fill="#64748b">START</text>
+
+  <!-- ======= ARROWS =======
+       Every arrow ends exactly at a box edge.
+       Verified coordinates listed in GRID comment above.
+  -->
+
+  <!-- [1] START → PENDING_DELIVERY  top(310,90) -->
+  <line x1="310" y1="49" x2="310" y2="90" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#a-b)"/>
+  <text x="320" y="73" font-size="8" fill="#60a5fa">order.confirmed</text>
+
+  <!-- [2] PENDING_DELIVERY right(391,115) → CONFIRMED_RECEIPT left(483,115) -->
+  <line x1="391" y1="115" x2="483" y2="115" stroke="#22c55e" stroke-width="1.8" marker-end="url(#a-g)"/>
+  <text x="437" y="108" text-anchor="middle" font-size="8" fill="#22c55e">ลูกค้ากดยืนยันรับ</text>
+
+  <!-- [3] PENDING_DELIVERY left(229,115) → REFUSED_DELIVERY right(189,115)  same row, horizontal -->
+  <line x1="229" y1="115" x2="189" y2="115" stroke="#f43f5e" stroke-width="1.5" marker-end="url(#a-r)"/>
+  <text x="207" y="107" text-anchor="middle" font-size="8" fill="#f43f5e">ปฏิเสธรับ</text>
+
+  <!-- [4] CONFIRMED_RECEIPT bottom(568,140) → ACTIVE top(568,215) -->
+  <line x1="568" y1="140" x2="568" y2="215" stroke="#22c55e" stroke-width="1.5" marker-end="url(#a-g)"/>
+  <text x="582" y="175" font-size="8" fill="#22c55e">system approves</text>
+  <text x="582" y="186" font-size="7" fill="#64748b">points credited</text>
+
+  <!-- [5] PENDING_DELIVERY bottom-left(285,140) → AUTO_FORFEITED top(110,215)
+       Curve stays between the two columns                                    -->
+  <path d="M285,140 Q200,168 110,215" stroke="#f59e0b" stroke-width="1.5" fill="none" marker-end="url(#a-a)"/>
+  <text x="196" y="170" text-anchor="middle" font-size="8" fill="#f59e0b">ไม่กดยืนยัน</text>
+  <text x="196" y="181" text-anchor="middle" font-size="7" fill="#64748b">ใน X วัน</text>
+
+  <!-- [6] REFUSED_DELIVERY bottom(110,140) → VOIDED top(110,335)
+       Route at x=18, LEFT of AUTO box (AUTO.L=31), so path never enters AUTO  -->
+  <path d="M95,140 Q18,162 18,268 Q18,335 36,360" stroke="#f43f5e" stroke-width="1.5" fill="none" marker-end="url(#a-r)"/>
+  <text x="42" y="192" font-size="7.5" fill="#f43f5e">order</text>
+  <text x="42" y="202" font-size="7.5" fill="#f43f5e">refund</text>
+
+  <!-- [7] PENDING_DELIVERY bottom(275,140) → VOIDED right(184,360)
+       Route at x=218, BETWEEN cols (AUTO.R=189 < 218 < PENDING.L=229)
+       dashed = order.cancelled                                                -->
+  <path d="M265,140 Q218,205 218,340 Q218,360 184,360" stroke="#64748b" stroke-width="1.2" fill="none" stroke-dasharray="5,3" marker-end="url(#a-gr)"/>
+  <text x="229" y="252" font-size="7.5" fill="#64748b">order</text>
+  <text x="229" y="263" font-size="7.5" fill="#64748b">cancelled</text>
+
+  <!-- [8] ACTIVE right(643,240) → PARTIALLY_REDEEMED left(712,240) -->
+  <line x1="643" y1="240" x2="712" y2="240" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#a-b)"/>
+  <text x="676" y="232" text-anchor="middle" font-size="8" fill="#60a5fa">ใช้บางส่วน</text>
+
+  <!-- [9] ACTIVE bottom(568,265) → EXPIRED top(568,335) -->
+  <line x1="568" y1="265" x2="568" y2="335" stroke="#64748b" stroke-width="1.5" marker-end="url(#a-gr)"/>
+  <text x="582" y="303" font-size="8" fill="#64748b">ครบ 180 วัน</text>
+
+  <!-- [10] ACTIVE bottom-right → FULLY_REDEEMED top(799,335)
+       Curve goes BELOW PARTIAL box (PARTIAL.B=265), arrives at FULLY top      -->
+  <path d="M643,258 Q799,283 799,335" stroke="#60a5fa" stroke-width="1.2" fill="none" stroke-dasharray="4,2" marker-end="url(#a-b)"/>
+  <text x="735" y="298" text-anchor="middle" font-size="7.5" fill="#60a5fa">ใช้ทั้งหมด (direct)</text>
+
+  <!-- [11] PARTIALLY_REDEEMED bottom(799,265) → FULLY_REDEEMED top(799,335) -->
+  <line x1="799" y1="265" x2="799" y2="335" stroke="#60a5fa" stroke-width="1.5" marker-end="url(#a-b)"/>
+  <text x="813" y="303" font-size="8" fill="#60a5fa">ใช้แต้มหมด</text>
+
+  <!-- [12] PARTIALLY_REDEEMED bottom-left(730,265) → EXPIRED right(642,360)
+       Curve from PARTIAL bottom-left → diagonal down-left → EXPIRED right edge -->
+  <path d="M730,265 Q688,320 642,360" stroke="#64748b" stroke-width="1.2" fill="none" stroke-dasharray="4,2" marker-end="url(#a-gr)"/>
+  <text x="677" y="308" text-anchor="middle" font-size="7.5" fill="#64748b">180วันหมด</text>
+  <text x="677" y="319" text-anchor="middle" font-size="7" fill="#64748b">(ส่วนที่เหลือ)</text>
+
+  <!-- [13] ACTIVE right(643,250) → LOCKED right(643,475)
+       Route at x=665, RIGHT of EXPIRED (EXPIRED.R=642), x=665 < FULLY.L=719  -->
+  <path d="M643,253 Q666,310 666,392 Q666,450 643,475" stroke="#f43f5e" stroke-width="1.5" fill="none" marker-end="url(#a-r)"/>
+  <text x="676" y="358" font-size="8" fill="#f43f5e">แจ้งคืนสินค้า</text>
+  <text x="676" y="369" font-size="7" fill="#64748b">หลังรับของแล้ว</text>
+
+  <!-- [14] LOCKED right(643,475) → REVERSED left(719,475) -->
+  <line x1="643" y1="475" x2="719" y2="475" stroke="#f43f5e" stroke-width="1.5" marker-end="url(#a-r)"/>
+  <text x="680" y="468" text-anchor="middle" font-size="8" fill="#f43f5e">return approved</text>
+
+  <!-- [15] LOCKED left(493,475) → ACTIVE left(493,240)
+       Route at x=448, LEFT of ACTIVE/LOCKED (both .L=493)                    -->
+  <path d="M493,462 Q448,462 448,240 L493,240" stroke="#22c55e" stroke-width="1.2" fill="none" stroke-dasharray="4,2" marker-end="url(#a-g)"/>
+  <text x="434" y="355" text-anchor="middle" font-size="7.5" fill="#22c55e">return</text>
+  <text x="434" y="366" text-anchor="middle" font-size="7.5" fill="#22c55e">rejected</text>
+  <text x="434" y="377" text-anchor="middle" font-size="7" fill="#64748b">→ ACTIVE</text>
+
+  <!-- ======= LEGEND ======= -->
+  <rect x="30" y="522" width="900" height="106" rx="8" fill="rgba(10,15,30,0.75)" stroke="rgba(96,165,250,0.2)" stroke-width="1"/>
+  <text x="50" y="542" font-size="9.5" font-weight="700" fill="#f59e0b">LEGEND</text>
+
+  <!-- Active state sample -->
+  <rect x="50" y="549" width="14" height="10" rx="2" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="70" y="558" font-size="8" fill="#94a3b8">Active / transition state</text>
+
+  <!-- Terminal state sample -->
+  <rect x="230" y="549" width="14" height="10" rx="2" fill="rgba(30,41,59,0.6)" stroke="#475569" stroke-width="1.5"/>
+  <text x="250" y="558" font-size="8" fill="#94a3b8">Terminal state (สิ้นสุด)</text>
+
+  <!-- Edge case dashed sample -->
+  <rect x="420" y="549" width="14" height="10" rx="2" fill="rgba(245,158,11,0.05)" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2"/>
+  <text x="440" y="558" font-size="8" fill="#94a3b8">Edge case (extended)</text>
+
+  <!-- Arrow types -->
+  <line x1="590" y1="554" x2="618" y2="554" stroke="#22c55e" stroke-width="1.5" marker-end="url(#a-g)"/>
+  <text x="626" y="558" font-size="8" fill="#94a3b8">Happy path</text>
+
+  <line x1="730" y1="554" x2="758" y2="554" stroke="#f43f5e" stroke-width="1.5" marker-end="url(#a-r)"/>
+  <text x="766" y="558" font-size="8" fill="#94a3b8">Error / edge case</text>
+
+  <line x1="50" y1="571" x2="78" y2="571" stroke="#64748b" stroke-width="1.2" stroke-dasharray="4,2" marker-end="url(#a-gr)"/>
+  <text x="86" y="575" font-size="8" fill="#94a3b8">Indirect / skip transition</text>
+
+  <line x1="920" y1="566" x2="920" y2="566" stroke="none"/>
+
+  <line x1="30" y1="582" x2="930" y2="582" stroke="rgba(96,165,250,0.1)" stroke-width="1"/>
+
+  <text x="50" y="596" font-size="8" fill="#64748b">★ From Req: PENDING → CONFIRMED → ACTIVE → EXPIRED / FULLY_REDEEMED</text>
+  <text x="50" y="609" font-size="8" fill="#64748b">Extended: AUTO_FORFEITED (X วัน = policy), REFUSED_DELIVERY, VOIDED, LOCKED (CS พิจารณา), REVERSED, PARTIALLY_REDEEMED</text>
+  <text x="50" y="621" font-size="8" fill="#64748b">Arrow [13]: route x=666 &gt; EXPIRED.right(642) — clear path  |  Arrow [6]: route x=18 &lt; AUTO.left(31) — clear path  |  Arrow [7]: route x=218 between columns</text>
+</svg>
+    </div>
+
+    <!-- State Table -->
+    <div style="margin-top:1rem">
+      <div class="card-title" style="color:var(--blue-l);font-size:.72rem">📋 State Transition Table — ออกแบบให้ครอบคลุม edge cases ทั้งหมด</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:.72rem">
+          <thead>
+            <tr>
+              <th style="background:var(--ink3);border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fh);font-size:.62rem;letter-spacing:.06em;color:var(--text-m);text-align:left">STATE</th>
+              <th style="background:var(--ink3);border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fh);font-size:.62rem;letter-spacing:.06em;color:var(--text-m)">Trigger</th>
+              <th style="background:var(--ink3);border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fh);font-size:.62rem;letter-spacing:.06em;color:var(--text-m)">Actor</th>
+              <th style="background:var(--ink3);border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fh);font-size:.62rem;letter-spacing:.06em;color:var(--text-m)">แต้มใช้ได้?</th>
+              <th style="background:var(--ink3);border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fh);font-size:.62rem;letter-spacing:.06em;color:var(--text-m)">Next States</th>
+              <th style="background:var(--ink3);border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fh);font-size:.62rem;letter-spacing:.06em;color:var(--text-m)">Source</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="font-family:var(--fm);font-size:.65rem;color:var(--amber);font-weight:700">PENDING_DELIVERY</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;color:var(--text-d)">event: order.confirmed</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="color:var(--blue-l);font-family:var(--fm);font-size:.62rem">System (auto)</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="color:var(--rose);font-family:var(--fm);font-size:.65rem">✗ ไม่ได้</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fm);font-size:.6rem;color:var(--text-d);line-height:1.7">→ CONFIRMED_RECEIPT (กดรับ)<br>→ AUTO_FORFEITED (หมดเวลา 30วัน)<br>→ REFUSED_DELIVERY (ไม่รับ)<br>→ VOIDED (cancel order)</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="font-family:var(--fm);font-size:.6rem;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--amber);padding:1px 5px;border-radius:3px">Req ★</span></td>
+            </tr>
+            <tr style="background:rgba(255,255,255,.02)">
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="font-family:var(--fm);font-size:.65rem;color:#4ade80;font-weight:700">CONFIRMED_RECEIPT</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;color:var(--text-d)">ลูกค้ากด "ยืนยันรับสินค้า"</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="color:var(--green);font-family:var(--fm);font-size:.62rem">Customer</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="color:var(--amber);font-family:var(--fm);font-size:.65rem">⏳ กำลัง process</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fm);font-size:.6rem;color:var(--text-d)">→ ACTIVE (system process เสร็จ)</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="font-family:var(--fm);font-size:.6rem;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--amber);padding:1px 5px;border-radius:3px">Req ★</span></td>
+            </tr>
+            <tr>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="font-family:var(--fm);font-size:.65rem;color:var(--green);font-weight:700">ACTIVE</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;color:var(--text-d)">system อนุมัติแต้ม หลัง CONFIRMED</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="color:var(--blue-l);font-family:var(--fm);font-size:.62rem">System (auto)</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="color:var(--green);font-family:var(--fm);font-size:.65rem">✓ ใช้ได้</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fm);font-size:.6rem;color:var(--text-d);line-height:1.7">→ PARTIALLY_REDEEMED (ใช้บางส่วน)<br>→ FULLY_REDEEMED (ใช้ทั้งหมด)<br>→ EXPIRED (ครบ 180 วัน)<br>→ LOCKED (แจ้งคืนหลังรับ)</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="font-family:var(--fm);font-size:.6rem;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.25);color:var(--amber);padding:1px 5px;border-radius:3px">Req ★</span></td>
+            </tr>
+            <tr style="background:rgba(255,255,255,.02)">
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="font-family:var(--fm);font-size:.65rem;color:var(--blue-l);font-weight:700">PARTIALLY_REDEEMED</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;color:var(--text-d)">ลูกค้าใช้แต้มบางส่วน</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="color:var(--green);font-family:var(--fm);font-size:.62rem">Customer</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="color:var(--green);font-family:var(--fm);font-size:.65rem">✓ ส่วนที่เหลือ</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fm);font-size:.6rem;color:var(--text-d);line-height:1.7">→ FULLY_REDEEMED (ใช้หมด)<br>→ EXPIRED (clock หมด, ยึดส่วนที่เหลือ)</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="font-family:var(--fm);font-size:.6rem;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.25);color:var(--rose);padding:1px 5px;border-radius:3px;border-style:dashed">Extended</span></td>
+            </tr>
+            <tr>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="font-family:var(--fm);font-size:.65rem;color:var(--amber);font-weight:700">AUTO_FORFEITED</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;color:var(--text-d)">cron: ไม่กดยืนยันใน 30 วัน (configurable)</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="color:var(--blue-l);font-family:var(--fm);font-size:.62rem">System (cron)</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="color:var(--rose);font-family:var(--fm);font-size:.65rem">✗ terminal</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fm);font-size:.6rem;color:var(--text-d)">— terminal state —</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="font-family:var(--fm);font-size:.6rem;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.25);color:var(--rose);padding:1px 5px;border-radius:3px;border-style:dashed">Extended</span></td>
+            </tr>
+            <tr style="background:rgba(255,255,255,.02)">
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="font-family:var(--fm);font-size:.65rem;color:var(--rose);font-weight:700">REFUSED_DELIVERY</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;color:var(--text-d)">ลูกค้าปฏิเสธรับสินค้า ณ จุดส่ง</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="color:var(--green);font-family:var(--fm);font-size:.62rem">Customer</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="color:var(--rose);font-family:var(--fm);font-size:.65rem">✗ ไม่ได้</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fm);font-size:.6rem;color:var(--text-d)">→ VOIDED (refund confirmed)</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="font-family:var(--fm);font-size:.6rem;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.25);color:var(--rose);padding:1px 5px;border-radius:3px;border-style:dashed">Extended</span></td>
+            </tr>
+            <tr>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="font-family:var(--fm);font-size:.65rem;color:var(--rose);font-weight:700">LOCKED</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;color:var(--text-d)">ลูกค้าแจ้งคืนสินค้าหลังกดรับแล้ว</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="color:var(--green);font-family:var(--fm);font-size:.62rem">Customer + CS</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="color:var(--amber);font-family:var(--fm);font-size:.65rem">⏸ ระงับ</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fm);font-size:.6rem;color:var(--text-d);line-height:1.7">→ REVERSED (return approved)<br>→ ACTIVE (return rejected, resume)</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="font-family:var(--fm);font-size:.6rem;background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.25);color:var(--rose);padding:1px 5px;border-radius:3px;border-style:dashed">Extended</span></td>
+            </tr>
+            <tr style="background:rgba(255,255,255,.02)">
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="font-family:var(--fm);font-size:.65rem;color:var(--text-m);font-weight:700">REVERSED / VOIDED / EXPIRED / FULLY_REDEEMED</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;color:var(--text-m)">ดูด้านบน</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem"><span style="color:var(--text-m);font-family:var(--fm);font-size:.62rem">System / CS</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="color:var(--rose);font-family:var(--fm);font-size:.65rem">✗ terminal</span></td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;font-family:var(--fm);font-size:.6rem;color:var(--text-m)">— no more transitions —</td>
+              <td style="border:1px solid var(--line);padding:.5rem .7rem;text-align:center"><span style="font-family:var(--fm);font-size:.6rem;background:rgba(100,116,139,.1);border:1px solid rgba(100,116,139,.25);color:var(--text-m);padding:1px 5px;border-radius:3px">Mixed</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Design decisions -->
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.6rem;margin-top:1rem">
+      <div style="background:var(--ink3);border:1px solid rgba(245,158,11,.2);border-radius:8px;padding:.75rem">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--amber);margin-bottom:.4rem">💡 Design Decision #1</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6"><strong style="color:var(--text)">Auto-Forfeit threshold:</strong> Requirement ไม่ได้ระบุว่าถ้าลูกค้าไม่กดยืนยันจะเกิดอะไร → ต้องนิยามเป็น configurable policy เช่น 30 วัน และต้องแจ้ง reminder ก่อน expire</div>
+      </div>
+      <div style="background:var(--ink3);border:1px solid rgba(244,63,94,.2);border-radius:8px;padding:.75rem">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--rose);margin-bottom:.4rem">💡 Design Decision #2</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6"><strong style="color:var(--text)">LOCKED state:</strong> ถ้าลูกค้าคืนสินค้าหลังกดรับ ต้องระงับแต้มก่อน (ไม่ revoke ทันที) เพราะ CS ต้องพิจารณาก่อน — ถ้า reject return แต้มต้องกลับมา ACTIVE ได้</div>
+      </div>
+      <div style="background:var(--ink3);border:1px solid rgba(96,165,250,.2);border-radius:8px;padding:.75rem">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--blue-l);margin-bottom:.4rem">💡 Design Decision #3</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6"><strong style="color:var(--text)">PARTIALLY_REDEEMED expiry:</strong> ถ้าแต้มหมดอายุขณะที่ใช้ไปแล้วบางส่วน → เฉพาะส่วนที่เหลือหมดอายุ ส่วนที่ใช้ไปแล้วไม่ได้รับผลกระทบ</div>
+      </div>
+      <div style="background:var(--ink3);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:.75rem">
+        <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--green);margin-bottom:.4rem">💡 Design Decision #4</div>
+        <div style="font-size:.7rem;color:var(--text-d);line-height:1.6"><strong style="color:var(--text)">Earn calculation timing:</strong> แต้มคำนวณจาก order total หลังหักส่วนลดอื่นๆ แต่ก่อนหักแต้มที่ใช้ใน order นั้น — ป้องกัน circular dependency</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════
+     PROCESS VIEW
+═══════════════════════════════════════════ -->
+<div class="view-panel" id="view-process">
+  <div class="intro-strip" style="border-left-color:var(--green)">
+    <div class="is-icon">⚙</div>
+    <div>
+      <strong style="color:var(--green)">PROCESS VIEW — Runtime Behavior & Sequence Flows</strong>
+      มองจากมุม SRE / Performance Engineer — ระบบทำงานอย่างไรใน runtime? ใครคุยกับใคร? ลำดับขั้นตอนเป็นอย่างไร?
+      แสดงด้วย Sequence Diagram ของ flow ที่สำคัญ
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+    <!-- Checkout Sequence -->
+    <div class="card">
+      <div class="card-title" style="color:var(--green)">⚙ Sequence: Checkout & Payment Flow (UC-02)</div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;min-width:700px">
+          <thead>
+            <tr>
+              <th style="width:30px;background:var(--ink3);border:1px solid var(--line);padding:.4rem;font-family:var(--fm);font-size:.58rem;color:var(--text-m)">#</th>
+              <th style="background:rgba(59,130,246,.12);border:1px solid rgba(59,130,246,.25);padding:.4rem;font-family:var(--fh);font-size:.6rem;font-weight:700;color:var(--blue-l)">👤 Customer</th>
+              <th style="background:rgba(20,184,166,.1);border:1px solid rgba(20,184,166,.2);padding:.4rem;font-family:var(--fh);font-size:.6rem;font-weight:700;color:var(--teal)">🛒 Cart Service</th>
+              <th style="background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.2);padding:.4rem;font-family:var(--fh);font-size:.6rem;font-weight:700;color:var(--orange)">🧾 Order Service</th>
+              <th style="background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.2);padding:.4rem;font-family:var(--fh);font-size:.6rem;font-weight:700;color:var(--green)">💳 Payment GW</th>
+              <th style="background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.2);padding:.4rem;font-family:var(--fh);font-size:.6rem;font-weight:700;color:var(--cyan)">🚚 Shipping API</th>
+              <th style="background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.2);padding:.4rem;font-family:var(--fh);font-size:.6rem;font-weight:700;color:var(--violet)">🔔 Notify Service</th>
+              <th style="background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.2);padding:.4rem;font-family:var(--fh);font-size:.6rem;font-weight:700;color:var(--amber)">⭐ Loyalty Service</th>
+            </tr>
+          </thead>
+          <tbody id="seqBody">
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Notification methods -->
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title" style="color:var(--violet)">🔔 Notification Channels (UC-03)</div>
+        <div class="method-list">
+          <div class="method-row">
+            <span class="method-icon">📧</span>
+            <span class="method-name" style="color:var(--violet)">Email</span>
+            <span class="method-detail">ส่งผ่าน SMTP / Email Provider (e.g. SendGrid)<br>ยืนยัน order + รายละเอียด shipping</span>
+          </div>
+          <div class="method-row">
+            <span class="method-icon">💬</span>
+            <span class="method-name" style="color:var(--violet)">SMS</span>
+            <span class="method-detail">ส่งผ่าน SMS Gateway (e.g. DTAC/True)<br>ข้อความสั้น tracking number + status</span>
+          </div>
+          <div class="method-row">
+            <span class="method-icon">📱</span>
+            <span class="method-name" style="color:var(--violet)">In-App Push</span>
+            <span class="method-detail">Firebase Cloud Messaging (FCM)<br>Rich notification พร้อม deep link ไป order detail</span>
+          </div>
+        </div>
+        <div class="note-box">
+          <strong>Multi-channel pattern:</strong> ลูกค้าเลือกได้มากกว่า 1 ช่องทาง → Notification Service ใช้ Fan-out pattern ส่งพร้อมกัน (Parallel async)
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:var(--orange)">🚚 Shipping Fee Logic</div>
+        <div style="display:flex;flex-direction:column;gap:.4rem">
+          <div style="background:var(--ink3);border:1px solid rgba(249,115,22,.2);border-radius:6px;padding:.6rem .8rem">
+            <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--orange);margin-bottom:.3rem">KERRY Express</div>
+            <div style="font-size:.7rem;color:var(--text-d);line-height:1.5">รองรับทั่วประเทศ ราคาคำนวณตามน้ำหนัก + ระยะทาง<br><span style="font-family:var(--fm);font-size:.62rem;color:var(--text-m)">CarrierAPI → calculateFee(weight, destination)</span></div>
+          </div>
+          <div style="background:var(--ink3);border:1px solid rgba(249,115,22,.2);border-radius:6px;padding:.6rem .8rem">
+            <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--orange);margin-bottom:.3rem">LINEMAN Courier</div>
+            <div style="font-size:.7rem;color:var(--text-d);line-height:1.5"><strong style="color:var(--rose)">เฉพาะกรุงเทพฯ และปริมณฑล</strong><br>ส่งด่วนภายในวัน ราคา fixed-rate<br><span style="font-family:var(--fm);font-size:.62rem;color:var(--text-m)">Geo-check ก่อน → แสดงตัวเลือกถ้าอยู่ใน zone</span></div>
+          </div>
+          <div style="background:var(--ink3);border:1px solid rgba(249,115,22,.2);border-radius:6px;padding:.6rem .8rem">
+            <div style="font-family:var(--fh);font-size:.68rem;font-weight:700;color:var(--orange);margin-bottom:.3rem">EMS (ไปรษณีย์ไทย)</div>
+            <div style="font-size:.7rem;color:var(--text-d);line-height:1.5">รองรับทั่วประเทศ + ต่างประเทศ<br><span style="font-family:var(--fm);font-size:.62rem;color:var(--text-m)">CarrierAPI → Thailand Post API</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loyalty Flow -->
+    <div class="card">
+      <div class="card-title" style="color:var(--amber)">⭐ Loyalty Points State Machine</div>
+      <div class="flow-wrap">
+        <div class="flow-diag" style="flex-wrap:wrap;gap:.5rem">
+          <div class="flow-box" style="border-color:rgba(245,158,11,.4);color:var(--amber);background:rgba(245,158,11,.08)">Order CONFIRMED<br><span style="font-size:.55rem;color:var(--text-m)">points: PENDING</span></div>
+          <div class="flow-arr">→</div>
+          <div class="flow-box" style="border-color:rgba(245,158,11,.4);color:var(--amber);background:rgba(245,158,11,.08)">Shipment DELIVERED<br><span style="font-size:.55rem;color:var(--text-m)">ลูกค้ากดยืนยัน</span></div>
+          <div class="flow-arr">→</div>
+          <div class="flow-box" style="border-color:rgba(34,197,94,.4);color:var(--green);background:rgba(34,197,94,.08)">Points APPROVED<br><span style="font-size:.55rem;color:var(--text-m)">เริ่มนับ 180 วัน</span></div>
+          <div class="flow-arr">→</div>
+          <div class="flow-diamond" style="border-color:rgba(245,158,11,.4);color:var(--amber);background:rgba(245,158,11,.08)"><span>ครบ<br>180 วัน?</span></div>
+          <div class="flow-arr">Yes →</div>
+          <div class="flow-box" style="border-color:rgba(239,68,68,.4);color:var(--rose);background:rgba(239,68,68,.08)">Points EXPIRED</div>
+          <div style="position:relative;display:inline-flex;align-items:center">
+            <div class="flow-arr" style="margin-left:.3rem">No ↓ ใช้แต้ม</div>
+          </div>
+          <div class="flow-box" style="border-color:rgba(139,92,246,.4);color:var(--violet);background:rgba(139,92,246,.08)">Points REDEEMED<br><span style="font-size:.55rem;color:var(--text-m)">ลดราคา 1แต้ม=1บาท</span></div>
+        </div>
+      </div>
+      <div style="font-family:var(--fm);font-size:.62rem;color:var(--text-m);margin-top:.4rem">
+        * Earn: floor(orderTotal / 100) แต้ม ต่อ order  |  แต้ม pending จนกว่าลูกค้าจะกดยืนยันรับสินค้า
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DEVELOPMENT VIEW
+═══════════════════════════════════════════ -->
+<div class="view-panel" id="view-development">
+  <div class="intro-strip" style="border-left-color:var(--violet)">
+    <div class="is-icon">📦</div>
+    <div>
+      <strong style="color:var(--violet)">DEVELOPMENT VIEW — Software Organization & Module Structure</strong>
+      มองจากมุม Developer / Tech Lead — code จัดเป็น module/package อย่างไร? แต่ละ module รับผิดชอบอะไร?
+      ขอบเขต dependency ไปทิศทางใด?
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-title" style="color:var(--violet)">🏗 Service Architecture (Microservices)</div>
+        <div class="pkg-tree">
+
+          <div class="pkg-node root" style="border-color:rgba(139,92,246,.5);background:rgba(139,92,246,.05)">
+            <div class="pkg-name" style="color:var(--violet)">🏠 toy-r-not-us/ (Monorepo)</div>
+            <div class="pkg-desc">Turborepo / Nx workspace — ทุก service อยู่ใน repo เดียว</div>
+          </div>
+
+          <div class="pkg-node" style="border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.04);margin-left:1.5rem">
+            <div class="pkg-name" style="color:var(--blue-l)">📱 apps/web-frontend</div>
+            <div class="pkg-desc">Next.js 14 App Router — SSR สำหรับ SEO + CSR สำหรับ Cart interaction</div>
+            <div class="pkg-files">
+              <span class="pkg-file">pages/</span><span class="pkg-file">components/</span><span class="pkg-file">hooks/</span><span class="pkg-file">store/ (Zustand)</span>
+            </div>
+          </div>
+
+          <div class="pkg-node" style="border-color:rgba(59,130,246,.4);background:rgba(59,130,246,.04);margin-left:1.5rem">
+            <div class="pkg-name" style="color:var(--blue-l)">🔀 apps/api-gateway</div>
+            <div class="pkg-desc">Kong / Custom BFF — Rate limiting, Auth, Routing ไปยัง services</div>
+            <div class="pkg-files">
+              <span class="pkg-file">routes/</span><span class="pkg-file">middleware/</span><span class="pkg-file">auth/</span>
+            </div>
+          </div>
+
+          <div class="pkg-node" style="border-color:rgba(20,184,166,.3);background:rgba(20,184,166,.04);margin-left:1.5rem">
+            <div class="pkg-name" style="color:var(--teal)">📦 services/product-service</div>
+            <div class="pkg-desc">Product catalog, Search, Inventory check</div>
+            <div class="pkg-files">
+              <span class="pkg-file">domain/</span><span class="pkg-file">repository/</span><span class="pkg-file">api/</span>
+            </div>
+          </div>
+
+          <div class="pkg-node" style="border-color:rgba(20,184,166,.3);background:rgba(20,184,166,.04);margin-left:1.5rem">
+            <div class="pkg-name" style="color:var(--teal)">🛒 services/cart-service</div>
+            <div class="pkg-desc">Cart state (Redis), Calculate total, Session management</div>
+            <div class="pkg-files">
+              <span class="pkg-file">domain/</span><span class="pkg-file">cache/</span><span class="pkg-file">api/</span>
+            </div>
+          </div>
+
+          <div class="pkg-node" style="border-color:rgba(249,115,22,.3);background:rgba(249,115,22,.04);margin-left:1.5rem">
+            <div class="pkg-name" style="color:var(--orange)">🧾 services/order-service</div>
+            <div class="pkg-desc">Order creation, Status management, Inventory deduction</div>
+            <div class="pkg-files">
+              <span class="pkg-file">domain/</span><span class="pkg-file">saga/</span><span class="pkg-file">repository/</span><span class="pkg-file">api/</span>
+            </div>
+          </div>
+
+          <div class="pkg-node" style="border-color:rgba(34,197,94,.3);background:rgba(34,197,94,.04);margin-left:1.5rem">
+            <div class="pkg-name" style="color:var(--green)">💳 services/payment-service</div>
+            <div class="pkg-desc">Payment processing, Gateway adapters (Line Pay, Visa/MC, Debit)</div>
+            <div class="pkg-files">
+              <span class="pkg-file">domain/</span><span class="pkg-file">adapters/</span><span class="pkg-file">webhook/</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem">
+              <span class="dep-badge dep-ext">🔌 Line Pay API</span>
+              <span class="dep-badge dep-ext">🔌 Visa/MC Gateway</span>
+              <span class="dep-badge dep-ext">🔌 KBank API</span>
+            </div>
+          </div>
+
+          <div class="pkg-node" style="border-color:rgba(6,182,212,.3);background:rgba(6,182,212,.04);margin-left:1.5rem">
+            <div class="pkg-name" style="color:var(--cyan)">🚚 services/shipping-service</div>
+            <div class="pkg-desc">Carrier integration, Fee calculation, Label generation, Geo-zone check</div>
+            <div class="pkg-files">
+              <span class="pkg-file">domain/</span><span class="pkg-file">carriers/</span><span class="pkg-file">geo/</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem">
+              <span class="dep-badge dep-ext">🔌 Kerry API</span>
+              <span class="dep-badge dep-ext">🔌 Lineman API</span>
+              <span class="dep-badge dep-ext">🔌 Thai Post EMS</span>
+            </div>
+          </div>
+
+          <div class="pkg-node" style="border-color:rgba(139,92,246,.3);background:rgba(139,92,246,.04);margin-left:1.5rem">
+            <div class="pkg-name" style="color:var(--violet)">🔔 services/notification-service</div>
+            <div class="pkg-desc">Multi-channel fan-out: Email / SMS / Push (async via Message Queue)</div>
+            <div class="pkg-files">
+              <span class="pkg-file">channels/</span><span class="pkg-file">templates/</span><span class="pkg-file">queue-consumer/</span>
+            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.35rem">
+              <span class="dep-badge dep-ext">🔌 SendGrid (Email)</span>
+              <span class="dep-badge dep-ext">🔌 SMS Gateway</span>
+              <span class="dep-badge dep-ext">🔌 FCM (Push)</span>
+            </div>
+          </div>
+
+          <div class="pkg-node" style="border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.04);margin-left:1.5rem">
+            <div class="pkg-name" style="color:var(--amber)">⭐ services/loyalty-service</div>
+            <div class="pkg-desc">Points engine, Expiry calculation, Redemption logic</div>
+            <div class="pkg-files">
+              <span class="pkg-file">domain/</span><span class="pkg-file">scheduler/</span><span class="pkg-file">repository/</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card" style="margin-bottom:1rem">
+        <div class="card-title" style="color:var(--cyan)">🔄 Inter-Service Communication</div>
+        <div style="display:flex;flex-direction:column;gap:.5rem">
+          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.7rem .9rem">
+            <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--blue-l);margin-bottom:.35rem">Synchronous (REST / gRPC)</div>
+            <div style="font-size:.68rem;color:var(--text-d);line-height:1.6">
+              Gateway → Services (REST JSON)<br>
+              Cart → Product (stock check)<br>
+              Order → Payment (charge)<br>
+              Order → Shipping (create label)
+            </div>
+          </div>
+          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.7rem .9rem">
+            <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--amber);margin-bottom:.35rem">Asynchronous (Kafka / RabbitMQ)</div>
+            <div style="font-size:.68rem;color:var(--text-d);line-height:1.6">
+              <strong style="color:var(--amber)">order.confirmed</strong> → Notification Service, Loyalty Service<br>
+              <strong style="color:var(--amber)">order.delivered</strong> → Loyalty Service (approve points)<br>
+              <strong style="color:var(--amber)">payment.completed</strong> → Order Service<br>
+              <strong style="color:var(--amber)">inventory.low</strong> → Admin notification
+            </div>
+          </div>
+          <div style="background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.7rem .9rem">
+            <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--green);margin-bottom:.35rem">Dependency Rules (Clean Architecture)</div>
+            <div style="font-family:var(--fm);font-size:.62rem;color:var(--text-d);line-height:1.8;white-space:pre-wrap">Domain ←── Application ←── Infrastructure
+Domain ←── Application ←── API (Controller)
+
+Domain ห้าม import framework/library!
+Services ห้าม import กันโดยตรง ใช้ Event เท่านั้น</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title" style="color:var(--green)">🗄 Data Storage Strategy</div>
+        <div style="display:flex;flex-direction:column;gap:.4rem">
+          <div style="display:flex;gap:.5rem;padding:.5rem;background:var(--ink3);border:1px solid var(--line);border-radius:6px;align-items:flex-start">
+            <span style="font-size:.85rem;flex-shrink:0">🐘</span>
+            <div><div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--blue-l)">PostgreSQL (per-service DB)</div><div style="font-size:.68rem;color:var(--text-d)">Orders, Payments, Loyalty, Customers — ACID transactions</div></div>
+          </div>
+          <div style="display:flex;gap:.5rem;padding:.5rem;background:var(--ink3);border:1px solid var(--line);border-radius:6px;align-items:flex-start">
+            <span style="font-size:.85rem;flex-shrink:0">⚡</span>
+            <div><div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--rose)">Redis Cluster</div><div style="font-size:.68rem;color:var(--text-d)">Cart sessions, Product cache, Rate limiting counters</div></div>
+          </div>
+          <div style="display:flex;gap:.5rem;padding:.5rem;background:var(--ink3);border:1px solid var(--line);border-radius:6px;align-items:flex-start">
+            <span style="font-size:.85rem;flex-shrink:0">🔍</span>
+            <div><div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--teal)">Elasticsearch</div><div style="font-size:.68rem;color:var(--text-d)">Product search — full-text + fuzzy match ชื่อสินค้า</div></div>
+          </div>
+          <div style="display:flex;gap:.5rem;padding:.5rem;background:var(--ink3);border:1px solid var(--line);border-radius:6px;align-items:flex-start">
+            <span style="font-size:.85rem;flex-shrink:0">📨</span>
+            <div><div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--amber)">Kafka</div><div style="font-size:.68rem;color:var(--text-d)">Event streaming ระหว่าง services — async decoupling</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     PHYSICAL VIEW
+═══════════════════════════════════════════ -->
+<div class="view-panel" id="view-physical">
+  <div class="intro-strip" style="border-left-color:var(--orange)">
+    <div class="is-icon">🖥</div>
+    <div>
+      <strong style="color:var(--orange)">PHYSICAL VIEW — Infrastructure & Deployment Topology</strong>
+      มองจากมุม DevOps / SRE — software วิ่งบน hardware อะไร? deployed ที่ไหน? scale อย่างไร?
+      ออกแบบเพื่อรองรับ Peak load หลัง v2.0: Weekday ×4 (200K orders/day) และ Weekend ×5 (400K orders/day)
+    </div>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem">
+
+    <!-- Layer: Client -->
+    <div class="infra-layer" style="border-color:rgba(59,130,246,.25)">
+      <div class="infra-layer-label" style="color:var(--blue-l)">CLIENT LAYER</div>
+      <div class="infra-nodes">
+        <div class="inode" style="border-color:rgba(59,130,246,.3)">
+          <span class="inode-icon">🌐</span>
+          <div class="inode-name" style="color:var(--blue-l)">Web Browser</div>
+          <div class="inode-spec">Next.js SSR/CSR</div>
+        </div>
+        <div class="inode" style="border-color:rgba(59,130,246,.3)">
+          <span class="inode-icon">📱</span>
+          <div class="inode-name" style="color:var(--blue-l)">Mobile App</div>
+          <div class="inode-spec">React Native / iOS / Android</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="infra-arrow">↕ HTTPS / TLS 1.3</div>
+
+    <!-- Layer: CDN + WAF -->
+    <div class="infra-layer" style="border-color:rgba(245,158,11,.25)">
+      <div class="infra-layer-label" style="color:var(--amber)">CDN + SECURITY LAYER</div>
+      <div class="infra-nodes">
+        <div class="inode" style="border-color:rgba(245,158,11,.3)">
+          <span class="inode-icon">🌍</span>
+          <div class="inode-name" style="color:var(--amber)">Cloudfront CDN</div>
+          <div class="inode-spec">Static assets, Next.js pages</div>
+          <div class="inode-spec">Edge cache ทั่วโลก</div>
+        </div>
+        <div class="inode" style="border-color:rgba(245,158,11,.3)">
+          <span class="inode-icon">🛡</span>
+          <div class="inode-name" style="color:var(--amber)">WAF + DDoS</div>
+          <div class="inode-spec">AWS Shield + WAF</div>
+          <div class="inode-spec">Rate limiting</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="infra-arrow">↕</div>
+
+    <!-- Layer: Load Balancer -->
+    <div class="infra-layer" style="border-color:rgba(249,115,22,.25)">
+      <div class="infra-layer-label" style="color:var(--orange)">LOAD BALANCING LAYER</div>
+      <div class="infra-nodes">
+        <div class="inode" style="border-color:rgba(249,115,22,.3)">
+          <span class="inode-icon">⚖</span>
+          <div class="inode-name" style="color:var(--orange)">ALB (Active-Active)</div>
+          <div class="inode-spec">AWS Application LB</div>
+          <div class="inode-count">2 AZ</div>
+        </div>
+        <div class="inode" style="border-color:rgba(249,115,22,.3)">
+          <span class="inode-icon">🔀</span>
+          <div class="inode-name" style="color:var(--orange)">API Gateway</div>
+          <div class="inode-spec">Kong / AWS API GW</div>
+          <div class="inode-spec">Auth + Rate limit</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="infra-arrow">↕</div>
+
+    <!-- Layer: Application Services -->
+    <div class="infra-layer" style="border-color:rgba(20,184,166,.25)">
+      <div class="infra-layer-label" style="color:var(--teal)">APPLICATION SERVICES LAYER (Kubernetes EKS)</div>
+      <div class="infra-nodes">
+        <div class="inode" style="border-color:rgba(20,184,166,.3)">
+          <span class="inode-icon">📦</span>
+          <div class="inode-name" style="color:var(--teal)">Product Svc</div>
+          <div class="inode-spec">Node/pod</div>
+          <div class="inode-count">2→4 pods</div>
+          <div class="inode-alert">HPA enabled</div>
+        </div>
+        <div class="inode" style="border-color:rgba(20,184,166,.3)">
+          <span class="inode-icon">🛒</span>
+          <div class="inode-name" style="color:var(--teal)">Cart Svc</div>
+          <div class="inode-spec">Stateless</div>
+          <div class="inode-count">3→10 pods</div>
+          <div class="inode-alert">HPA peak ×5</div>
+        </div>
+        <div class="inode" style="border-color:rgba(249,115,22,.3)">
+          <span class="inode-icon">🧾</span>
+          <div class="inode-name" style="color:var(--orange)">Order Svc</div>
+          <div class="inode-spec">Saga orchestrator</div>
+          <div class="inode-count">2→8 pods</div>
+          <div class="inode-alert">HPA enabled</div>
+        </div>
+        <div class="inode" style="border-color:rgba(34,197,94,.3)">
+          <span class="inode-icon">💳</span>
+          <div class="inode-name" style="color:var(--green)">Payment Svc</div>
+          <div class="inode-spec">PCI-DSS zone</div>
+          <div class="inode-count">2→4 pods</div>
+          <div class="inode-spec">Isolated VPC</div>
+        </div>
+        <div class="inode" style="border-color:rgba(6,182,212,.3)">
+          <span class="inode-icon">🚚</span>
+          <div class="inode-name" style="color:var(--cyan)">Shipping Svc</div>
+          <div class="inode-spec">Carrier adapters</div>
+          <div class="inode-count">2→4 pods</div>
+          <div class="inode-alert">Circuit Breaker</div>
+        </div>
+        <div class="inode" style="border-color:rgba(139,92,246,.3)">
+          <span class="inode-icon">🔔</span>
+          <div class="inode-name" style="color:var(--violet)">Notify Svc</div>
+          <div class="inode-spec">Async consumer</div>
+          <div class="inode-count">2→6 pods</div>
+          <div class="inode-alert">HPA enabled</div>
+        </div>
+        <div class="inode" style="border-color:rgba(245,158,11,.3)">
+          <span class="inode-icon">⭐</span>
+          <div class="inode-name" style="color:var(--amber)">Loyalty Svc</div>
+          <div class="inode-spec">Scheduler + API</div>
+          <div class="inode-count">2 pods</div>
+          <div class="inode-spec">Cron: daily expiry</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="infra-arrow">↕</div>
+
+    <!-- Layer: Data -->
+    <div class="infra-layer" style="border-color:rgba(239,68,68,.25)">
+      <div class="infra-layer-label" style="color:var(--rose)">DATA LAYER</div>
+      <div class="infra-nodes">
+        <div class="inode" style="border-color:rgba(239,68,68,.3)">
+          <span class="inode-icon">🐘</span>
+          <div class="inode-name" style="color:var(--rose)">PostgreSQL</div>
+          <div class="inode-spec">RDS Multi-AZ</div>
+          <div class="inode-spec">Orders, Loyalty, Pay</div>
+          <div class="inode-count">Primary + 1 Replica</div>
+        </div>
+        <div class="inode" style="border-color:rgba(239,68,68,.3)">
+          <span class="inode-icon">⚡</span>
+          <div class="inode-name" style="color:var(--rose)">Redis Cluster</div>
+          <div class="inode-spec">ElastiCache</div>
+          <div class="inode-spec">Cart, Session, Cache</div>
+          <div class="inode-count">3 shards</div>
+        </div>
+        <div class="inode" style="border-color:rgba(239,68,68,.3)">
+          <span class="inode-icon">🔍</span>
+          <div class="inode-name" style="color:var(--rose)">Elasticsearch</div>
+          <div class="inode-spec">Product Search</div>
+          <div class="inode-count">3-node cluster</div>
+        </div>
+        <div class="inode" style="border-color:rgba(239,68,68,.3)">
+          <span class="inode-icon">📨</span>
+          <div class="inode-name" style="color:var(--rose)">Kafka</div>
+          <div class="inode-spec">MSK (Managed)</div>
+          <div class="inode-spec">Event streaming</div>
+          <div class="inode-count">3 brokers</div>
+        </div>
+        <div class="inode" style="border-color:rgba(239,68,68,.3)">
+          <span class="inode-icon">🪣</span>
+          <div class="inode-name" style="color:var(--rose)">S3 + CDN</div>
+          <div class="inode-spec">Product images</div>
+          <div class="inode-spec">Shipping labels</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Layer: External -->
+    <div class="infra-layer" style="border-color:rgba(100,116,139,.25)">
+      <div class="infra-layer-label" style="color:var(--text-m)">EXTERNAL SERVICES</div>
+      <div class="infra-nodes">
+        <div class="inode" style="border-color:rgba(100,116,139,.25)">
+          <span class="inode-icon">💚</span>
+          <div class="inode-name" style="color:var(--text-d)">Line Pay</div>
+          <div class="inode-spec">Payment API</div>
+        </div>
+        <div class="inode" style="border-color:rgba(100,116,139,.25)">
+          <span class="inode-icon">💳</span>
+          <div class="inode-name" style="color:var(--text-d)">Visa/MC GW</div>
+          <div class="inode-spec">Card processing</div>
+        </div>
+        <div class="inode" style="border-color:rgba(100,116,139,.25)">
+          <span class="inode-icon">🏦</span>
+          <div class="inode-name" style="color:var(--text-d)">Bank APIs</div>
+          <div class="inode-spec">KBank/Thai/BBL/KTB</div>
+        </div>
+        <div class="inode" style="border-color:rgba(100,116,139,.25)">
+          <span class="inode-icon">📦</span>
+          <div class="inode-name" style="color:var(--text-d)">Kerry API</div>
+          <div class="inode-spec">Nationwide shipping</div>
+        </div>
+        <div class="inode" style="border-color:rgba(100,116,139,.25)">
+          <span class="inode-icon">🛵</span>
+          <div class="inode-name" style="color:var(--text-d)">Lineman API</div>
+          <div class="inode-spec">BKK+Perimeter only</div>
+        </div>
+        <div class="inode" style="border-color:rgba(100,116,139,.25)">
+          <span class="inode-icon">📮</span>
+          <div class="inode-name" style="color:var(--text-d)">Thai Post EMS</div>
+          <div class="inode-spec">Nationwide + Intl</div>
+        </div>
+        <div class="inode" style="border-color:rgba(100,116,139,.25)">
+          <span class="inode-icon">📧</span>
+          <div class="inode-name" style="color:var(--text-d)">SendGrid</div>
+          <div class="inode-spec">Email delivery</div>
+        </div>
+        <div class="inode" style="border-color:rgba(100,116,139,.25)">
+          <span class="inode-icon">📱</span>
+          <div class="inode-name" style="color:var(--text-d)">FCM / APNS</div>
+          <div class="inode-spec">Push notification</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Peak Load Planning -->
+  <div class="card">
+    <div class="card-title" style="color:var(--rose)">📈 Peak Load Capacity Planning (Post v2.0)</div>
+    <div class="perf-panel">
+      <div class="perf-title">Order Volume Comparison</div>
+      <div class="perf-bar-wrap">
+        <div class="perf-bar-row">
+          <div class="perf-bar-label">Weekday (Before)</div>
+          <div class="perf-bar-bg"><div class="perf-bar-fill" style="width:12.5%;background:var(--blue)"></div></div>
+          <div class="perf-val" style="color:var(--blue-l)">50K/day</div>
+        </div>
+        <div class="perf-bar-row">
+          <div class="perf-bar-label">Weekend (Before)</div>
+          <div class="perf-bar-bg"><div class="perf-bar-fill" style="width:20%;background:var(--teal)"></div></div>
+          <div class="perf-val" style="color:var(--teal)">80K/day</div>
+        </div>
+        <div class="perf-bar-row">
+          <div class="perf-bar-label">Weekday Peak (×4)</div>
+          <div class="perf-bar-bg"><div class="perf-bar-fill" style="width:50%;background:var(--amber)"></div></div>
+          <div class="perf-val" style="color:var(--amber)">200K/day</div>
+        </div>
+        <div class="perf-bar-row">
+          <div class="perf-bar-label">Weekend Peak (×5)</div>
+          <div class="perf-bar-bg"><div class="perf-bar-fill" style="width:100%;background:linear-gradient(to right,var(--rose),var(--orange))"></div></div>
+          <div class="perf-val" style="color:var(--rose)">400K/day</div>
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem">
+      <div style="flex:1;min-width:200px;background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.6rem .8rem">
+        <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--amber);margin-bottom:.3rem">Weekend Peak = ~4.6 RPS</div>
+        <div style="font-family:var(--fm);font-size:.62rem;color:var(--text-d);line-height:1.6">400,000 orders/day ÷ 86,400 sec = 4.63 avg RPS<br>Peak hours (×3x avg) ≈ 14 RPS checkout<br>ต้องรองรับ burst ถึง ~50 RPS</div>
+      </div>
+      <div style="flex:1;min-width:200px;background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.6rem .8rem">
+        <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--green);margin-bottom:.3rem">HPA Configuration</div>
+        <div style="font-family:var(--fm);font-size:.62rem;color:var(--text-d);line-height:1.6">Cart Service: min=3, max=10 pods<br>Order Service: min=2, max=8 pods<br>Scale trigger: CPU &gt;60% หรือ RPS threshold</div>
+      </div>
+      <div style="flex:1;min-width:200px;background:var(--ink3);border:1px solid var(--line);border-radius:6px;padding:.6rem .8rem">
+        <div style="font-family:var(--fh);font-size:.65rem;font-weight:700;color:var(--rose);margin-bottom:.3rem">Availability Target</div>
+        <div style="font-family:var(--fm);font-size:.62rem;color:var(--text-d);line-height:1.6">SLO ≥ 99.9% (43.8 min downtime/month)<br>Multi-AZ deployment<br>RDS Auto failover &lt; 60 sec</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- end view-content -->
+
+<script>
+function showView(id) {
+  document.querySelectorAll('.view-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.vtab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + id).classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+// Build sequence table
+const seqRows = [
+  { step:'1', from:'Customer', arrow:'→', to:'Cart Svc', msg:'GET /cart (show items + total)', color:'var(--blue-l)' },
+  { step:'2', from:'Cart Svc', arrow:'→', to:'Product', msg:'Check stock availability', color:'var(--teal)', note:'stock check' },
+  { step:'3', from:'Customer', arrow:'→', to:'Cart Svc', msg:'POST /checkout/shipping {method: KERRY}', color:'var(--blue-l)' },
+  { step:'4', from:'Cart Svc', arrow:'→', to:'Shipping', msg:'calculateFee(weight, dest, method)', color:'var(--cyan)' },
+  { step:'5', from:'Shipping', arrow:'→', to:'Cart Svc', msg:'Return: shippingFee + estimatedDays', color:'var(--cyan)' },
+  { step:'6', from:'Customer', arrow:'→', to:'Cart Svc', msg:'POST /checkout/payment {method: VISA, ...}', color:'var(--blue-l)' },
+  { step:'7', from:'Cart Svc', arrow:'→', to:'Order Svc', msg:'createOrder(items, shipping, payment)', color:'var(--orange)' },
+  { step:'8', from:'Order Svc', arrow:'→', to:'Payment GW', msg:'charge(amount, cardToken)', color:'var(--green)', note:'PCI zone' },
+  { step:'9', from:'Payment GW', arrow:'→', to:'Order Svc', msg:'paymentResult: APPROVED / DECLINED', color:'var(--green)' },
+  { step:'10', from:'Order Svc', arrow:'→', to:'Shipping', msg:'createShippingLabel(orderId, address)', color:'var(--cyan)' },
+  { step:'11', from:'Order Svc', arrow:'→', to:'Notify', msg:'[EVENT] order.confirmed → fan-out', color:'var(--violet)', note:'async Kafka' },
+  { step:'12', from:'Order Svc', arrow:'→', to:'Loyalty', msg:'[EVENT] order.confirmed → earnPoints()', color:'var(--amber)', note:'async Kafka' },
+  { step:'13', from:'Order Svc', arrow:'→', to:'Customer', msg:'Return: orderId, trackingNo, estimatedDate', color:'var(--blue-l)' },
+  { step:'14', from:'Notify', arrow:'→', to:'Customer', msg:'Email + SMS + Push (multi-channel fan-out)', color:'var(--violet)' },
+];
+
+const actors = ['Customer','Cart Svc','Order Svc','Payment GW','Shipping API','Notify Service','Loyalty Service'];
+const actorMap = {
+  'Customer': 0, 'Cart Svc': 1, 'Order Svc': 2,
+  'Payment GW': 3, 'Shipping': 4, 'Notify': 5, 'Loyalty': 6
+};
+const actorColors = [
+  'rgba(59,130,246,.15)','rgba(20,184,166,.12)','rgba(249,115,22,.12)',
+  'rgba(34,197,94,.12)','rgba(6,182,212,.12)','rgba(139,92,246,.12)','rgba(245,158,11,.12)'
+];
+
+const tbody = document.getElementById('seqBody');
+seqRows.forEach(row => {
+  const tr = document.createElement('tr');
+  for(let i = 0; i < 8; i++) {
+    const td = document.createElement('td');
+    td.style.cssText = 'border:1px solid rgba(59,130,246,0.1);padding:.4rem .3rem;font-family:var(--fm);font-size:.58rem;vertical-align:middle;min-width:60px;';
+    if(i === 0) {
+      td.style.background = 'var(--ink2)';
+      td.style.color = 'var(--text-m)';
+      td.style.textAlign = 'center';
+      td.textContent = row.step;
+    } else {
+      const colIdx = i - 1;
+      const fromIdx = actorMap[row.from] !== undefined ? actorMap[row.from] : -1;
+      const toIdx = actorMap[row.to] !== undefined ? actorMap[row.to] : -1;
+      if(colIdx === fromIdx || colIdx === toIdx) {
+        td.style.background = actorColors[colIdx];
+      } else {
+        td.style.background = 'transparent';
+      }
+      if(colIdx === fromIdx) {
+        const d = document.createElement('div');
+        d.style.cssText = 'display:flex;flex-direction:column;gap:2px;';
+        const arrow = document.createElement('div');
+        const toName = actors[toIdx] || row.to;
+        arrow.style.cssText = `color:${row.color};font-size:.6rem;font-weight:700;`;
+        arrow.textContent = `→ ${toName}`;
+        const msg = document.createElement('div');
+        msg.style.cssText = 'color:var(--text-d);font-size:.56rem;line-height:1.3;word-break:break-word;max-width:140px;';
+        msg.textContent = row.msg;
+        d.appendChild(arrow);
+        d.appendChild(msg);
+        if(row.note) {
+          const note = document.createElement('div');
+          note.style.cssText = 'font-size:.52rem;background:rgba(245,158,11,.12);border:1px solid rgba(245,158,11,.2);color:var(--amber);padding:1px 4px;border-radius:3px;display:inline-block;margin-top:2px;';
+          note.textContent = row.note;
+          d.appendChild(note);
+        }
+        td.appendChild(d);
+      }
+    }
+    tr.appendChild(td);
+  }
+  tbody.appendChild(tr);
+});
+
+// QA Matrix for overview
+const QA_MATRIX = [
+  { name:'Functional', icon:'🎯', v:['high','low','low','low','high'] },
+  { name:'Performance', icon:'⚡', v:['low','high','low','high','low'] },
+  { name:'Compatibility', icon:'🔌', v:['high','low','high','low','low'] },
+  { name:'Usability', icon:'🖱', v:['high','low','low','low','high'] },
+  { name:'Reliability', icon:'🛡', v:['high','high','low','high','high'] },
+  { name:'Security', icon:'🔒', v:['high','high','high','high','high'] },
+  { name:'Maintainability', icon:'🔧', v:['high','low','high','low','low'] },
+  { name:'Portability', icon:'📦', v:['low','low','high','high','low'] },
+];
+const relDot = {
+  high: '<span style="color:var(--orange);font-size:.85rem">●</span>',
+  med:  '<span style="color:var(--blue-l);font-size:.75rem;opacity:.7">◉</span>',
+  low:  '<span style="opacity:.3;font-size:.7rem">○</span>'
+};
+const matrixBody = document.getElementById('qaMatrixBody');
+if(matrixBody) {
+  QA_MATRIX.forEach((qa,i) => {
+    const tr = document.createElement('tr');
+    tr.style.background = i%2===0 ? 'transparent' : 'rgba(255,255,255,.02)';
+    tr.innerHTML = `
+      <td style="border:1px solid var(--line);padding:.3rem .5rem;font-family:var(--fm);font-size:.6rem;color:var(--text-d)">${qa.icon} ${qa.name}</td>
+      ${qa.v.map(r=>`<td style="border:1px solid var(--line);padding:.3rem;text-align:center">${relDot[r]}</td>`).join('')}
+    `;
+    matrixBody.appendChild(tr);
+  });
+}
+
+
+function toggleTheme(){
+  const html=document.documentElement;
+  const isDark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',isDark?'light':'dark');
+  const btn=document.getElementById('theme-btn');
+  btn.textContent=isDark?'🌙 Dark':'☀ Light';
+}
+</script>
+</body>
+</html>

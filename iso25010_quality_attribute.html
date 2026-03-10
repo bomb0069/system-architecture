@@ -1,0 +1,2082 @@
+<!DOCTYPE html>
+<html lang="th" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ISO 25010 Quality Attributes — Interactive Learning</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d1a4a;
+    --navy-mid: #152060;
+    --navy-light: #1e2d7a;
+    --blue: #3B82F4;
+    --blue-bright: #60a5fa;
+    --orange: #F5A623;
+    --orange-dim: #d4891c;
+    --teal: #14b8a6;
+    --green: #22c55e;
+    --red: #ef4444;
+    --purple: #a855f7;
+    --bg: #070e2b;
+    --bg2: #0d1a4a;
+    --bg3: #111f5c;
+    --border: rgba(59,130,244,0.2);
+    --border-bright: rgba(59,130,244,0.5);
+    --text: #e2e8f0;
+    --text-dim: #94a3b8;
+    --text-muted: #64748b;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'IBM Plex Sans Thai', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--navy-mid) 0%, #0d1a4a 60%, #1a0a3a 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 64px;
+  }
+  .logo-mark {
+    font-family: var(--font-head);
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--orange);
+    letter-spacing: 0.05em;
+  }
+  .logo-mark span { color: var(--blue-bright); }
+  .header-title {
+    font-family: var(--font-head);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .header-badge {
+    background: rgba(59,130,244,0.15);
+    border: 1px solid var(--border-bright);
+    color: var(--blue-bright);
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  /* ── LAYOUT ── */
+  .app {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: calc(100vh - 64px);
+  }
+
+  /* ── SIDEBAR ── */
+  aside {
+    background: var(--bg2);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem 0;
+    position: sticky;
+    top: 64px;
+    height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .sidebar-section-title {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 0 1.5rem;
+    margin-bottom: 0.5rem;
+    margin-top: 1.5rem;
+  }
+  .sidebar-section-title:first-child { margin-top: 0; }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.65rem 1.5rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    border-left: 3px solid transparent;
+    position: relative;
+  }
+  .nav-item:hover { background: rgba(59,130,244,0.07); }
+  .nav-item.active {
+    background: rgba(59,130,244,0.12);
+    border-left-color: var(--blue);
+  }
+  .nav-dot {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: var(--font-head);
+  }
+  .nav-text { flex: 1; }
+  .nav-en {
+    font-size: 0.72rem;
+    font-weight: 600;
+    font-family: var(--font-head);
+    line-height: 1;
+  }
+  .nav-th {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    margin-top: 2px;
+  }
+  .nav-item.active .nav-th { color: var(--text-dim); }
+
+  /* ── MAIN ── */
+  main {
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: calc(100vh - 64px);
+  }
+
+  /* ── TAB BAR ── */
+  .tabs {
+    display: flex;
+    gap: 0.25rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    padding-bottom: 0;
+  }
+  .tab-btn {
+    font-family: var(--font-head);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.6rem 1.1rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+    transition: all 0.15s;
+    letter-spacing: 0.04em;
+  }
+  .tab-btn:hover { color: var(--text-dim); }
+  .tab-btn.active {
+    color: var(--blue-bright);
+    border-bottom-color: var(--blue);
+  }
+
+  /* ── CONTENT PANELS ── */
+  .panel { display: none; animation: fadeIn 0.2s ease; }
+  .panel.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+  /* ── QA HERO ── */
+  .qa-hero {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--bg3) 0%, var(--bg2) 100%);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+  }
+  .qa-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; right: 0;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(59,130,244,0.06) 0%, transparent 70%);
+    transform: translate(40%, -40%);
+  }
+  .qa-icon-big {
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    flex-shrink: 0;
+  }
+  .qa-hero-text h1 {
+    font-family: var(--font-head);
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+  }
+  .qa-hero-text .qa-num {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+  }
+  .qa-hero-text p {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    max-width: 600px;
+  }
+  .iso-tag {
+    margin-left: auto;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    background: rgba(245,166,35,0.1);
+    border: 1px solid rgba(245,166,35,0.3);
+    color: var(--orange);
+    padding: 4px 10px;
+    border-radius: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  /* ── SUB-CHARACTERISTICS ── */
+  .sub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  .sub-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    transition: border-color 0.15s;
+  }
+  .sub-card:hover { border-color: var(--border-bright); }
+  .sub-name {
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--blue-bright);
+    margin-bottom: 0.3rem;
+  }
+  .sub-th {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    margin-bottom: 0.4rem;
+  }
+  .sub-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+
+  /* ── SECTION HEADER ── */
+  .section-h {
+    font-family: var(--font-head);
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--orange);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .section-h::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, rgba(245,166,35,0.3), transparent);
+  }
+
+  /* ── PROCESS FLOW ── */
+  .process-flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin-bottom: 2rem;
+  }
+  .process-step {
+    display: grid;
+    grid-template-columns: 48px 1fr;
+    gap: 0;
+    position: relative;
+  }
+  .process-step:not(:last-child) .step-line {
+    position: absolute;
+    left: 23px;
+    top: 48px;
+    width: 2px;
+    height: calc(100% - 16px);
+    background: linear-gradient(to bottom, var(--blue), rgba(59,130,244,0.1));
+  }
+  .process-step:last-child .step-line { display: none; }
+  .step-node {
+    width: 48px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 4px;
+    position: relative;
+    z-index: 1;
+  }
+  .step-circle {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    border: 2px solid;
+    flex-shrink: 0;
+  }
+  .step-body {
+    padding: 0 0 1.5rem 1rem;
+  }
+  .step-title {
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.4rem;
+    padding-top: 4px;
+  }
+  .step-desc {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+    margin-bottom: 0.75rem;
+  }
+
+  /* ── CODE BLOCK / EXAMPLE ── */
+  .code-block {
+    background: #030a1f;
+    border: 1px solid rgba(59,130,244,0.15);
+    border-left: 3px solid var(--blue);
+    border-radius: 8px;
+    padding: 0.9rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    line-height: 1.7;
+    color: var(--text-dim);
+    overflow-x: auto;
+    white-space: pre-wrap;
+  }
+  .code-block .key { color: var(--blue-bright); }
+  .code-block .val { color: var(--orange); }
+  .code-block .str { color: var(--teal); }
+  .code-block .cmt { color: var(--text-muted); font-style: italic; }
+  .code-block .ok { color: var(--green); }
+  .code-block .err { color: var(--red); }
+
+  /* ── METRICS TABLE ── */
+  .metrics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.78rem;
+    margin-bottom: 2rem;
+  }
+  .metrics-table th {
+    font-family: var(--font-head);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 0.6rem 0.8rem;
+    text-align: left;
+    background: var(--bg2);
+    border-bottom: 1px solid var(--border);
+  }
+  .metrics-table td {
+    padding: 0.65rem 0.8rem;
+    border-bottom: 1px solid rgba(59,130,244,0.08);
+    color: var(--text-dim);
+    vertical-align: top;
+    line-height: 1.5;
+  }
+  .metrics-table tr:hover td { background: rgba(59,130,244,0.04); }
+  .metric-name {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--teal);
+  }
+  .target-pill {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.66rem;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: rgba(34,197,94,0.1);
+    border: 1px solid rgba(34,197,94,0.3);
+    color: var(--green);
+    white-space: nowrap;
+  }
+
+  /* ── 4+1 VIEW GRID ── */
+  .view41-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+  }
+  .view-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    transition: all 0.15s;
+    cursor: default;
+  }
+  .view-card:hover { border-color: var(--border-bright); transform: translateY(-1px); }
+  .view-card.highlighted { border-color: var(--orange); background: rgba(245,166,35,0.05); }
+  .view-card-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.6rem;
+  }
+  .view-icon {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.85rem;
+  }
+  .view-name {
+    font-family: var(--font-head);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .view-diagram-type {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+  .view-relevance {
+    font-size: 0.72rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .rel-badge {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    padding: 1px 6px;
+    border-radius: 3px;
+    margin-bottom: 0.4rem;
+  }
+  .rel-high { background: rgba(245,166,35,0.15); color: var(--orange); border: 1px solid rgba(245,166,35,0.3); }
+  .rel-med { background: rgba(59,130,244,0.12); color: var(--blue-bright); border: 1px solid rgba(59,130,244,0.25); }
+  .rel-low { background: rgba(100,116,139,0.1); color: var(--text-muted); border: 1px solid rgba(100,116,139,0.2); }
+
+  /* ── VERIFICATION CHECKLIST ── */
+  .check-list { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+  .check-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+  }
+  .check-icon {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.6rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .ci-auto { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .ci-manual { background: rgba(245,166,35,0.15); color: var(--orange); border: 1px solid rgba(245,166,35,0.3); }
+  .ci-tool { background: rgba(59,130,244,0.15); color: var(--blue-bright); border: 1px solid rgba(59,130,244,0.3); }
+
+  /* ── OVERVIEW PAGE ── */
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+  .ov-card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.2rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    gap: 0.9rem;
+    align-items: flex-start;
+  }
+  .ov-card:hover { border-color: var(--border-bright); transform: translateY(-2px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+  .ov-icon { font-size: 1.5rem; flex-shrink: 0; margin-top: 2px; }
+  .ov-card h3 {
+    font-family: var(--font-head);
+    font-size: 0.9rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+  .ov-card .ov-th { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+  .ov-card p { font-size: 0.75rem; color: var(--text-dim); line-height: 1.5; }
+  .ov-subs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.5rem;
+  }
+  .ov-sub-tag {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    background: rgba(59,130,244,0.08);
+    border: 1px solid rgba(59,130,244,0.15);
+    color: var(--text-muted);
+    padding: 1px 6px;
+    border-radius: 4px;
+  }
+
+  /* ── PROCESS OVERVIEW DIAGRAM ── */
+  .process-diagram {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    padding: 1.2rem;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+  }
+  .pd-box {
+    flex-shrink: 0;
+    text-align: center;
+    width: 120px;
+  }
+  .pd-circle {
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+    margin: 0 auto 0.4rem;
+    border: 2px solid;
+  }
+  .pd-label {
+    font-family: var(--font-head);
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .pd-sub {
+    font-size: 0.6rem;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  .pd-arrow {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  /* ── 4+1 OVERVIEW DIAGRAM ── */
+  .view41-diagram {
+    position: relative;
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .view41-center {
+    text-align: center;
+    margin-bottom: 1rem;
+  }
+  .scenario-box {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(245,166,35,0.1);
+    border: 2px solid var(--orange);
+    border-radius: 10px;
+    padding: 0.6rem 1.2rem;
+    font-family: var(--font-head);
+    font-weight: 700;
+    font-size: 0.85rem;
+    color: var(--orange);
+  }
+  .view41-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+  @media (min-width: 900px) {
+    .view41-row { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  }
+  .vr-card {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.8rem;
+    text-align: center;
+  }
+  .vr-name {
+    font-family: var(--font-head);
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+  }
+  .vr-focus { font-size: 0.68rem; color: var(--text-muted); margin-bottom: 0.4rem; }
+  .vr-qa-tags { display: flex; flex-wrap: wrap; gap: 0.25rem; justify-content: center; }
+  .vr-tag {
+    font-size: 0.58rem;
+    font-family: var(--font-mono);
+    padding: 1px 5px;
+    border-radius: 3px;
+    border: 1px solid rgba(59,130,244,0.2);
+    color: var(--blue-bright);
+    background: rgba(59,130,244,0.07);
+  }
+
+  /* ── SCROLLBAR ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--navy-light); border-radius: 3px; }
+
+  /* ── INTRO BANNER ── */
+  .intro-banner {
+    background: linear-gradient(135deg, rgba(59,130,244,0.08) 0%, rgba(245,166,35,0.05) 100%);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    border-radius: 10px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 2rem;
+    font-size: 0.82rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .intro-banner strong { color: var(--blue-bright); font-family: var(--font-head); }
+
+  /* ── PILL TAGS ── */
+  .pill { display: inline-flex; align-items: center; gap: 0.3rem; font-family: var(--font-mono); font-size: 0.65rem; padding: 2px 8px; border-radius: 999px; }
+  .pill-blue { background: rgba(59,130,244,0.12); border: 1px solid rgba(59,130,244,0.25); color: var(--blue-bright); }
+  .pill-orange { background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.25); color: var(--orange); }
+  .pill-teal { background: rgba(20,184,166,0.1); border: 1px solid rgba(20,184,166,0.25); color: var(--teal); }
+  .pill-green { background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25); color: var(--green); }
+
+  .info-row { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+
+[data-theme="light"] {
+  --navy: #1e40af; --navy-mid: #1d4ed8; --navy-light: #2563eb;
+  --blue: #2563eb; --blue-bright: #1d4ed8;
+  --orange: #d97706; --orange-dim: #b45309;
+  --teal: #0d9488; --green: #16a34a; --red: #dc2626; --purple: #7c3aed;
+  --bg: #f8fafc; --bg2: #ffffff; --bg3: #f1f5f9;
+  --border: rgba(59,130,246,.18); --border-bright: rgba(59,130,246,.4);
+  --text: #0f172a; --text-dim: #334155; --text-muted: #64748b;
+}
+[data-theme="light"] body { background: var(--bg); color: var(--text); }
+[data-theme="light"] .sidebar { background: #1e3a8a !important; }
+[data-theme="light"] .nav-item.active { background: #dbeafe !important; }
+[data-theme="light"] .nav-item:hover { background: rgba(219,234,254,.6) !important; }
+[data-theme="light"] .code-block { background: #f0f4ff !important; color: #334155 !important; }
+[data-theme="light"] .code-block .key { color: #1d4ed8 !important; }
+[data-theme="light"] .code-block .val { color: #b45309 !important; }
+[data-theme="light"] .code-block .str { color: #0d9488 !important; }
+[data-theme="light"] .code-block .cmt { color: #94a3b8 !important; }
+[data-theme="light"] .ov-card { background: #ffffff; border-color: rgba(59,130,246,.15); color: #0f172a; }
+[data-theme="light"] .ov-card:hover { background: #f0f4ff; }
+[data-theme="light"] .sub-card { background: #f8fafc; border-color: rgba(59,130,246,.12); }
+[data-theme="light"] .metrics-table th { background: #e8eef8; color: #64748b; }
+[data-theme="light"] .metrics-table td { color: #334155; }
+[data-theme="light"] .metrics-table { color: #0f172a; }
+[data-theme="light"] .intro-banner { background: rgba(219,234,254,.5) !important; }
+[data-theme="light"] .main-content { background: #f8fafc; }
+[data-theme="light"] .tab-btn { background: #f1f5f9; color: #475569; border-color: rgba(59,130,246,.2); }
+[data-theme="light"] .tab-btn.active { background: rgba(219,234,254,.8); color: #1d4ed8; }
+</style>
+</head>
+<body>
+<button id="theme-btn" onclick="toggleTheme()" style="position:fixed;top:10px;right:12px;z-index:9999;display:flex;align-items:center;gap:.3rem;padding:.25rem .75rem;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;font-family:var(--font-mono);font-size:.6rem;font-weight:700;color:rgba(255,255,255,.85);cursor:pointer;transition:all .15s;backdrop-filter:blur(8px)">☀ Light</button>
+
+
+<header>
+  <div class="logo-mark">ISO<span>25010</span></div>
+  <div class="header-title">Quality Attributes · Product Quality Model</div>
+  <div class="header-badge">Interactive Learning v1.0</div>
+</header>
+
+<div class="app">
+  <aside id="sidebar">
+    <div class="sidebar-section-title">ภาพรวม</div>
+    <div class="nav-item active" onclick="navigateTo('overview')" id="nav-overview">
+      <div class="nav-dot" style="background:rgba(59,130,244,0.15);color:var(--blue-bright)">🗺</div>
+      <div class="nav-text">
+        <div class="nav-en">Overview</div>
+        <div class="nav-th">ISO 25010 ภาพรวม</div>
+      </div>
+    </div>
+    <div class="nav-item" onclick="navigateTo('process')" id="nav-process">
+      <div class="nav-dot" style="background:rgba(245,166,35,0.15);color:var(--orange)">⚙</div>
+      <div class="nav-text">
+        <div class="nav-en">Process</div>
+        <div class="nav-th">กระบวนการตั้งตัวแปร</div>
+      </div>
+    </div>
+    <div class="nav-item" onclick="navigateTo('view41')" id="nav-view41">
+      <div class="nav-dot" style="background:rgba(168,85,247,0.15);color:#a855f7">◈</div>
+      <div class="nav-text">
+        <div class="nav-en">4+1 View Model</div>
+        <div class="nav-th">Mapping QA → View</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section-title" style="margin-top:1.5rem">8 Quality Attributes</div>
+
+    <div id="qa-nav-items"></div>
+  </aside>
+
+  <main id="main-content">
+    <!-- Content injected by JS -->
+  </main>
+</div>
+
+<script>
+const QA_DATA = [
+  {
+    id: 'functional',
+    num: 'QA-01',
+    en: 'Functional Suitability',
+    th: 'ความเหมาะสมเชิงฟังก์ชัน',
+    icon: '🎯',
+    color: '#22c55e',
+    bg: 'rgba(34,197,94,0.1)',
+    desc: 'ระบบทำสิ่งที่ควรทำได้ครบถ้วนและถูกต้องตามความต้องการ — ทั้งในส่วนที่ระบุไว้ชัดเจน และที่ผู้ใช้คาดหวังโดยปริยาย',
+    subs: [
+      { name: 'Functional Completeness', th: 'ความครบถ้วน', desc: 'ฟีเจอร์ครอบคลุม user task ทั้งหมดที่กำหนดไว้ใน requirements' },
+      { name: 'Functional Correctness', th: 'ความถูกต้อง', desc: 'ผลลัพธ์ถูกต้องตามข้อกำหนด ไม่มี rounding error, logic error' },
+      { name: 'Functional Appropriateness', th: 'ความเหมาะสม', desc: 'ระบบช่วย user บรรลุเป้าหมายได้ โดยไม่มี extra effort หรือ workaround' },
+    ],
+    process: [
+      {
+        num: '01', title: 'ระบุ Function ที่ต้องการ',
+        desc: 'สร้าง functional requirement list จาก use case, user story หรือ BRD แยกตาม actor และ goal',
+        example: `<span class="cmt">// จาก User Story</span>
+<span class="key">Feature</span>: <span class="str">"ระบบ checkout"</span>
+<span class="key">Functions</span>:
+  - <span class="val">addToCart()</span>          <span class="cmt">// required</span>
+  - <span class="val">applyDiscount()</span>       <span class="cmt">// required</span>
+  - <span class="val">processPayment()</span>      <span class="cmt">// required</span>
+  - <span class="val">sendConfirmation()</span>    <span class="cmt">// required</span>
+  - <span class="val">updateInventory()</span>     <span class="cmt">// required</span>`
+      },
+      {
+        num: '02', title: 'กำหนด Acceptance Criteria',
+        desc: 'แต่ละ function ต้องมีเงื่อนไขชัดเจนว่า "ผ่าน" หมายความว่าอะไร — Given / When / Then',
+        example: `<span class="cmt">// BDD Format</span>
+<span class="key">GIVEN</span> user มีสินค้าใน cart 2 ชิ้น
+<span class="key">AND</span>   coupon "SAVE20" มีมูลค่า 20%
+<span class="key">WHEN</span>  user กด "Apply Coupon"
+<span class="key">THEN</span>  ยอดรวมลดลง 20% ±0.01 บาท
+<span class="key">AND</span>   แสดง discount breakdown ครบถ้วน`
+      },
+      {
+        num: '03', title: 'ตั้งตัวแปรวัดผล',
+        desc: 'เลือก metric ที่สะท้อน completeness, correctness, appropriateness ได้จริง',
+        example: `<span class="key">Feature Coverage Rate</span>     = <span class="val">Implemented / Total × 100</span>
+<span class="key">Test Pass Rate</span>            = <span class="val">Passed / Total Test Cases × 100</span>
+<span class="key">Defect Escape Rate</span>        = <span class="val">Prod Bugs / Total Bugs × 100</span>
+<span class="key">Task Completion Rate</span>      = <span class="val">Success Tasks / Attempted × 100</span>
+<span class="key">User Error Rate</span>           = <span class="val">Errors / Total User Actions × 100</span>`
+      },
+      {
+        num: '04', title: 'กำหนด Target (SLO)',
+        desc: 'ระบุค่าเป้าหมายที่วัดได้ พร้อม tolerance และ time window',
+        example: `<span class="key">Feature Coverage</span>    ≥ <span class="ok">100%</span>    <span class="cmt">// must be complete</span>
+<span class="key">Test Pass Rate</span>      ≥ <span class="ok">99%</span>     <span class="cmt">// ก่อน release</span>
+<span class="key">Defect Escape Rate</span>  ≤ <span class="ok">1%</span>      <span class="cmt">// per sprint</span>
+<span class="key">Task Completion</span>     ≥ <span class="ok">95%</span>     <span class="cmt">// ใน usability test</span>`
+      }
+    ],
+    metrics: [
+      { name: 'Feature Coverage Rate', sub: 'Completeness', how: 'นับ feature ที่ implement / feature ทั้งหมดใน backlog', target: '≥ 100%', tool: 'Jira / Linear' },
+      { name: 'Automated Test Pass Rate', sub: 'Correctness', how: 'จำนวน test case ผ่าน / ทั้งหมด ใน CI pipeline', target: '≥ 99%', tool: 'Jest / Pytest / CI' },
+      { name: 'Defect Escape Rate', sub: 'Correctness', how: 'Bug ที่ลูกค้าพบ / Bug ทั้งหมดที่พบใน sprint', target: '≤ 1%', tool: 'Jira / Bugzilla' },
+      { name: 'Task Completion Rate', sub: 'Appropriateness', how: 'User ทำ task สำเร็จ / User ทั้งหมดที่พยายาม', target: '≥ 95%', tool: 'Usability Testing' },
+    ],
+    view41: {
+      logical: { rel: 'high', desc: 'Class/Component diagram แสดง business logic, domain model, use case realization' },
+      process: { rel: 'med', desc: 'Activity diagram แสดง workflow ของแต่ละ function และ business process' },
+      development: { rel: 'low', desc: 'Package diagram ช่วยจัดกลุ่ม module ตาม functional area' },
+      physical: { rel: 'low', desc: 'Deployment diagram เกี่ยวน้อย เว้นแต่ function ขึ้นอยู่กับ specific infrastructure' },
+      scenario: { rel: 'high', desc: 'Use Case diagram และ User Story เป็น primary driver ของ Functional Suitability' },
+    },
+    verification: [
+      { type: 'auto', label: 'AUTO', text: 'Unit Testing + Integration Testing ครอบคลุม acceptance criteria ทุกข้อ' },
+      { type: 'auto', label: 'AUTO', text: 'BDD Test (Cucumber/Behave) รัน Given-When-Then scenarios อัตโนมัติใน CI' },
+      { type: 'tool', label: 'TOOL', text: 'Code Coverage tool (Jacoco, Istanbul) ตรวจสอบว่า test ครอบคลุม code path' },
+      { type: 'manual', label: 'MANUAL', text: 'User Acceptance Testing (UAT) กับ real users ก่อน release' },
+      { type: 'manual', label: 'MANUAL', text: 'Feature walkthrough กับ business stakeholder ทุก sprint review' },
+    ]
+  },
+  {
+    id: 'performance',
+    num: 'QA-02',
+    en: 'Performance Efficiency',
+    th: 'ประสิทธิภาพการทำงาน',
+    icon: '⚡',
+    color: '#f59e0b',
+    bg: 'rgba(245,158,11,0.1)',
+    desc: 'ระบบทำงานเร็วพอ ใช้ทรัพยากรอย่างคุ้มค่า และรองรับ load ที่กำหนดได้ภายใต้เงื่อนไขที่ระบุ',
+    subs: [
+      { name: 'Time Behaviour', th: 'พฤติกรรมด้านเวลา', desc: 'Response time, Processing time, Throughput อยู่ในระดับที่กำหนด' },
+      { name: 'Resource Utilization', th: 'การใช้ทรัพยากร', desc: 'CPU, Memory, Network, Storage ถูกใช้อย่างเหมาะสม ไม่สิ้นเปลือง' },
+      { name: 'Capacity', th: 'ความจุ', desc: 'รองรับจำนวน user, transaction, data volume ตาม requirement ได้' },
+    ],
+    process: [
+      {
+        num: '01', title: 'วิเคราะห์ Performance Requirement',
+        desc: 'แยก requirement ออกเป็น 3 มิติ — Time Behaviour, Resource Utilization, Capacity — พร้อมระบุ context',
+        example: `<span class="cmt">// ระบุ context ให้ครบ</span>
+<span class="key">Context</span>: <span class="str">Checkout API</span>
+<span class="key">Concurrent Users</span>: <span class="val">5,000</span>
+<span class="key">Load Pattern</span>: <span class="str">Peak 09:00–12:00</span>
+<span class="key">Data Volume</span>: <span class="val">2M orders/day</span>`
+      },
+      {
+        num: '02', title: 'ตั้งตัวแปร Latency + Throughput',
+        desc: 'ใช้ Percentile (P50/P95/P99) ไม่ใช้ Average เพราะ Average ซ่อน outlier',
+        example: `<span class="cmt">// ✅ ถูกต้อง — ใช้ Percentile</span>
+<span class="key">P50 Latency</span>   ≤ <span class="val">80ms</span>     <span class="cmt">// 50% ของ request</span>
+<span class="key">P95 Latency</span>   ≤ <span class="val">200ms</span>    <span class="cmt">// 95% ของ request</span>
+<span class="key">P99 Latency</span>   ≤ <span class="val">500ms</span>    <span class="cmt">// 99% ของ request</span>
+<span class="key">Throughput</span>     ≥ <span class="val">10,000 RPS</span>
+
+<span class="cmt">// ❌ ผิด — Average ซ่อนปัญหา</span>
+<span class="err">Average Latency ≤ 200ms  // ไม่พอ!</span>`
+      },
+      {
+        num: '03', title: 'กำหนด Resource Budget',
+        desc: 'ระบุ upper bound ของ resource ที่แต่ละ service ใช้ได้ เพื่อป้องกัน noisy neighbor',
+        example: `<span class="cmt">// Resource Budget per instance</span>
+<span class="key">CPU</span>        ≤ <span class="val">70%</span>    <span class="cmt">// avg under normal load</span>
+<span class="key">Memory</span>     ≤ <span class="val">80%</span>    <span class="cmt">// ไม่ trigger OOM</span>
+<span class="key">Network Out</span> ≤ <span class="val">500MB/s</span>
+<span class="key">DB Conn</span>    ≤ <span class="val">100</span>     <span class="cmt">// per instance</span>`
+      },
+      {
+        num: '04', title: 'Capacity Planning',
+        desc: 'คำนวณจำนวน instance ที่ต้องการ โดยใช้ Little\'s Law และ projected growth',
+        example: `<span class="cmt">// Little's Law: N = λ × W</span>
+<span class="key">Throughput</span> (λ) = <span class="val">10,000 req/s</span>
+<span class="key">Latency</span>    (W) = <span class="val">0.2 s</span>
+<span class="key">Concurrency</span>(N) = <span class="val">10,000 × 0.2 = 2,000</span>
+
+<span class="cmt">// Instance sizing</span>
+<span class="key">Max thread/instance</span> = <span class="val">200</span>
+<span class="key">Min instances needed</span> = <span class="ok">2,000 / 200 = 10</span>
+<span class="key">With 2x headroom</span>    = <span class="ok">20 instances</span>`
+      }
+    ],
+    metrics: [
+      { name: 'P95 Response Time', sub: 'Time Behaviour', how: 'ค่า latency ที่ 95th percentile จาก APM / Load test', target: '≤ 200ms', tool: 'Datadog / Grafana' },
+      { name: 'Throughput (RPS)', sub: 'Time Behaviour', how: 'Requests per second ที่ระบบประมวลผลสำเร็จ', target: '≥ 10,000', tool: 'k6 / Gatling' },
+      { name: 'CPU Utilization', sub: 'Resource Utilization', how: 'Average CPU % across all instances under normal load', target: '≤ 70%', tool: 'CloudWatch / Prometheus' },
+      { name: 'Memory Utilization', sub: 'Resource Utilization', how: 'Average Memory % across all instances', target: '≤ 80%', tool: 'CloudWatch / Prometheus' },
+      { name: 'Capacity Headroom', sub: 'Capacity', how: '% remaining capacity at peak load', target: '≥ 30%', tool: 'Load Testing' },
+    ],
+    view41: {
+      logical: { rel: 'low', desc: 'Component design (Caching layers, async patterns) ที่ส่งผลต่อ performance' },
+      process: { rel: 'high', desc: 'Sequence diagram แสดง call chain, async/sync flows, และ bottleneck ที่อาจเกิด' },
+      development: { rel: 'low', desc: 'Package structure ที่ส่งผลต่อ compile time, deployment size' },
+      physical: { rel: 'high', desc: 'Deployment diagram แสดง network topology, CDN, load balancer, DB replication' },
+      scenario: { rel: 'med', desc: 'Performance scenario ระบุ workload, stimulus, response measure' },
+    },
+    verification: [
+      { type: 'auto', label: 'AUTO', text: 'Load Test (k6/Gatling) ด้วย target load ก่อน release ทุกครั้ง' },
+      { type: 'auto', label: 'AUTO', text: 'APM (Datadog/New Relic) monitoring P95 latency real-time ใน production' },
+      { type: 'tool', label: 'TOOL', text: 'Flame Graph analysis หา CPU hotspot — ใช้ async profiler' },
+      { type: 'auto', label: 'AUTO', text: 'Performance regression test ใน CI pipeline — fail if P95 > threshold' },
+      { type: 'manual', label: 'MANUAL', text: 'Capacity Review ทุกไตรมาส เทียบ actual growth vs projection' },
+    ]
+  },
+  {
+    id: 'compatibility',
+    num: 'QA-03',
+    en: 'Compatibility',
+    th: 'ความเข้ากันได้',
+    icon: '🔗',
+    color: '#14b8a6',
+    bg: 'rgba(20,184,166,0.1)',
+    desc: 'ระบบสามารถแลกเปลี่ยนข้อมูลและทำงานร่วมกับระบบอื่นได้ โดยไม่กระทบต่อการทำงานของแต่ละฝ่าย',
+    subs: [
+      { name: 'Co-existence', th: 'การอยู่ร่วมกัน', desc: 'ทำงานใน shared environment ได้โดยไม่รบกวน resource ของระบบอื่น' },
+      { name: 'Interoperability', th: 'การทำงานร่วมกัน', desc: 'แลกเปลี่ยนข้อมูลและ invoke function ของระบบอื่นได้ตาม standard' },
+    ],
+    process: [
+      {
+        num: '01', title: 'สร้าง Integration Map',
+        desc: 'ระบุทุก external system ที่ต้องติดต่อ พร้อม protocol, data format, และ version',
+        example: `<span class="key">System</span>        <span class="key">Protocol</span>   <span class="key">Format</span>   <span class="key">Version</span>
+<span class="str">PaymentGW</span>     REST/TLS   JSON     v3.2
+<span class="str">Inventory</span>     gRPC       Protobuf v1.5
+<span class="str">Analytics</span>     Kafka      Avro     schema-v2
+<span class="str">Legacy ERP</span>    SOAP       XML      WSDL-v1`
+      },
+      {
+        num: '02', title: 'กำหนด API Contract',
+        desc: 'สร้าง formal contract (OpenAPI, AsyncAPI, Proto) ที่ทุก party ตกลงใช้ร่วมกัน',
+        example: `<span class="cmt">// OpenAPI 3.0 Contract</span>
+<span class="key">paths</span>:
+  /orders:
+    <span class="key">post</span>:
+      <span class="key">requestBody</span>: <span class="str">OrderRequest</span>
+      <span class="key">responses</span>:
+        <span class="val">201</span>: <span class="str">OrderCreated</span>
+        <span class="val">422</span>: <span class="str">ValidationError</span>
+<span class="cmt">// Contract = "law" ระหว่าง services</span>`
+      },
+      {
+        num: '03', title: 'ตั้งตัวแปรวัด Compatibility',
+        desc: 'วัดทั้ง API compatibility, data format compatibility, และ version compatibility',
+        example: `<span class="key">API Contract Compliance</span>  = <span class="val">Passing / Total Contract Tests</span>
+<span class="key">Breaking Change Rate</span>     = <span class="val">Breaking Releases / Total Releases</span>
+<span class="key">Integration Test Pass</span>    = <span class="val">Pass / Total Integration Tests</span>
+<span class="key">Schema Drift Count</span>       = <span class="val">Fields changed without notice</span>`
+      },
+      {
+        num: '04', title: 'Consumer-Driven Contract Testing',
+        desc: 'Consumer กำหนด expectation → Provider ต้องผ่านทุก expectation ก่อน deploy',
+        example: `<span class="cmt">// Pact: Consumer defines expectations</span>
+<span class="key">Consumer</span> <span class="str">OrderService</span> expects:
+  POST /payments → <span class="ok">{ status: "approved", txId: string }</span>
+
+<span class="cmt">// Provider must satisfy ALL consumer pacts</span>
+<span class="key">Pact Verification</span>: <span class="ok">PASS ✓</span> before deploy`
+      }
+    ],
+    metrics: [
+      { name: 'API Contract Compliance', sub: 'Interoperability', how: 'Contract test pass rate ใน Pact / Dredd', target: '100%', tool: 'Pact / Dredd' },
+      { name: 'Breaking Change Rate', sub: 'Interoperability', how: 'จำนวน backward-incompatible release / total release', target: '0 ต่อ sprint', tool: 'API diff tools' },
+      { name: 'Integration Test Pass', sub: 'Co-existence', how: 'Integration test ผ่าน % ใน staging environment', target: '≥ 99%', tool: 'Postman / Newman' },
+    ],
+    view41: {
+      logical: { rel: 'high', desc: 'Interface diagram แสดง API contracts, adapters, ports ระหว่าง systems' },
+      process: { rel: 'med', desc: 'Sequence diagram แสดง inter-system communication flow และ error handling' },
+      development: { rel: 'high', desc: 'Component diagram แสดง integration points, adapters, anti-corruption layers' },
+      physical: { rel: 'med', desc: 'Network diagram แสดง connectivity, firewall rules, VPC peering' },
+      scenario: { rel: 'med', desc: 'Integration scenario testing กับ real/stub external systems' },
+    },
+    verification: [
+      { type: 'auto', label: 'AUTO', text: 'Consumer-Driven Contract Testing (Pact) รันใน CI pipeline ทุก commit' },
+      { type: 'tool', label: 'TOOL', text: 'API Schema validation ด้วย OpenAPI validator ตรวจทุก request/response' },
+      { type: 'auto', label: 'AUTO', text: 'Integration test suite ใน staging environment ก่อน production deploy' },
+      { type: 'manual', label: 'MANUAL', text: 'Breaking change review โดย API Design Guild ก่อน release ทุกครั้ง' },
+    ]
+  },
+  {
+    id: 'usability',
+    num: 'QA-04',
+    en: 'Usability',
+    th: 'ความสะดวกในการใช้งาน',
+    icon: '👤',
+    color: '#ec4899',
+    bg: 'rgba(236,72,153,0.1)',
+    desc: 'ผู้ใช้สามารถใช้งานระบบได้อย่างมีประสิทธิผล มีประสิทธิภาพ และพึงพอใจ ในบริบทการใช้งานจริง',
+    subs: [
+      { name: 'Recognizability', th: 'รู้จักวิธีใช้ได้ทันที', desc: 'User เข้าใจได้ทันทีว่าระบบนี้เหมาะกับตนเองหรือไม่' },
+      { name: 'Learnability', th: 'เรียนรู้ได้ง่าย', desc: 'User ใหม่สามารถเรียนรู้และใช้งานได้โดยไม่ต้องอบรมนาน' },
+      { name: 'Operability', th: 'ใช้งานง่าย', desc: 'ควบคุม นำทาง และดำเนินงานได้โดยง่าย' },
+      { name: 'User Error Protection', th: 'ป้องกันความผิดพลาด', desc: 'ลด user error และช่วย recover จาก error ได้ง่าย' },
+      { name: 'UI Aesthetics', th: 'ความสวยงาม', desc: 'UI ดูน่าพึงพอใจ สะอาดตา สอดคล้องกัน' },
+      { name: 'Accessibility', th: 'การเข้าถึง', desc: 'รองรับผู้พิการและความแตกต่างของ user' },
+    ],
+    process: [
+      {
+        num: '01', title: 'กำหนด User Profile',
+        desc: 'ระบุ primary users, technical background, frequency of use, และ context of use',
+        example: `<span class="key">Primary User</span>: <span class="str">Finance Admin</span>
+<span class="key">Tech Level</span>:   <span class="val">Intermediate</span>
+<span class="key">Usage</span>:       <span class="str">Daily, 4–6 hours/day</span>
+<span class="key">Context</span>:     <span class="str">Office, dual monitor, mouse</span>
+<span class="key">Goals</span>:       <span class="str">Process 200 invoices/day</span>
+<span class="key">Pain Points</span>: <span class="str">Repetitive data entry</span>`
+      },
+      {
+        num: '02', title: 'กำหนด Usability Goals',
+        desc: 'แปลง user profile เป็น measurable usability goals ตาม Nielsen\'s metrics',
+        example: `<span class="cmt">// 5 Usability Dimensions</span>
+<span class="key">Learnability</span>: ผู้ใช้ใหม่ทำ task หลักสำเร็จภายใน <span class="val">10 นาที</span>
+<span class="key">Efficiency</span>:   Expert user process invoice ใน &lt; <span class="val">2 นาที/ใบ</span>
+<span class="key">Memorability</span>: กลับมาใช้หลัง 1 สัปดาห์ ไม่ต้องเรียนใหม่
+<span class="key">Error Rate</span>:   &lt; <span class="val">1 error</span> ต่อ 10 transactions
+<span class="key">Satisfaction</span>: SUS Score ≥ <span class="val">80</span> (Grade A)`
+      },
+      {
+        num: '03', title: 'ออกแบบ Usability Test',
+        desc: 'สร้าง task scenario ที่ reflect real use — ทดสอบกับ representative users อย่างน้อย 5 คน',
+        example: `<span class="cmt">// Task Scenario</span>
+<span class="key">Task</span>: "คุณได้รับ invoice จาก Supplier A
+      กรุณาบันทึกและ approve ใน system"
+
+<span class="key">Measure</span>:
+  - Time on task (seconds)
+  - Success/failure
+  - Error count
+  - Think-aloud observations`
+      },
+      {
+        num: '04', title: 'SUS Questionnaire',
+        desc: 'System Usability Scale — 10 ข้อ วัด perceived usability ได้รวดเร็ว',
+        example: `<span class="cmt">// SUS Score Interpretation</span>
+Score ≥ <span class="ok">85</span>  → Grade A  (Excellent)
+Score ≥ <span class="ok">75</span>  → Grade B  (Good)
+Score ≥ <span class="ok">68</span>  → Grade C  (Acceptable)
+Score ≥ <span class="val">51</span>  → Grade D  (Poor)
+Score  &lt; <span class="err">51</span>  → Grade F  (Fail — redesign!)`
+      }
+    ],
+    metrics: [
+      { name: 'Task Completion Rate', sub: 'Operability', how: 'จำนวน task ที่สำเร็จ / ทั้งหมดในการ usability test', target: '≥ 95%', tool: 'User Testing Session' },
+      { name: 'Task Time (Expert)', sub: 'Efficiency', how: 'เวลาที่ expert user ใช้ทำ primary task', target: '≤ 2 min', tool: 'Screen Recording' },
+      { name: 'User Error Rate', sub: 'Error Protection', how: 'ข้อผิดพลาดต่อจำนวน action', target: '≤ 1%', tool: 'Session Recording' },
+      { name: 'SUS Score', sub: 'Satisfaction', how: 'System Usability Scale questionnaire 10 ข้อ', target: '≥ 80', tool: 'Survey' },
+      { name: 'WCAG Compliance', sub: 'Accessibility', how: 'Pass automated + manual accessibility checks', target: 'AA level', tool: 'axe / Lighthouse' },
+    ],
+    view41: {
+      logical: { rel: 'high', desc: 'UI Component hierarchy, navigation flows, state machine ของ UI interactions' },
+      process: { rel: 'med', desc: 'User flow diagram แสดง task completion path และ error recovery flows' },
+      development: { rel: 'med', desc: 'Design system structure, component library organization' },
+      physical: { rel: 'low', desc: 'CDN deployment ส่งผลต่อ load time ซึ่งกระทบ usability ทางอ้อม' },
+      scenario: { rel: 'high', desc: 'Usability scenario และ persona-based test cases' },
+    },
+    verification: [
+      { type: 'manual', label: 'MANUAL', text: 'Moderated Usability Testing กับ real users ก่อน major release' },
+      { type: 'tool', label: 'TOOL', text: 'Hotjar/FullStory Session Recording วิเคราะห์ user behavior ใน production' },
+      { type: 'auto', label: 'AUTO', text: 'Lighthouse Accessibility audit รันใน CI pipeline' },
+      { type: 'tool', label: 'TOOL', text: 'A/B Testing วัด conversion rate ระหว่าง design variants' },
+      { type: 'manual', label: 'MANUAL', text: 'SUS Questionnaire หลัง UAT ทุกครั้ง' },
+    ]
+  },
+  {
+    id: 'reliability',
+    num: 'QA-05',
+    en: 'Reliability',
+    th: 'ความเชื่อถือได้',
+    icon: '🛡',
+    color: '#3B82F4',
+    bg: 'rgba(59,130,244,0.1)',
+    desc: 'ระบบทำงานได้อย่างถูกต้องและต่อเนื่องภายใต้เงื่อนไขที่กำหนด รวมถึงสามารถกลับมาทำงานได้หลังจากเกิดความล้มเหลว',
+    subs: [
+      { name: 'Maturity', th: 'วุฒิภาวะ', desc: 'ล้มเหลวน้อยภายใต้การใช้งานปกติ — วัดด้วย MTBF' },
+      { name: 'Availability', th: 'ความพร้อมใช้', desc: 'พร้อมให้บริการเมื่อต้องการ — วัดด้วย uptime %' },
+      { name: 'Fault Tolerance', th: 'ทนต่อความผิดพลาด', desc: 'ยังทำงานได้แม้ component บางส่วนล้มเหลว' },
+      { name: 'Recoverability', th: 'การฟื้นตัว', desc: 'กลับมาทำงานได้เร็วหลังล้มเหลว — วัดด้วย MTTR, RTO, RPO' },
+    ],
+    process: [
+      {
+        num: '01', title: 'Failure Mode Analysis',
+        desc: 'ระบุทุก failure scenario ที่อาจเกิด พร้อม probability และ impact',
+        example: `<span class="cmt">// FMEA Table</span>
+<span class="key">Failure</span>           <span class="key">P</span>  <span class="key">Impact</span>   <span class="key">Detection</span>
+DB Primary Down    H  Critical  Heartbeat
+Cache Eviction     M  High      Cache miss rate
+3rd Party API      M  High      Circuit breaker
+Network Partition  L  Critical  Health check`
+      },
+      {
+        num: '02', title: 'กำหนด Availability Target',
+        desc: 'คำนวณ allowed downtime จาก business requirement ก่อน กำหนด SLO',
+        example: `<span class="key">Target SLO</span>   <span class="key">Downtime/year</span>   <span class="key">Downtime/month</span>
+<span class="val">99%</span>          87.6 hours       7.3 hours
+<span class="val">99.9%</span>        8.76 hours       43.8 minutes
+<span class="val">99.95%</span>       4.38 hours       21.9 minutes
+<span class="ok">99.99%</span>       52.6 minutes     <span class="ok">4.4 minutes</span>
+<span class="ok">99.999%</span>      5.26 minutes     <span class="ok">26.3 seconds</span>`
+      },
+      {
+        num: '03', title: 'กำหนด RTO และ RPO',
+        desc: 'Recovery Time Objective (ฟื้นตัวเร็วแค่ไหน) และ Recovery Point Objective (ข้อมูลหายได้แค่ไหน)',
+        example: `<span class="cmt">// Business-driven targets</span>
+<span class="key">RTO</span> = <span class="val">15 minutes</span>
+<span class="cmt">// ระบบต้องกลับมาใช้งานได้ภายใน 15 นาที</span>
+
+<span class="key">RPO</span> = <span class="val">5 minutes</span>
+<span class="cmt">// ยอมรับการสูญเสียข้อมูล ไม่เกิน 5 นาทีสุดท้าย</span>
+
+<span class="cmt">// Architecture implication:</span>
+<span class="str">RTO 15min → Hot standby required</span>
+<span class="str">RPO 5min  → Sync replication + WAL shipping</span>`
+      },
+      {
+        num: '04', title: 'MTBF / MTTR Targets',
+        desc: 'ตั้งเป้า Mean Time Between Failures และ Mean Time To Recover',
+        example: `<span class="key">Availability</span> ≈ MTBF / (MTBF + MTTR)
+
+<span class="cmt">// Target 99.9% Availability</span>
+<span class="key">MTBF</span> = <span class="val">720 hours</span>  <span class="cmt">// 30 วัน</span>
+<span class="key">MTTR</span> = <span class="val">0.72 hours</span>  <span class="cmt">// 43 นาที</span>
+720 / (720 + 0.72) ≈ <span class="ok">99.9%</span> ✓
+
+<span class="cmt">// Elite targets:</span>
+<span class="key">MTTD</span> &lt; <span class="ok">5 min</span>   <span class="cmt">// ตรวจพบเร็ว</span>
+<span class="key">MTTR</span> &lt; <span class="ok">30 min</span>  <span class="cmt">// แก้ไขเร็ว</span>`
+      }
+    ],
+    metrics: [
+      { name: 'Availability (SLI)', sub: 'Availability', how: 'Successful requests / Total requests × 100 (RUM-based)', target: '≥ 99.99%', tool: 'Datadog SLO' },
+      { name: 'MTBF', sub: 'Maturity', how: 'Total uptime / Number of failures', target: '≥ 720 hrs', tool: 'Incident tracker' },
+      { name: 'MTTR', sub: 'Recoverability', how: 'Total recovery time / Number of incidents', target: '≤ 30 min', tool: 'PagerDuty' },
+      { name: 'Error Budget Burn Rate', sub: 'Availability', how: 'ต้องน้อยกว่า 1x (ไม่เผา budget เกินกำหนด)', target: '< 1x', tool: 'Datadog / SLO tools' },
+      { name: 'RTO Achievement', sub: 'Recoverability', how: 'ระยะเวลา recovery จาก DR drill ไม่เกิน RTO target', target: '≤ 15 min', tool: 'DR Drill results' },
+    ],
+    view41: {
+      logical: { rel: 'high', desc: 'Circuit breaker, retry, fallback patterns ใน service logic' },
+      process: { rel: 'high', desc: 'Fault handling flows, failover sequences, health check patterns' },
+      development: { rel: 'med', desc: 'Module isolation เพื่อป้องกัน cascade failure' },
+      physical: { rel: 'high', desc: 'Multi-AZ deployment, load balancer, replica sets, backup strategy' },
+      scenario: { rel: 'high', desc: 'Failure scenario testing: chaos engineering, DR drill' },
+    },
+    verification: [
+      { type: 'auto', label: 'AUTO', text: 'SLO monitoring dashboard + Error Budget burn rate alert ใน production' },
+      { type: 'manual', label: 'MANUAL', text: 'DR Drill ทดสอบ failover จริงทุกไตรมาส วัด RTO/RPO จริง' },
+      { type: 'tool', label: 'TOOL', text: 'Chaos Engineering (Chaos Monkey/Gremlin) inject failure ใน staging' },
+      { type: 'auto', label: 'AUTO', text: 'Health check endpoint monitoring ทุก 30 วินาที พร้อม alerting' },
+      { type: 'manual', label: 'MANUAL', text: 'Game Day simulation ทีมรับมือกับ failure scenario ที่ออกแบบไว้' },
+    ]
+  },
+  {
+    id: 'availability',
+    num: 'QA-05b',
+    en: 'Availability (Deep Dive)',
+    th: 'ความพร้อมใช้งาน — ลงลึก',
+    icon: '🟢',
+    color: '#3B82F4',
+    bg: 'rgba(59,130,244,0.12)',
+    desc: 'ระบบพร้อมให้บริการเมื่อ user ต้องการ — วัดเป็น % ของเวลาที่ระบบทำงานได้ถูกต้องเทียบกับเวลาทั้งหมดใน service window ที่กำหนด',
+    subs: [
+      { name: 'Service Window', th: 'กรอบเวลาให้บริการ', desc: 'นิยาม "เวลาที่นับ" ให้ชัด เช่น 24/7, Business Hours, หรือ Batch Window' },
+      { name: 'SLI (Indicator)', th: 'ตัวชี้วัดระดับบริการ', desc: 'ตัวแปรที่วัดได้จริง เช่น % successful requests จาก user จริง' },
+      { name: 'SLO (Objective)', th: 'เป้าหมายระดับบริการ', desc: 'ค่าเป้าหมายของ SLI เช่น >= 99.9% ใน rolling 28 วัน' },
+      { name: 'Error Budget', th: 'งบประมาณความผิดพลาด', desc: 'เวลาที่ยอมให้ระบบล้มได้ = 100% - SLO เช่น 0.1% = 43.8 นาที/เดือน' },
+      { name: 'RTO', th: 'เวลาสูงสุดในการฟื้นตัว', desc: 'ระบบต้องกลับมาทำงานได้ภายในกี่นาทีหลัง incident' },
+      { name: 'RPO', th: 'จุดข้อมูลที่ยอมรับการสูญเสีย', desc: 'ยอมรับการสูญเสียข้อมูลย้อนหลังไปได้ไม่เกินกี่นาที' },
+    ],
+    process: [
+      {
+        num: '01', title: 'นิยาม Service Window และ Availability ที่แท้จริง',
+        desc: 'ก่อนตั้ง SLO ต้องตกลงกับ business ว่า "พร้อมใช้" หมายความว่าอะไร — Infrastructure uptime ไม่เท่ากับ User-perceived availability',
+        example: `<span class="cmt">// 5 วิธีวัด Availability ตามความน่าเชื่อถือ</span>
+<span class="cmt">// (น้อยไปมาก)</span>
+
+1. <span class="key">Infrastructure</span>  server uptime %
+   <span class="cmt">→ ง่ายที่สุด แต่ไม่สะท้อน user จริง</span>
+
+2. <span class="key">Application</span>     HTTP 2xx / total requests
+   <span class="cmt">→ ดีขึ้น แต่ยังเป็นมุมมองของเรา</span>
+
+3. <span class="key">Synthetic</span>       จำลอง request จากหลายจุด
+   <span class="cmt">→ Proactive จับ regional issue</span>
+
+4. <span class="key">RUM</span>             จาก browser/app จริง
+   <span class="cmt">→ ดีที่สุดสำหรับ user experience</span>
+
+5. <span class="key">Business Tx</span>     orders/min, checkout success rate
+   <span class="cmt">→ สะท้อน business impact ที่แท้จริง</span>
+
+<span class="ok">Best practice</span>: RUM + Business Tx ร่วมกัน`
+      },
+      {
+        num: '02', title: 'กำหนด SLO และคำนวณ Error Budget',
+        desc: 'SLO ต้องมาจาก business requirement ไม่ใช่เพราะ "อยากได้ 99.99%" แล้ว Error Budget กำหนดว่าทีมมี "quota" เท่าไหร่สำหรับการ experiment',
+        example: `<span class="cmt">// คำนวณ Error Budget จาก SLO</span>
+<span class="key">SLO</span>     <span class="key">Error Budget/month</span>  <span class="key">Budget/week</span>
+<span class="val">99%</span>     7.3 hours           1.68 hours
+<span class="val">99.9%</span>   43.8 minutes        10.1 minutes
+<span class="ok">99.95%</span>  21.9 minutes        5 minutes
+<span class="ok">99.99%</span>  4.4 minutes         1 minute
+
+<span class="cmt">// Error Budget Burn Rate Alert</span>
+<span class="key">burn_rate</span> = actual_error_rate / error_budget_rate
+
+Burn rate &gt; <span class="val">14.4x</span> → budget หมดใน 1 ชั่วโมง <span class="err">CRITICAL</span>
+Burn rate &gt; <span class="val">6x</span>    → budget หมดใน 6 ชั่วโมง <span class="val">PAGE</span>
+Burn rate &gt; <span class="val">3x</span>    → budget หมดใน 3 วัน    <span class="str">WARN</span>
+Burn rate &lt; <span class="ok">1x</span>    → อยู่ในเกณฑ์ปกติ        <span class="ok">OK</span>`
+      },
+      {
+        num: '03', title: 'กำหนด RTO และ RPO จาก Business Impact',
+        desc: 'RTO = ฟื้นตัวเร็วแค่ไหน, RPO = ข้อมูลหายได้แค่ไหน — ทั้งสองต้องมาจาก cost of downtime ก่อน แล้ว architecture จึงออกแบบตาม',
+        example: `<span class="cmt">// Business questions ก่อน</span>
+<span class="key">RTO</span>: "user รอได้นานแค่ไหนก่อนเสียหาย?"
+<span class="val">→ RTO = 15 minutes</span>
+
+<span class="key">RPO</span>: "ข้อมูลหาย x นาที รับได้ไหม?"
+<span class="val">→ RPO = 5 minutes</span>
+
+<span class="cmt">// Architecture implications</span>
+<span class="key">RTO 15min</span>  → Hot standby + Auto failover
+<span class="key">RTO 4hrs</span>   → Warm standby + Manual failover
+<span class="key">RTO 24hrs</span>  → Cold backup + Restore procedure
+
+<span class="key">RPO 5min</span>   → Synchronous replication
+<span class="key">RPO 1hr</span>    → Async replication + WAL shipping
+<span class="key">RPO 24hrs</span>  → Daily snapshot backup`
+      },
+      {
+        num: '04', title: 'Failure Mode Analysis และ Resilience Patterns',
+        desc: 'ระบุ SPOF ทุกจุดด้วย FMEA แล้วเลือก pattern ที่ตอบ availability target ได้ — Redundancy เป็นแค่ส่วนหนึ่ง ต้องมี resilience patterns ด้วย',
+        example: `<span class="cmt">// Redundancy Strategy ตาม RTO</span>
+<span class="key">Active-Active</span>   RTO ≈ 0s    <span class="cmt">// cost สูงสุด</span>
+<span class="key">Active-Passive</span>  RTO 1-5min  <span class="cmt">// Auto failover</span>
+<span class="key">Pilot Light</span>     RTO 10-15min <span class="cmt">// Warm standby</span>
+<span class="key">Backup-Restore</span>  RTO hours   <span class="cmt">// cost ต่ำสุด</span>
+
+<span class="cmt">// Resilience Patterns</span>
+<span class="key">Circuit Breaker</span>  → หยุดส่ง request ไป service ที่พัง
+<span class="key">Retry + Backoff</span>  → ลองใหม่ด้วย exponential backoff
+<span class="key">Bulkhead</span>         → isolate failure ไม่ให้ cascade
+<span class="key">Fallback</span>         → ให้ degraded response แทน error
+<span class="key">Health Check</span>     → ตรวจสุขภาพทุก 30 วินาที
+<span class="key">Timeout</span>          → อย่ารอนานเกินไป (fast fail)`
+      }
+    ],
+    metrics: [
+      { name: 'Availability SLI (RUM)', sub: 'SLI/SLO', how: 'Successful user requests / Total requests จาก Real User Monitoring', target: '>= 99.95%', tool: 'Datadog SLO / Grafana' },
+      { name: 'Error Budget Remaining', sub: 'Error Budget', how: '% ของ error budget ที่เหลือในเดือนนี้', target: '> 0%', tool: 'SLO Dashboard' },
+      { name: 'MTTD', sub: 'Detection', how: 'เวลาเฉลี่ยตั้งแต่ระบบพังจนทีมรู้', target: '< 5 min', tool: 'PagerDuty / OpsGenie' },
+      { name: 'MTTR', sub: 'Recovery', how: 'เวลาเฉลี่ยตั้งแต่รู้ว่าพังจนกู้คืนสำเร็จ', target: '< 30 min', tool: 'Incident tracker' },
+      { name: 'RTO Achievement', sub: 'RTO/RPO', how: 'Recovery time จริงจาก DR drill เทียบ RTO target', target: '<= RTO', tool: 'DR Drill log' },
+      { name: 'MTBF', sub: 'Maturity', how: 'เวลาเฉลี่ยระหว่าง incident (uptime / failure count)', target: '>= 720 hrs', tool: 'Incident history' },
+    ],
+    view41: {
+      logical: { rel: 'high', desc: 'Circuit Breaker, Bulkhead, Health Check interface, Retry/Fallback logic ใน component design' },
+      process: { rel: 'high', desc: 'Failover sequence diagram, Health heartbeat, Retry-with-backoff, Chaos scenario flows' },
+      development: { rel: 'med', desc: 'resilience4j / Polly library packages, health module, monitoring package — isolation boundaries' },
+      physical: { rel: 'high', desc: 'Multi-AZ deployment, Auto-scaling group, RDS Multi-AZ, Redis Cluster, CDN, DR region topology' },
+      scenario: { rel: 'high', desc: 'DR drill scenario, Chaos engineering test, "Primary DB fails at peak load" scenario' },
+    },
+    verification: [
+      { type: 'auto', label: 'AUTO', text: 'SLO Error Budget burn rate alert — page on-call ทันทีถ้า burn rate > 6x ใน 6 ชั่วโมง' },
+      { type: 'auto', label: 'AUTO', text: 'Synthetic monitoring probe ทุก 30 วินาที จากหลาย region — จับ regional availability issue' },
+      { type: 'auto', label: 'AUTO', text: 'Real User Monitoring (RUM) ใน browser/app — วัด availability จากมุมมอง user จริง' },
+      { type: 'tool', label: 'TOOL', text: 'Chaos Engineering (Gremlin / Chaos Monkey) inject DB failure, network partition ใน staging' },
+      { type: 'manual', label: 'MANUAL', text: 'DR Drill ทุกไตรมาส — failover จริง วัด RTO/RPO ที่ได้จริงเทียบ target' },
+      { type: 'manual', label: 'MANUAL', text: 'Game Day — ทีมรับมือ failure scenario ที่ออกแบบไว้ล่วงหน้า ตรวจ runbook และ escalation path' },
+    ]
+  },
+  {
+    id: 'security',
+    num: 'QA-06',
+    en: 'Security',
+    th: 'ความมั่นคงปลอดภัย',
+    icon: '🔒',
+    color: '#ef4444',
+    bg: 'rgba(239,68,68,0.1)',
+    desc: 'ระบบปกป้องข้อมูลและทรัพยากรจากการเข้าถึงที่ไม่ได้รับอนุญาต ทั้งโดยบุคคล กระบวนการ หรือโปรแกรม',
+    subs: [
+      { name: 'Confidentiality', th: 'การรักษาความลับ', desc: 'ข้อมูลเข้าถึงได้เฉพาะผู้มีสิทธิ์เท่านั้น' },
+      { name: 'Integrity', th: 'ความสมบูรณ์', desc: 'ข้อมูลไม่ถูกแก้ไขโดยไม่ได้รับอนุญาต' },
+      { name: 'Non-repudiation', th: 'การไม่ปฏิเสธการกระทำ', desc: 'พิสูจน์ได้ว่าใครทำอะไร เมื่อไหร่' },
+      { name: 'Authenticity', th: 'ความถูกต้องของตัวตน', desc: 'พิสูจน์ได้ว่าผู้ใช้เป็นตัวจริง' },
+      { name: 'Accountability', th: 'ความรับผิดชอบ', desc: 'ทุก action ถูกบันทึกและตรวจสอบได้' },
+    ],
+    process: [
+      {
+        num: '01', title: 'Threat Modeling (STRIDE)',
+        desc: 'ใช้ STRIDE framework ระบุ threat ที่อาจเกิดกับแต่ละ component',
+        example: `<span class="key">S</span>poofing        → Auth bypass, Token theft
+<span class="key">T</span>ampering       → SQL injection, Data modification
+<span class="key">R</span>epudiation     → Log deletion, Audit trail missing
+<span class="key">I</span>nfo Disclosure → Sensitive data in logs/errors
+<span class="key">D</span>enial of Service → Rate limit bypass, ReDoS
+<span class="key">E</span>levation       → Privilege escalation, IDOR`
+      },
+      {
+        num: '02', title: 'Defense in Depth',
+        desc: 'วาง security control หลายชั้น — ไม่พึ่งพา single control',
+        example: `<span class="cmt">// Layer 1: Network</span>
+<span class="str">WAF + DDoS Protection + VPC isolation</span>
+
+<span class="cmt">// Layer 2: Application</span>
+<span class="str">Input validation + Auth/Authz + Rate limit</span>
+
+<span class="cmt">// Layer 3: Data</span>
+<span class="str">Encryption at rest + in transit + key mgmt</span>
+
+<span class="cmt">// Layer 4: Audit</span>
+<span class="str">Immutable audit log + SIEM + alerting</span>`
+      },
+      {
+        num: '03', title: 'กำหนด Security Metrics',
+        desc: 'วัด security posture เป็นตัวเลขที่ track ได้',
+        example: `<span class="key">Vulnerability Count</span>  (Critical/High/Med/Low)
+<span class="key">Mean Time to Patch</span>  ≤ <span class="val">7 days</span> for Critical
+<span class="key">Auth Failure Rate</span>   <span class="cmt">// spike = attack signal</span>
+<span class="key">Encryption Coverage</span>  = <span class="val">100%</span> for PII
+<span class="key">Audit Log Coverage</span>   = <span class="val">100%</span> for sensitive ops`
+      },
+      {
+        num: '04', title: 'Security Testing Pipeline',
+        desc: 'ฝัง security test เข้า SDLC — ไม่รอทำตอนท้าย',
+        example: `<span class="cmt">// Shift-Left Security</span>
+<span class="key">SAST</span>   (Static)  → ทุก commit  → Semgrep/SonarQube
+<span class="key">SCA</span>    (Deps)    → ทุก PR      → Dependabot/Snyk
+<span class="key">DAST</span>   (Dynamic) → ทุก release → OWASP ZAP
+<span class="key">Pentest</span>          → ทุกปี       → External firm`
+      }
+    ],
+    metrics: [
+      { name: 'Critical Vulnerability Count', sub: 'Integrity', how: 'จำนวน unpatched critical CVE ใน production', target: '= 0', tool: 'Snyk / Trivy' },
+      { name: 'Mean Time to Patch (Critical)', sub: 'Integrity', how: 'เวลาเฉลี่ยตั้งแต่พบ critical vuln จนถึง patch deploy', target: '≤ 7 days', tool: 'Vulnerability tracker' },
+      { name: 'Encryption Coverage', sub: 'Confidentiality', how: '% ของ PII/sensitive fields ที่เข้ารหัสทั้ง at-rest และ in-transit', target: '100%', tool: 'Security audit' },
+      { name: 'Failed Auth Spike', sub: 'Authenticity', how: 'จำนวน failed auth attempts — spike = brute force indicator', target: 'Baseline ±3σ', tool: 'SIEM / Datadog' },
+    ],
+    view41: {
+      logical: { rel: 'high', desc: 'Security domain model: Auth, Authz, Audit, Encryption layers' },
+      process: { rel: 'high', desc: 'Authentication flows, authorization checks, audit logging sequence' },
+      development: { rel: 'high', desc: 'Security module boundaries, secret management, dependency scanning' },
+      physical: { rel: 'high', desc: 'Network segmentation, TLS termination, WAF, secrets vault deployment' },
+      scenario: { rel: 'high', desc: 'Attack scenario testing: pen test cases, STRIDE threat scenarios' },
+    },
+    verification: [
+      { type: 'auto', label: 'AUTO', text: 'SAST scan (Semgrep) ทุก commit — fail build หาก critical finding' },
+      { type: 'auto', label: 'AUTO', text: 'Dependency vulnerability scan (Snyk/Dependabot) ทุก PR' },
+      { type: 'tool', label: 'TOOL', text: 'DAST scan (OWASP ZAP) ใน staging ก่อน release ทุกครั้ง' },
+      { type: 'manual', label: 'MANUAL', text: 'Annual Penetration Testing โดย external security firm' },
+      { type: 'auto', label: 'AUTO', text: 'SIEM alert สำหรับ auth spike, unusual access patterns' },
+    ]
+  },
+  {
+    id: 'maintainability',
+    num: 'QA-07',
+    en: 'Maintainability',
+    th: 'ความสะดวกในการบำรุงรักษา',
+    icon: '🔧',
+    color: '#a855f7',
+    bg: 'rgba(168,85,247,0.1)',
+    desc: 'ระบบสามารถถูกแก้ไข ปรับปรุง และขยายได้ง่าย โดยใช้ effort น้อย และ risk ต่ำ',
+    subs: [
+      { name: 'Modularity', th: 'ความเป็นโมดูล', desc: 'แยกเป็น component ชัดเจน เปลี่ยนได้โดยกระทบส่วนอื่นน้อย' },
+      { name: 'Reusability', th: 'การนำกลับมาใช้', desc: 'Component/logic นำมาใช้ซ้ำในบริบทอื่นได้' },
+      { name: 'Analysability', th: 'การวิเคราะห์ได้', desc: 'ระบุ impact ของการเปลี่ยนแปลงได้รวดเร็ว' },
+      { name: 'Modifiability', th: 'การแก้ไขได้', desc: 'แก้ไข implement bug fix หรือ feature โดยไม่เกิด regression' },
+      { name: 'Testability', th: 'การทดสอบได้', desc: 'สร้าง test criteria ได้ง่าย รัน test ได้เร็ว' },
+    ],
+    process: [
+      {
+        num: '01', title: 'กำหนด Maintainability Targets',
+        desc: 'ตั้ง threshold สำหรับ code quality metrics ที่ enforce ใน CI',
+        example: `<span class="key">Cyclomatic Complexity</span> ≤ <span class="val">10</span> per function
+<span class="key">Cognitive Complexity</span>  ≤ <span class="val">15</span> per function
+<span class="key">Code Coverage</span>        ≥ <span class="val">80%</span>
+<span class="key">Duplication</span>          ≤ <span class="val">3%</span>
+<span class="key">Technical Debt Ratio</span> ≤ <span class="val">5%</span>`
+      },
+      {
+        num: '02', title: 'Architecture Fitness Functions',
+        desc: 'เขียน test ที่ตรวจสอบ architecture decision อัตโนมัติ — ห้าม dependency ผิดทิศ',
+        example: `<span class="cmt">// ArchUnit (Java) Example</span>
+<span class="key">rule</span>: <span class="str">Controller → Service ✓</span>
+<span class="key">rule</span>: <span class="str">Service → Repository ✓</span>
+<span class="err">rule</span>: <span class="err">Repository → Controller ✗ FORBIDDEN</span>
+<span class="err">rule</span>: <span class="err">Service → Controller ✗ FORBIDDEN</span>
+
+<span class="cmt">// Enforced in CI — break build if violated</span>`
+      },
+      {
+        num: '03', title: 'DORA Lead Time Tracking',
+        desc: 'Lead time for changes = ตัวชี้วัด Maintainability ที่ดีมาก เพราะสะท้อนความยาก-ง่ายในการแก้ไขจริง',
+        example: `<span class="key">Lead Time</span> = commit → production
+<span class="key">Elite</span>:   &lt; <span class="ok">1 hour</span>
+<span class="key">High</span>:    1 day – 1 week
+<span class="key">Medium</span>: 1 week – 1 month
+<span class="err">Low</span>:    &gt; 1 month → <span class="err">Maintainability ต่ำ!</span>
+
+<span class="cmt">// ระบบที่ Lead Time สูง = แก้ยาก ทดสอบยาก deploy ยาก</span>`
+      },
+      {
+        num: '04', title: 'Change Failure Rate',
+        desc: 'วัดว่า deployment ที่ไป production แล้วพัง % = วัด Modifiability จริง',
+        example: `<span class="key">CFR</span> = Failed Deploys / Total Deploys × 100
+
+<span class="key">Elite</span>: CFR ≤ <span class="ok">5%</span>
+<span class="key">Good</span>:  CFR ≤ <span class="val">15%</span>
+<span class="err">Bad</span>:   CFR &gt;  <span class="err">30%</span> → ต้องปรับ architecture/testing
+
+<span class="cmt">// CFR สูง = ระบบ tightly coupled, test coverage ต่ำ</span>`
+      }
+    ],
+    metrics: [
+      { name: 'Cyclomatic Complexity', sub: 'Modifiability', how: 'Average cyclomatic complexity per function', target: '≤ 10', tool: 'SonarQube / CodeClimate' },
+      { name: 'Test Coverage', sub: 'Testability', how: 'Line/Branch coverage ของ automated tests', target: '≥ 80%', tool: 'Jacoco / Istanbul' },
+      { name: 'Code Duplication', sub: 'Reusability', how: '% duplicated code blocks ในโปรเจกต์', target: '≤ 3%', tool: 'SonarQube' },
+      { name: 'Lead Time for Changes', sub: 'Modifiability', how: 'Commit timestamp → Production deploy timestamp', target: '< 1 day', tool: 'DORA metrics dashboard' },
+      { name: 'Change Failure Rate', sub: 'Modifiability', how: '% deployment ที่ต้อง rollback หรือ hotfix', target: '< 5%', tool: 'Deploy tracker' },
+    ],
+    view41: {
+      logical: { rel: 'high', desc: 'Layer diagram, module boundaries, dependency direction rules' },
+      process: { rel: 'low', desc: 'Process view เกี่ยวน้อย เว้นแต่ async processes ที่ซับซ้อน' },
+      development: { rel: 'high', desc: 'Package structure, module coupling/cohesion, dependency graph' },
+      physical: { rel: 'low', desc: 'IaC (Infrastructure as Code) ส่งผลต่อ maintainability ของ infra' },
+      scenario: { rel: 'med', desc: 'Change scenario: "ถ้าต้องเปลี่ยน payment provider ใช้เวลากี่วัน?"' },
+    },
+    verification: [
+      { type: 'auto', label: 'AUTO', text: 'SonarQube Quality Gate ใน CI — fail build หาก Quality Gate ไม่ผ่าน' },
+      { type: 'auto', label: 'AUTO', text: 'Architecture Fitness Functions (ArchUnit/Dependency Cruiser) ตรวจ dependency rules' },
+      { type: 'tool', label: 'TOOL', text: 'DORA metrics dashboard track Lead Time + CFR รายสัปดาห์' },
+      { type: 'manual', label: 'MANUAL', text: 'Code Review checklist ตาม architecture guidelines ทุก PR' },
+      { type: 'auto', label: 'AUTO', text: 'Test coverage enforcement — reject PR ที่ลด coverage ต่ำกว่า threshold' },
+    ]
+  },
+  {
+    id: 'portability',
+    num: 'QA-08',
+    en: 'Portability',
+    th: 'ความสามารถในการย้ายระบบ',
+    icon: '📦',
+    color: '#f97316',
+    bg: 'rgba(249,115,22,0.1)',
+    desc: 'ระบบสามารถถ่ายโอน ติดตั้ง และทำงานได้ใน hardware, software หรือ environment ที่แตกต่างกัน',
+    subs: [
+      { name: 'Adaptability', th: 'การปรับตัว', desc: 'ปรับใช้ environment ต่าง ๆ ได้โดยไม่ต้องแก้ code หลัก' },
+      { name: 'Installability', th: 'การติดตั้ง', desc: 'ติดตั้งหรือถอนติดตั้งได้ง่ายใน environment ที่กำหนด' },
+      { name: 'Replaceability', th: 'การแทนที่', desc: 'แทนที่ด้วยซอฟต์แวร์อื่นที่มีจุดประสงค์เดียวกันได้' },
+    ],
+    process: [
+      {
+        num: '01', title: 'กำหนด Target Environments',
+        desc: 'ระบุ environment ทั้งหมดที่ระบบต้องรองรับ พร้อม constraint ของแต่ละ environment',
+        example: `<span class="key">Environment</span>   <span class="key">OS</span>       <span class="key">Runtime</span>  <span class="key">Constraint</span>
+Dev           MacOS    Docker   Local only
+Staging       Ubuntu   K8s      AWS us-east-1
+Production    Ubuntu   K8s      AWS Multi-AZ
+DR            Ubuntu   K8s      AWS us-west-2
+On-premise    RHEL     Podman   Air-gapped`
+      },
+      {
+        num: '02', title: 'Externalize Configuration',
+        desc: '"12-Factor App" Principle: Config อยู่ใน environment ไม่ใช่ใน code',
+        example: `<span class="cmt">// ❌ Anti-pattern: Hardcoded config</span>
+<span class="err">DB_HOST = "db.prod.internal"</span>
+
+<span class="cmt">// ✅ 12-Factor: Env vars / ConfigMap</span>
+<span class="key">DB_HOST</span>     = <span class="str">env("DATABASE_HOST")</span>
+<span class="key">DB_PORT</span>     = <span class="str">env("DATABASE_PORT")</span>
+<span class="key">API_KEY</span>     = <span class="str">secrets("PAYMENT_API_KEY")</span>
+<span class="key">LOG_LEVEL</span>   = <span class="str">env("LOG_LEVEL", "info")</span>`
+      },
+      {
+        num: '03', title: 'Containerization',
+        desc: 'Docker container = portable deployment unit ที่ทำงานได้ทุก environment ที่มี container runtime',
+        example: `<span class="cmt"># Multi-stage Dockerfile</span>
+<span class="key">FROM</span> node:20-alpine <span class="key">AS</span> build
+<span class="key">COPY</span> . .
+<span class="key">RUN</span> npm ci && npm run build
+
+<span class="key">FROM</span> node:20-alpine <span class="key">AS</span> runtime
+<span class="key">COPY --from=</span>build /app/dist ./dist
+<span class="key">CMD</span> ["node", "dist/main.js"]
+
+<span class="cmt"># Same image runs in Dev/Staging/Prod</span>`
+      },
+      {
+        num: '04', title: 'Infrastructure as Code',
+        desc: 'ทุก infrastructure config เขียนเป็น code — ย้าย environment ใหม่ได้ด้วย command เดียว',
+        example: `<span class="cmt">// Terraform — Portable infra definition</span>
+<span class="key">module</span> <span class="str">"app_cluster"</span> {
+  source       = <span class="str">"./modules/k8s"</span>
+  <span class="key">environment</span>  = <span class="str">var.environment</span>
+  <span class="key">region</span>       = <span class="str">var.aws_region</span>
+  <span class="key">instance_type</span>= <span class="str">var.instance_type</span>
+}
+<span class="cmt">// Change var.aws_region → deploy to new region</span>`
+      }
+    ],
+    metrics: [
+      { name: 'Containerization Coverage', sub: 'Adaptability', how: '% services ที่ run ใน container (Docker/OCI)', target: '100%', tool: 'Container registry' },
+      { name: 'Environment Parity Score', sub: 'Adaptability', how: 'Dev/Staging/Prod config differences count', target: '0 hardcoded', tool: 'Config diff tool' },
+      { name: 'Deploy Time (new region)', sub: 'Installability', how: 'เวลาที่ใช้ deploy ไป region ใหม่ โดยใช้ IaC', target: '< 30 min', tool: 'Terraform timing' },
+      { name: 'IaC Coverage', sub: 'Installability', how: '% infrastructure ที่จัดการด้วย IaC (Terraform/Pulumi)', target: '≥ 90%', tool: 'IaC drift detection' },
+    ],
+    view41: {
+      logical: { rel: 'low', desc: 'Abstraction layers ที่ isolate environment-specific logic' },
+      process: { rel: 'low', desc: 'Deployment pipeline สำหรับ multi-environment CI/CD' },
+      development: { rel: 'high', desc: 'Dockerfile, Helm charts, Terraform modules — portable build artifacts' },
+      physical: { rel: 'high', desc: 'Multi-region deployment topology, cloud-agnostic architecture' },
+      scenario: { rel: 'med', desc: '"ย้ายจาก AWS ไป GCP ใช้เวลากี่วัน?" scenario' },
+    },
+    verification: [
+      { type: 'auto', label: 'AUTO', text: 'Container build ใน CI — same image push ไป registry ใช้ทุก environment' },
+      { type: 'auto', label: 'AUTO', text: 'IaC drift detection (Terraform plan) ตรวจทุกวัน — alert ถ้ามี manual change' },
+      { type: 'manual', label: 'MANUAL', text: 'DR drill: deploy ทั้งระบบใน region ใหม่ จากศูนย์ วัดเวลา' },
+      { type: 'tool', label: 'TOOL', text: 'Config audit tool ตรวจ hardcoded values ใน codebase' },
+    ]
+  }
+];
+
+const VIEW41_INFO = {
+  logical: { icon: '🔷', name: 'Logical View', focus: 'Functionality · Domain', color: '#3B82F4', diagrams: 'Class, Component, State' },
+  process: { icon: '⚙️', name: 'Process View', focus: 'Concurrency · Runtime', color: '#22c55e', diagrams: 'Sequence, Activity, Communication' },
+  development: { icon: '📦', name: 'Development View', focus: 'Software Org · Code', color: '#a855f7', diagrams: 'Package, Component, Dependency' },
+  physical: { icon: '🖥', name: 'Physical View', focus: 'Infrastructure · Deployment', color: '#f97316', diagrams: 'Deployment, Network, Infrastructure' },
+  scenario: { icon: '▶️', name: 'Scenarios (+1)', focus: 'Use Cases · User Goals', color: '#F5A623', diagrams: 'Use Case, User Story, Test Scenario' },
+};
+
+let currentPage = 'overview';
+let currentQA = null;
+let currentTab = 'overview';
+
+function navigateTo(page, qaId) {
+  currentPage = page;
+  currentQA = qaId || null;
+
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + (qaId || page));
+  if (navEl) navEl.classList.add('active');
+
+  const main = document.getElementById('main-content');
+
+  if (page === 'overview') {
+    main.innerHTML = renderOverview();
+  } else if (page === 'process') {
+    main.innerHTML = renderProcessPage();
+  } else if (page === 'view41') {
+    main.innerHTML = renderView41Page();
+  } else if (page === 'qa' && qaId) {
+    const qa = QA_DATA.find(q => q.id === qaId);
+    if (qa) main.innerHTML = renderQA(qa);
+    currentTab = 'overview';
+  }
+}
+
+function switchTab(tabId) {
+  currentTab = tabId;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-btn-' + tabId).classList.add('active');
+  document.getElementById('panel-' + tabId).classList.add('active');
+}
+
+// ── BUILD SIDEBAR NAV ──
+function buildSidebarNav() {
+  const container = document.getElementById('qa-nav-items');
+  container.innerHTML = QA_DATA.map(qa => `
+    <div class="nav-item" onclick="navigateTo('qa','${qa.id}')" id="nav-${qa.id}">
+      <div class="nav-dot" style="background:${qa.bg};color:${qa.color}">${qa.icon}</div>
+      <div class="nav-text">
+        <div class="nav-en" style="font-size:0.68rem">${qa.en}</div>
+        <div class="nav-th">${qa.th}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── RENDER OVERVIEW ──
+function renderOverview() {
+  return `
+  <div class="intro-banner">
+    <strong>ISO/IEC 25010 Product Quality Model</strong> — กำหนด 8 คุณลักษณะหลักที่ใช้วัดคุณภาพ software
+    แต่ละ attribute มี sub-characteristics ที่แตกย่อยออกไป ใช้เป็น <strong>vocabulary กลาง</strong>
+    ระหว่าง Business, Architect, Developer และ Tester เพื่อสื่อสาร requirement ได้ตรงกัน
+  </div>
+
+  <div class="section-h">8 Quality Attributes</div>
+  <div class="overview-grid">
+    ${QA_DATA.map(qa => `
+      <div class="ov-card" onclick="navigateTo('qa','${qa.id}')">
+        <div class="ov-icon">${qa.icon}</div>
+        <div>
+          <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.1rem">
+            <div style="font-family:var(--font-mono);font-size:0.6rem;color:${qa.color}">${qa.num}</div>
+          </div>
+          <h3 style="color:${qa.color}">${qa.en}</h3>
+          <div class="ov-th">${qa.th}</div>
+          <p>${qa.desc}</p>
+          <div class="ov-subs">
+            ${qa.subs.map(s => `<span class="ov-sub-tag">${s.name}</span>`).join('')}
+          </div>
+        </div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="section-h" style="margin-top:2rem">Quality in Use Model (มุมมอง User)</div>
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:0.75rem;margin-bottom:2rem">
+    ${[
+      { icon: '🎯', name: 'Effectiveness', th: 'บรรลุเป้าหมายครบไหม?' },
+      { icon: '⚡', name: 'Efficiency', th: 'บรรลุโดยใช้ effort น้อยไหม?' },
+      { icon: '😊', name: 'Satisfaction', th: 'พึงพอใจในการใช้งานไหม?' },
+      { icon: '🛡', name: 'Freedom from Risk', th: 'ไม่ก่อความเสี่ยงต่อ user ไหม?' },
+      { icon: '🌐', name: 'Context Coverage', th: 'ใช้ได้หลาย context ไหม?' },
+    ].map(q => `
+      <div class="sub-card">
+        <div style="font-size:1.2rem;margin-bottom:0.4rem">${q.icon}</div>
+        <div class="sub-name">${q.name}</div>
+        <div class="sub-desc">${q.th}</div>
+      </div>
+    `).join('')}
+  </div>
+
+  <div class="intro-banner" style="border-left-color:var(--orange)">
+    💡 <strong style="color:var(--orange)">Product Quality</strong> = คุณลักษณะของ software ตัวมันเอง (มุมมอง developer/architect)<br>
+    💡 <strong style="color:var(--teal)">Quality in Use</strong> = ประสบการณ์ที่ user ได้รับเมื่อใช้งานจริง<br>
+    → ระบบที่มี Product Quality สูง <em>ไม่ได้</em>รับประกัน Quality in Use เสมอไป — ต้องวัดทั้งสองมุม
+  </div>
+  `;
+}
+
+// ── RENDER QA DETAIL ──
+function renderQA(qa) {
+  const viewRelClass = { high: 'rel-high', med: 'rel-med', low: 'rel-low' };
+  const viewRelLabel = { high: 'PRIMARY', med: 'SECONDARY', low: 'MINOR' };
+
+  return `
+  <div class="qa-hero">
+    <div class="qa-icon-big" style="background:${qa.bg}">
+      <span style="font-size:2rem">${qa.icon}</span>
+    </div>
+    <div class="qa-hero-text">
+      <div class="qa-num">${qa.num} · ISO/IEC 25010</div>
+      <h1 style="color:${qa.color}">${qa.en}</h1>
+      <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.4rem">${qa.th}</div>
+      <p>${qa.desc}</p>
+    </div>
+    <div class="iso-tag">${qa.num}</div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-btn-overview" onclick="switchTab('overview')">Sub-Characteristics</button>
+    <button class="tab-btn" id="tab-btn-process" onclick="switchTab('process')">กระบวนการตั้งตัวแปร</button>
+    <button class="tab-btn" id="tab-btn-metrics" onclick="switchTab('metrics')">Metrics & Targets</button>
+    <button class="tab-btn" id="tab-btn-view41" onclick="switchTab('view41')">4+1 View Mapping</button>
+    <button class="tab-btn" id="tab-btn-verify" onclick="switchTab('verify')">Verification</button>
+  </div>
+
+  <!-- Sub-Characteristics -->
+  <div class="panel active" id="panel-overview">
+    <div class="section-h">Sub-Characteristics</div>
+    <div class="sub-grid">
+      ${qa.subs.map((s, i) => `
+        <div class="sub-card" style="border-color:${qa.color}22">
+          <div class="sub-name" style="color:${qa.color}">${s.name}</div>
+          <div class="sub-th">${s.th}</div>
+          <div class="sub-desc">${s.desc}</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <div class="section-h">ตัวอย่างคำถามสำหรับ Architect</div>
+    <div style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:1.5rem">
+      ${qa.subs.map(s => `
+        <div style="display:flex;gap:0.75rem;padding:0.7rem 1rem;background:var(--bg2);border:1px solid var(--border);border-radius:8px;align-items:flex-start">
+          <span style="color:${qa.color};font-size:0.8rem;flex-shrink:0;margin-top:2px">▸</span>
+          <div>
+            <div style="font-family:var(--font-head);font-size:0.72rem;font-weight:700;color:${qa.color};margin-bottom:0.2rem">${s.name}</div>
+            <div style="font-size:0.78rem;color:var(--text-dim)">ระบบ <em>นี้</em> มี ${s.th} ดีพอไหม? วัดได้อย่างไร?</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  <!-- Process -->
+  <div class="panel" id="panel-process">
+    <div class="section-h">กระบวนการตั้งตัวแปรและกำหนด Target</div>
+    <div class="process-flow">
+      ${qa.process.map((step, i) => `
+        <div class="process-step">
+          <div class="step-line"></div>
+          <div class="step-node">
+            <div class="step-circle" style="background:${qa.bg};border-color:${qa.color};color:${qa.color}">${step.num}</div>
+          </div>
+          <div class="step-body">
+            <div class="step-title" style="color:${qa.color}">${step.title}</div>
+            <div class="step-desc">${step.desc}</div>
+            <div class="code-block">${step.example}</div>
+          </div>
+        </div>
+      `).join('')}
+    </div>
+  </div>
+
+  <!-- Metrics -->
+  <div class="panel" id="panel-metrics">
+    <div class="section-h">Key Metrics & Targets</div>
+    <table class="metrics-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>Sub-characteristic</th>
+          <th>วิธีวัด</th>
+          <th>Target</th>
+          <th>Tool</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${qa.metrics.map(m => `
+          <tr>
+            <td><div class="metric-name">${m.name}</div></td>
+            <td><span class="pill pill-blue">${m.sub}</span></td>
+            <td style="font-size:0.75rem;color:var(--text-dim)">${m.how}</td>
+            <td><span class="target-pill">${m.target}</span></td>
+            <td><span style="font-family:var(--font-mono);font-size:0.67rem;color:var(--text-muted)">${m.tool}</span></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+
+    <div class="section-h">สูตรเขียน SLO ที่ดี</div>
+    <div class="code-block">
+<span class="cmt">// Template: SLO ที่ดีต้องระบุครบทุกองค์ประกอบ</span>
+<span class="key">[WHAT]</span>   <span class="str">${qa.metrics[0]?.name || 'Metric name'}</span>
+<span class="key">[HOW]</span>    วัดจาก <span class="val">${qa.metrics[0]?.tool || 'Tool'}</span>
+<span class="key">[TARGET]</span> ${qa.metrics[0]?.target || '≥ X%'}
+<span class="key">[WINDOW]</span> วัดแบบ rolling 28 วัน
+<span class="key">[SCOPE]</span>  เฉพาะ ${qa.en} ของ [service name]
+<span class="key">[OWNER]</span>  ทีม [team name]</div>
+  </div>
+
+  <!-- 4+1 View -->
+  <div class="panel" id="panel-view41">
+    <div class="section-h">4+1 View Model Mapping</div>
+    <div style="margin-bottom:1rem;font-size:0.8rem;color:var(--text-dim)">
+      แต่ละ View ในโมเดล 4+1 มีความเกี่ยวข้องกับ ${qa.en} ในระดับที่แตกต่างกัน
+    </div>
+    <div class="view41-grid">
+      ${Object.entries(qa.view41).map(([viewKey, viewData]) => {
+        const vi = VIEW41_INFO[viewKey];
+        const relClass = viewRelClass[viewData.rel];
+        const relLabel = viewRelLabel[viewData.rel];
+        const isHighlighted = viewData.rel === 'high';
+        return `
+          <div class="view-card ${isHighlighted ? 'highlighted' : ''}">
+            <div class="view-card-header">
+              <div class="view-icon" style="background:${vi.color}22">${vi.icon}</div>
+              <div>
+                <div class="view-name" style="color:${vi.color}">${vi.name}</div>
+              </div>
+            </div>
+            <div class="view-diagram-type">📐 ${vi.diagrams}</div>
+            <div><span class="rel-badge ${relClass}">${relLabel}</span></div>
+            <div class="view-relevance">${viewData.desc}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+
+    <div class="section-h">Architecture Decision ที่เกี่ยวข้อง</div>
+    <div class="code-block">
+<span class="cmt">// ADR template สำหรับ ${qa.en}</span>
+<span class="key">Title</span>:   ADR-XXX: Architecture decision for ${qa.en}
+<span class="key">Status</span>:  Proposed / Accepted / Deprecated
+<span class="key">Context</span>: ${qa.desc.substring(0, 80)}...
+<span class="key">Decision</span>: [เลือก pattern/approach อะไร]
+<span class="key">QA Impact</span>: ${qa.en} ↑ / [Other QA] ↓
+<span class="key">Verify</span>:  [วัดด้วย metric อะไร ที่ target เท่าไหร่]</div>
+  </div>
+
+  <!-- Verification -->
+  <div class="panel" id="panel-verify">
+    <div class="section-h">Verification Approaches</div>
+    <ul class="check-list">
+      ${qa.verification.map(v => {
+        const typeMap = { auto: 'ci-auto', manual: 'ci-manual', tool: 'ci-tool' };
+        const labelMap = { auto: '🤖', manual: '👤', tool: '🔧' };
+        return `
+          <li class="check-item">
+            <div class="check-icon ${typeMap[v.type]}">${labelMap[v.type]}</div>
+            <div>
+              <span class="pill ${v.type === 'auto' ? 'pill-green' : v.type === 'manual' ? 'pill-orange' : 'pill-blue'}" style="margin-right:0.4rem">${v.label}</span>
+              ${v.text}
+            </div>
+          </li>
+        `;
+      }).join('')}
+    </ul>
+
+    <div class="section-h">Verification Legend</div>
+    <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1.5rem">
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;color:var(--text-dim)">
+        <span class="check-icon ci-auto" style="width:24px;height:24px">🤖</span>
+        <span><strong style="color:var(--green)">AUTO</strong> — รันอัตโนมัติใน CI/CD pipeline</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;color:var(--text-dim)">
+        <span class="check-icon ci-tool" style="width:24px;height:24px">🔧</span>
+        <span><strong style="color:var(--blue-bright)">TOOL</strong> — ใช้ tool เฉพาะทาง อาจต้องตีความผล</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:0.5rem;font-size:0.78rem;color:var(--text-dim)">
+        <span class="check-icon ci-manual" style="width:24px;height:24px">👤</span>
+        <span><strong style="color:var(--orange)">MANUAL</strong> — ต้องใช้คนตัดสิน ทำเป็นระยะ</span>
+      </div>
+    </div>
+  </div>
+  `;
+}
+
+// ── RENDER PROCESS PAGE ──
+function renderProcessPage() {
+  return `
+  <div class="intro-banner">
+    <strong>กระบวนการตั้งตัวแปรและ Target</strong> — ขั้นตอนที่ใช้แปลง Quality Attribute จาก ISO 25010
+    ให้กลายเป็น <strong>Architecturally Significant Requirement (ASR)</strong> ที่วัดได้จริง
+  </div>
+
+  <div class="section-h">ภาพรวม Process</div>
+  <div class="process-diagram">
+    ${[
+      { icon: '📋', label: 'ISO 25010', sub: 'QA Vocabulary', color: '#3B82F4' },
+      { icon: '🎯', label: 'Identify', sub: 'QA ที่สำคัญกับระบบนี้', color: '#22c55e' },
+      { icon: '🔍', label: 'Define Variable', sub: 'ตัวแปรที่วัดได้', color: '#F5A623' },
+      { icon: '📊', label: 'Set Target', sub: 'SLO / Threshold', color: '#a855f7' },
+      { icon: '⚗️', label: 'Measure', sub: 'วิธีวัด + Tool', color: '#14b8a6' },
+      { icon: '✅', label: 'Verify', sub: 'Auto/Manual/Tool', color: '#ef4444' },
+      { icon: '◈', label: '4+1 View', sub: 'Architecture Impact', color: '#ec4899' },
+    ].map((s, i, arr) => `
+      <div class="pd-box">
+        <div class="pd-circle" style="background:${s.color}15;border-color:${s.color};color:${s.color}">${s.icon}</div>
+        <div class="pd-label" style="color:${s.color}">${s.label}</div>
+        <div class="pd-sub">${s.sub}</div>
+      </div>
+      ${i < arr.length - 1 ? '<div class="pd-arrow">→</div>' : ''}
+    `).join('')}
+  </div>
+
+  <div class="section-h">Step 1 — ระบุ QA ที่สำคัญกับระบบ (Prioritization)</div>
+  <div class="code-block" style="margin-bottom:1.5rem">
+<span class="cmt">// Framework: Utility Tree (SEI/ATAM)</span>
+<span class="key">Availability</span>
+├── <span class="str">High availability during business hours</span>  [H, H]
+└── <span class="str">Graceful degradation during off-peak</span>    [M, H]
+
+<span class="key">Performance</span>
+├── <span class="str">Sub-200ms API response for checkout</span>      [H, H]
+└── <span class="str">Report generation < 30s</span>                 [M, L]
+
+<span class="cmt">// [Business Importance, Technical Risk]</span>
+<span class="cmt">// H=High, M=Medium, L=Low → Focus on [H,H] first</span></div>
+
+  <div class="section-h">Step 2 — ตั้งตัวแปร (Define Variable)</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-bottom:1.5rem">
+    <div class="code-block">
+<span class="cmt">// ❌ Variable ที่ไม่ดี</span>
+<span class="err">"ระบบต้องเร็วและเสถียร"</span>
+<span class="err">"ระบบต้องรองรับผู้ใช้เยอะๆ"</span>
+<span class="err">"ระบบต้อง secure"</span>
+<span class="cmt">// ปัญหา: ไม่มีหน่วย, วัดไม่ได้,
+// ทุกคนตีความต่างกัน</span></div>
+    <div class="code-block">
+<span class="cmt">// ✅ Variable ที่ดี</span>
+<span class="ok">P95 Latency ของ /api/checkout</span>
+<span class="ok">Concurrent active sessions</span>
+<span class="ok">Unpatched critical CVE count</span>
+<span class="cmt">// ดีเพราะ: มีหน่วย, วัดได้,
+// ทุกคนเข้าใจตรงกัน</span></div>
+  </div>
+
+  <div class="section-h">Step 3 — กำหนด Target (SMART SLO)</div>
+  <div class="code-block" style="margin-bottom:1.5rem">
+<span class="cmt">// SMART = Specific, Measurable, Achievable, Relevant, Time-bound</span>
+
+<span class="cmt">// ❌ ไม่ SMART</span>
+<span class="err">Availability ต้องสูง</span>
+
+<span class="cmt">// ✅ SMART SLO</span>
+<span class="key">Availability SLO</span>:
+  <span class="str">Measured by</span>:  User-perceived availability (RUM)
+  <span class="str">Calculation</span>: Successful requests / Total requests × 100
+  <span class="str">Target</span>:       ≥ <span class="ok">99.9%</span>
+  <span class="str">Window</span>:       Rolling 28 days
+  <span class="str">Error Budget</span>: <span class="val">43.8 minutes / month</span>
+  <span class="str">Alert at</span>:     Error Budget burn rate > <span class="val">2x</span> (6-hour window)</div>
+
+  <div class="section-h">Step 4 — เลือกวิธีวัด (Measurement Method)</div>
+  <table class="metrics-table" style="margin-bottom:1.5rem">
+    <thead>
+      <tr><th>QA</th><th>Primary Metric</th><th>Measurement Type</th><th>Tool Example</th></tr>
+    </thead>
+    <tbody>
+      ${[
+        ['Functional Suitability', 'Test Pass Rate, Feature Coverage', 'Code-based', 'Jest, Pytest, Jira'],
+        ['Performance Efficiency', 'P95 Latency, Throughput', 'Load Testing + APM', 'k6, Datadog'],
+        ['Compatibility', 'Contract Test Pass Rate', 'Consumer-Driven Contract', 'Pact, Dredd'],
+        ['Usability', 'Task Completion Rate, SUS Score', 'User Testing', 'Session recording'],
+        ['Reliability', 'Availability SLI, MTTR', 'Production Monitoring', 'SLO dashboard'],
+        ['Security', 'Vulnerability Count, Patch Time', 'SAST/DAST/Pentest', 'Snyk, ZAP'],
+        ['Maintainability', 'Cyclomatic Complexity, Lead Time', 'Static Analysis + DORA', 'SonarQube'],
+        ['Portability', 'Container Coverage, IaC %', 'Environment Audit', 'Terraform, Docker'],
+      ].map(([qa, m, t, tool]) => `
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:0.68rem;color:var(--text-dim)">${qa}</td>
+          <td class="metric-name">${m}</td>
+          <td><span class="pill pill-blue">${t}</span></td>
+          <td style="font-family:var(--font-mono);font-size:0.67rem;color:var(--text-muted)">${tool}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+
+  <div class="section-h">Step 5 — วาง Verification Strategy</div>
+  <div class="code-block">
+<span class="cmt">// Shift-Left: ยิ่งตรวจเร็ว ยิ่งถูก</span>
+
+<span class="key">Developer Machine</span>:   Unit tests, Linting, Type check
+<span class="key">Pre-commit</span>:          SAST, Format check, Complexity check
+<span class="key">Pull Request</span>:        Integration test, Contract test, Coverage gate
+<span class="key">Staging Deploy</span>:      Performance test, DAST, E2E test
+<span class="key">Production</span>:          SLO monitoring, Real User Monitoring
+<span class="key">Periodic</span>:            DR drill, Pentest, Usability test, Capacity review
+
+<span class="cmt">// Cost to fix bug increases 10x per stage →
+// Catch it as early as possible</span></div>
+  `;
+}
+
+// ── RENDER 4+1 VIEW PAGE ──
+function renderView41Page() {
+  return `
+  <div class="intro-banner">
+    <strong>4+1 Architectural View Model</strong> (Philippe Kruchten, 1995) — ใช้ 4 View หลัก + 1 Scenario
+    เพื่อ describe architecture จากมุมมองที่แตกต่างกันของแต่ละ stakeholder
+    แต่ละ View เชื่อมโยงกับ Quality Attribute ที่ต่างกัน
+  </div>
+
+  <div class="section-h">โมเดล 4+1 View</div>
+  <div class="view41-diagram">
+    <div class="view41-center">
+      <div class="scenario-box">▶ Scenarios (+1) — Use Cases / User Stories</div>
+      <div style="font-size:0.72rem;color:var(--text-muted);margin-top:0.4rem">ทุก View ต้องสอดคล้องกับ Scenario</div>
+    </div>
+    <div class="view41-row">
+      ${Object.entries(VIEW41_INFO).filter(([k]) => k !== 'scenario').map(([key, vi]) => {
+        const relatedQAs = QA_DATA.filter(qa => qa.view41[key]?.rel === 'high').map(qa => qa.en.split(' ')[0]);
+        return `
+          <div class="vr-card" style="border-color:${vi.color}33">
+            <div style="font-size:1.3rem;margin-bottom:0.3rem">${vi.icon}</div>
+            <div class="vr-name" style="color:${vi.color}">${vi.name}</div>
+            <div class="vr-focus">${vi.focus}</div>
+            <div class="view-diagram-type">📐 ${vi.diagrams}</div>
+            <div class="vr-qa-tags">
+              ${relatedQAs.map(qa => `<span class="vr-tag">${qa}</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+  </div>
+
+  <div class="section-h">Stakeholder → View Mapping</div>
+  <table class="metrics-table" style="margin-bottom:1.5rem">
+    <thead>
+      <tr><th>Stakeholder</th><th>Primary View</th><th>คำถามที่ตอบ</th></tr>
+    </thead>
+    <tbody>
+      ${[
+        ['End User', 'Scenarios (+1)', 'ระบบทำสิ่งที่ฉันต้องการได้ไหม?'],
+        ['Business Analyst', 'Logical + Scenarios', 'Business logic ถูกต้อง ครบถ้วนไหม?'],
+        ['Software Architect', 'ทั้ง 4+1 View', 'Architecture ตอบ QA requirements ได้ไหม?'],
+        ['Developer', 'Development View', 'ควร organize code อย่างไร? module ใดรับผิดชอบอะไร?'],
+        ['DevOps / SRE', 'Physical + Process', 'ต้อง deploy อย่างไร? system ทำงานอย่างไรใน runtime?'],
+        ['Security Engineer', 'Logical + Physical', 'มี security boundary ที่ไหน? data flow ผ่านอะไรบ้าง?'],
+        ['Tester / QA', 'Scenarios + Process', 'Test case ครอบคลุม scenario อะไรบ้าง?'],
+      ].map(([s, v, q]) => `
+        <tr>
+          <td style="font-family:var(--font-mono);font-size:0.72rem;color:var(--orange)">${s}</td>
+          <td><span class="pill pill-blue">${v}</span></td>
+          <td style="font-size:0.75rem;color:var(--text-dim)">${q}</td>
+        </tr>
+      `).join('')}
+    </tbody>
+  </table>
+
+  <div class="section-h">QA → View Mapping Matrix</div>
+  <div style="overflow-x:auto;margin-bottom:1.5rem">
+    <table class="metrics-table">
+      <thead>
+        <tr>
+          <th>Quality Attribute</th>
+          <th>🔷 Logical</th>
+          <th>⚙ Process</th>
+          <th>📦 Development</th>
+          <th>🖥 Physical</th>
+          <th>▶ Scenario</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${QA_DATA.map(qa => {
+          const relDot = { high: `<span style="color:var(--orange);font-size:0.9rem">●</span>`, med: `<span style="color:var(--blue-bright);font-size:0.8rem;opacity:0.7">●</span>`, low: `<span style="color:var(--text-muted);font-size:0.7rem;opacity:0.4">●</span>` };
+          return `
+            <tr>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.4rem">
+                  <span>${qa.icon}</span>
+                  <span style="font-size:0.73rem;color:${qa.color}">${qa.en}</span>
+                </div>
+              </td>
+              <td style="text-align:center">${relDot[qa.view41.logical.rel]}</td>
+              <td style="text-align:center">${relDot[qa.view41.process.rel]}</td>
+              <td style="text-align:center">${relDot[qa.view41.development.rel]}</td>
+              <td style="text-align:center">${relDot[qa.view41.physical.rel]}</td>
+              <td style="text-align:center">${relDot[qa.view41.scenario.rel]}</td>
+            </tr>
+          `;
+        }).join('')}
+      </tbody>
+    </table>
+    <div style="display:flex;gap:1rem;margin-top:0.5rem;font-size:0.72rem;color:var(--text-muted)">
+      <span><span style="color:var(--orange)">●</span> PRIMARY — View นี้สำคัญมากสำหรับ QA นี้</span>
+      <span><span style="color:var(--blue-bright);opacity:0.7">●</span> SECONDARY — เกี่ยวข้องปานกลาง</span>
+      <span><span style="opacity:0.4">●</span> MINOR — เกี่ยวน้อยหรือทางอ้อม</span>
+    </div>
+  </div>
+
+  <div class="section-h">ตัวอย่าง: Availability ใน 4+1 View</div>
+  <div class="code-block">
+<span class="cmt">// Availability 99.99% → ต้องปรากฏในทุก View</span>
+
+<span class="key">Logical View</span>:
+  └─ Circuit Breaker component, Health Check interface, Fallback logic
+
+<span class="key">Process View</span>:
+  └─ Failover sequence diagram, Health check heartbeat, Retry with backoff flow
+
+<span class="key">Development View</span>:
+  └─ resilience4j library, health module, monitoring package boundaries
+
+<span class="key">Physical View</span>:
+  └─ Multi-AZ deployment, Load Balancer, RDS Multi-AZ, Redis Cluster
+
+<span class="key">Scenarios (+1)</span>:
+  └─ "Primary DB fails → system detects in 30s → failover → users resume in 2min"
+     DR drill scenario, Chaos engineering test cases</div>
+  `;
+}
+
+// ── INIT ──
+buildSidebarNav();
+navigateTo('overview');
+
+function toggleTheme(){
+  const html=document.documentElement;
+  const isDark=html.getAttribute('data-theme')==='dark';
+  html.setAttribute('data-theme',isDark?'light':'dark');
+  document.getElementById('theme-btn').textContent=isDark?'🌙 Dark':'☀ Light';
+  document.getElementById('theme-btn').style.background=isDark?'rgba(0,0,0,.08)':'rgba(255,255,255,.1)';
+  document.getElementById('theme-btn').style.color=isDark?'#334155':'rgba(255,255,255,.85)';
+  document.getElementById('theme-btn').style.borderColor=isDark?'rgba(0,0,0,.15)':'rgba(255,255,255,.2)';
+}
+</script>
+</body>
+</html>
