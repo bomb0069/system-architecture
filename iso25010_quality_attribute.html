@@ -1078,83 +1078,171 @@ Score  &lt; <span class="err">51</span>  → Grade F  (Fail — redesign!)`
     icon: '🛡',
     color: '#3B82F4',
     bg: 'rgba(59,130,244,0.1)',
-    desc: 'ระบบทำงานได้อย่างถูกต้องและต่อเนื่องภายใต้เงื่อนไขที่กำหนด รวมถึงสามารถกลับมาทำงานได้หลังจากเกิดความล้มเหลว',
+    desc: 'ระบบทำงานได้อย่างถูกต้องและต่อเนื่องภายใต้เงื่อนไขที่กำหนด โดยไม่ล้มเหลวหรือให้ผลลัพธ์ผิดพลาด — ครอบคลุม Maturity (ล้มเหลวน้อย), Fault Tolerance (ทนต่อความผิดพลาด) และ Recoverability (ฟื้นตัวเร็ว) · หมายเหตุ: Availability แยกออกเป็น QA-05b เพื่อเจาะลึกเพิ่มเติม',
     subs: [
-      { name: 'Maturity', th: 'วุฒิภาวะ', desc: 'ล้มเหลวน้อยภายใต้การใช้งานปกติ — วัดด้วย MTBF' },
-      { name: 'Availability', th: 'ความพร้อมใช้', desc: 'พร้อมให้บริการเมื่อต้องการ — วัดด้วย uptime %' },
-      { name: 'Fault Tolerance', th: 'ทนต่อความผิดพลาด', desc: 'ยังทำงานได้แม้ component บางส่วนล้มเหลว' },
-      { name: 'Recoverability', th: 'การฟื้นตัว', desc: 'กลับมาทำงานได้เร็วหลังล้มเหลว — วัดด้วย MTTR, RTO, RPO' },
+      {
+        name: 'Maturity',
+        th: 'วุฒิภาวะ',
+        desc: 'ระบบล้มเหลวน้อยภายใต้การใช้งานปกติ — วัดด้วย MTBF (Mean Time Between Failures) และ Defect Escape Rate สะท้อนคุณภาพของ code, test coverage, และ change management'
+      },
+      {
+        name: 'Fault Tolerance',
+        th: 'ทนต่อความผิดพลาด',
+        desc: 'ยังทำงานได้อย่างถูกต้อง (Graceful Degradation) แม้ component บางส่วนล้มเหลว — ต้องออกแบบ Circuit Breaker, Bulkhead, Retry with Backoff, Fallback ให้ครบ'
+      },
+      {
+        name: 'Recoverability',
+        th: 'การฟื้นตัว',
+        desc: 'กลับมาทำงานได้เร็วและถูกต้องหลังเกิดความล้มเหลว — วัดด้วย MTTR (Mean Time To Recover), RTO (Recovery Time Objective) และ RPO (Recovery Point Objective)'
+      },
     ],
     process: [
       {
-        num: '01', title: 'Failure Mode Analysis',
-        desc: 'ระบุทุก failure scenario ที่อาจเกิด พร้อม probability และ impact',
-        example: `<span class="cmt">// FMEA Table</span>
-<span class="key">Failure</span>           <span class="key">P</span>  <span class="key">Impact</span>   <span class="key">Detection</span>
-DB Primary Down    H  Critical  Heartbeat
-Cache Eviction     M  High      Cache miss rate
-3rd Party API      M  High      Circuit breaker
-Network Partition  L  Critical  Health check`
+        num: '01', title: 'Failure Mode & Effect Analysis (FMEA)',
+        desc: 'ระบุทุก failure scenario ที่อาจเกิด พร้อม Probability (P), Impact (I), และ Detection (D) — คำนวณ Risk Priority Number = P × I × D เพื่อ prioritize ว่าต้องแก้จุดไหนก่อน',
+        example: `<span class="cmt">// FMEA Risk Priority Table</span>
+<span class="key">Failure Scenario</span>      <span class="key">P</span>  <span class="key">Impact</span>    <span class="key">RPN</span>  <span class="key">Mitigation</span>
+DB Primary Down        H  Critical  <span class="err">HIGH</span>  Multi-AZ + Auto-failover
+3rd Party API Timeout  M  High      MED   Circuit Breaker + Fallback
+Cache Full Eviction    M  High      MED   Cache miss fallback to DB
+Network Partition      L  Critical  MED   Health check + retry
+Memory Leak            M  Medium    LOW   OOM restart + alert
+
+<span class="cmt">// ทุก HIGH RPN ต้องมี mitigation ก่อน go-live</span>`
       },
       {
-        num: '02', title: 'กำหนด Availability Target',
-        desc: 'คำนวณ allowed downtime จาก business requirement ก่อน กำหนด SLO',
-        example: `<span class="key">Target SLO</span>   <span class="key">Downtime/year</span>   <span class="key">Downtime/month</span>
-<span class="val">99%</span>          87.6 hours       7.3 hours
-<span class="val">99.9%</span>        8.76 hours       43.8 minutes
-<span class="val">99.95%</span>       4.38 hours       21.9 minutes
-<span class="ok">99.99%</span>       52.6 minutes     <span class="ok">4.4 minutes</span>
-<span class="ok">99.999%</span>      5.26 minutes     <span class="ok">26.3 seconds</span>`
+        num: '02', title: 'Fault Tolerance Pattern Design',
+        desc: 'ออกแบบ pattern ที่ระบบใช้รับมือกับ failure โดยเฉพาะ Circuit Breaker (ป้องกัน cascade failure), Bulkhead (แยก resource pool), Retry with Exponential Backoff (retry อัจฉริยะ), และ Fallback (คำตอบสำรองเมื่อ service ล้ม)',
+        example: `<span class="cmt">// Circuit Breaker Pattern</span>
+<span class="key">State</span>     <span class="key">Condition</span>              <span class="key">Action</span>
+<span class="ok">CLOSED</span>    Failure rate < 50%     ส่ง request ปกติ
+<span class="val">OPEN</span>      Failure rate ≥ 50%     <span class="err">Reject ทันที → Fallback</span>
+<span class="str">HALF-OPEN</span> After 30s cooldown     ทดสอบ 1 request
+
+<span class="cmt">// Retry with Exponential Backoff</span>
+<span class="key">Attempt</span>  <span class="key">Delay</span>   <span class="key">Max Jitter</span>
+1        <span class="val">100ms</span>   ±10ms
+2        <span class="val">200ms</span>   ±20ms
+3        <span class="val">400ms</span>   ±40ms
+4        <span class="val">800ms</span>   ±80ms → <span class="err">Give up → DLQ</span>`
       },
       {
-        num: '03', title: 'กำหนด RTO และ RPO',
-        desc: 'Recovery Time Objective (ฟื้นตัวเร็วแค่ไหน) และ Recovery Point Objective (ข้อมูลหายได้แค่ไหน)',
-        example: `<span class="cmt">// Business-driven targets</span>
-<span class="key">RTO</span> = <span class="val">15 minutes</span>
-<span class="cmt">// ระบบต้องกลับมาใช้งานได้ภายใน 15 นาที</span>
+        num: '03', title: 'Maturity — Test Coverage & Defect Gate',
+        desc: 'ป้องกัน failure ตั้งแต่ต้น ด้วย test pyramid ที่ครบถ้วน: Unit (เร็ว, isolated), Integration (service boundary), E2E (critical paths) — และกำหนด Defect Escape Rate ≤ 0.1% เป็น quality gate ก่อน deploy',
+        example: `<span class="cmt">// Test Pyramid for Reliability</span>
+<span class="key">Layer</span>          <span class="key">Coverage</span>  <span class="key">Run Time</span>  <span class="key">Purpose</span>
+Unit Tests       <span class="ok">≥ 80%</span>     &lt; 5 min    Logic correctness
+Integration      <span class="ok">≥ 60%</span>     &lt; 15 min   Service contracts
+Contract Tests   All APIs  &lt; 10 min   Prevent breaking change
+E2E Tests        <span class="ok">Critical</span>  &lt; 30 min   Happy path + error path
+Chaos Tests      Staging   Scheduled  Fault injection
 
-<span class="key">RPO</span> = <span class="val">5 minutes</span>
-<span class="cmt">// ยอมรับการสูญเสียข้อมูล ไม่เกิน 5 นาทีสุดท้าย</span>
-
-<span class="cmt">// Architecture implication:</span>
-<span class="str">RTO 15min → Hot standby required</span>
-<span class="str">RPO 5min  → Sync replication + WAL shipping</span>`
+<span class="cmt">// Quality Gate (block deploy if violated)</span>
+<span class="key">Defect Escape Rate</span> ≤ <span class="ok">0.1%</span>
+<span class="key">Test Coverage</span>      ≥ <span class="ok">80%</span>`
       },
       {
-        num: '04', title: 'MTBF / MTTR Targets',
-        desc: 'ตั้งเป้า Mean Time Between Failures และ Mean Time To Recover',
-        example: `<span class="key">Availability</span> ≈ MTBF / (MTBF + MTTR)
+        num: '04', title: 'Recoverability — RTO/RPO & Recovery Runbook',
+        desc: 'กำหนด RTO (Recovery Time Objective — ฟื้นตัวเร็วแค่ไหน) และ RPO (Recovery Point Objective — ยอมสูญเสียข้อมูลได้แค่ไหน) จาก business requirement จากนั้นออกแบบ recovery mechanism และเขียน runbook ที่ชัดเจน — ทดสอบจริงผ่าน DR Drill ทุกไตรมาส',
+        example: `<span class="cmt">// Business-driven RTO/RPO targets</span>
+<span class="key">Scenario</span>          <span class="key">RTO</span>      <span class="key">RPO</span>
+DB Primary Crash   <span class="ok">&lt; 60s</span>    <span class="ok">0s</span>      (Multi-AZ failover)
+AZ Outage          <span class="ok">&lt; 5min</span>   <span class="ok">&lt; 5min</span>  (Cross-AZ replica)
+Full DR            <span class="val">&lt; 15min</span>  <span class="val">&lt; 15min</span> (Backup restore)
 
-<span class="cmt">// Target 99.9% Availability</span>
-<span class="key">MTBF</span> = <span class="val">720 hours</span>  <span class="cmt">// 30 วัน</span>
-<span class="key">MTTR</span> = <span class="val">0.72 hours</span>  <span class="cmt">// 43 นาที</span>
-720 / (720 + 0.72) ≈ <span class="ok">99.9%</span> ✓
+<span class="cmt">// Recoverability formula</span>
+<span class="key">MTTR</span> = Detection + Diagnosis + Fix + Verify
+     = <span class="val">5min</span> + <span class="val">10min</span> + <span class="val">10min</span> + <span class="val">5min</span> = <span class="ok">30min</span>
 
-<span class="cmt">// Elite targets:</span>
-<span class="key">MTTD</span> &lt; <span class="ok">5 min</span>   <span class="cmt">// ตรวจพบเร็ว</span>
-<span class="key">MTTR</span> &lt; <span class="ok">30 min</span>  <span class="cmt">// แก้ไขเร็ว</span>`
-      }
+<span class="cmt">// Runbook must include:</span>
+<span class="str">1. Detection signal  2. Impact scope
+3. Immediate action  4. Root cause steps
+5. Rollback trigger  6. Post-mortem template</span>`
+      },
+      {
+        num: '05', title: 'MTBF / MTTR Measurement & Improvement',
+        desc: 'วัด MTBF (Mean Time Between Failures) และ MTTR จริงจาก production incidents — ใช้ data นี้ feed กลับเข้า improvement loop: ถ้า MTBF ต่ำ → แก้ที่ Maturity (code quality, testing); ถ้า MTTR สูง → แก้ที่ Recoverability (runbook, automation)',
+        example: `<span class="cmt">// Reliability Metrics Calculation</span>
+<span class="key">MTBF</span> = Total Uptime / Number of Failures
+     = <span class="val">8,640 hrs</span> / <span class="val">12 incidents</span> = <span class="ok">720 hrs</span>
+
+<span class="key">MTTR</span> = Total Recovery Time / Incidents
+     = <span class="val">360 min</span> / <span class="val">12</span> = <span class="ok">30 min</span>
+
+<span class="cmt">// Improvement triggers</span>
+MTBF < target → <span class="err">Root cause → fix code/process</span>
+MTTR > target → <span class="err">Improve runbook + automation</span>
+
+<span class="cmt">// DORA Metrics connection</span>
+<span class="key">Change Failure Rate</span>  ≤ <span class="ok">5%</span>   (elite)
+<span class="key">MTTR</span>                 ≤ <span class="ok">1 hr</span>  (elite)`
+      },
     ],
     metrics: [
-      { name: 'Availability (SLI)', sub: 'Availability', how: 'Successful requests / Total requests × 100 (RUM-based)', target: '≥ 99.99%', tool: 'Datadog SLO' },
-      { name: 'MTBF', sub: 'Maturity', how: 'Total uptime / Number of failures', target: '≥ 720 hrs', tool: 'Incident tracker' },
-      { name: 'MTTR', sub: 'Recoverability', how: 'Total recovery time / Number of incidents', target: '≤ 30 min', tool: 'PagerDuty' },
-      { name: 'Error Budget Burn Rate', sub: 'Availability', how: 'ต้องน้อยกว่า 1x (ไม่เผา budget เกินกำหนด)', target: '< 1x', tool: 'Datadog / SLO tools' },
-      { name: 'RTO Achievement', sub: 'Recoverability', how: 'ระยะเวลา recovery จาก DR drill ไม่เกิน RTO target', target: '≤ 15 min', tool: 'DR Drill results' },
+      {
+        name: 'MTBF',
+        sub: 'Maturity',
+        how: 'Total uptime / Number of failures ในช่วง 90 วัน — นับเฉพาะ user-impacting failures',
+        target: '≥ 720 hrs',
+        tool: 'Incident tracker (Jira/PagerDuty)'
+      },
+      {
+        name: 'MTTR',
+        sub: 'Recoverability',
+        how: 'Total recovery time / Incidents — วัดตั้งแต่ alert fire จนถึง service restored',
+        target: '≤ 30 min',
+        tool: 'PagerDuty / Datadog'
+      },
+      {
+        name: 'RTO Achievement',
+        sub: 'Recoverability',
+        how: 'ระยะเวลา recovery จาก DR drill ต้องไม่เกิน RTO target ที่กำหนด',
+        target: '≤ 15 min',
+        tool: 'DR Drill results'
+      },
+      {
+        name: 'RPO Achievement',
+        sub: 'Recoverability',
+        how: 'Data loss window ที่เกิดจริงใน DR drill ต้องไม่เกิน RPO target',
+        target: '≤ 5 min',
+        tool: 'DR Drill + DB replication lag'
+      },
+      {
+        name: 'Circuit Breaker Open Rate',
+        sub: 'Fault Tolerance',
+        how: 'สัดส่วนเวลาที่ circuit breaker อยู่ใน OPEN state — ถ้าสูง = dependency ไม่เสถียร',
+        target: '< 0.1%',
+        tool: 'Resilience4j / Istio metrics'
+      },
+      {
+        name: 'Defect Escape Rate',
+        sub: 'Maturity',
+        how: 'Production bugs ที่ไม่ถูกจับโดย test suite / Total deployments',
+        target: '≤ 0.1%',
+        tool: 'Jira + CI/CD pipeline'
+      },
+      {
+        name: 'Change Failure Rate (CFR)',
+        sub: 'Maturity',
+        how: '% deployments ที่ทำให้เกิด incident — DORA Elite ≤ 5%',
+        target: '≤ 5%',
+        tool: 'DORA dashboard'
+      },
     ],
     view41: {
-      logical: { rel: 'high', desc: 'Circuit breaker, retry, fallback patterns ใน service logic' },
-      process: { rel: 'high', desc: 'Fault handling flows, failover sequences, health check patterns' },
-      development: { rel: 'med', desc: 'Module isolation เพื่อป้องกัน cascade failure' },
-      physical: { rel: 'high', desc: 'Multi-AZ deployment, load balancer, replica sets, backup strategy' },
-      scenario: { rel: 'high', desc: 'Failure scenario testing: chaos engineering, DR drill' },
+      logical:      { rel: 'high', desc: 'Circuit breaker state, retry policy, fallback logic ใน domain model' },
+      process:      { rel: 'high', desc: 'Fault handling flows, failover sequence, health check และ recovery steps' },
+      development:  { rel: 'med',  desc: 'Module isolation ป้องกัน cascade failure, test pyramid per service' },
+      physical:     { rel: 'high', desc: 'Multi-AZ deployment, replica sets, backup policy, DR environment' },
+      scenario:     { rel: 'high', desc: 'Failure scenarios: DB crash, AZ outage, 3rd party timeout — chaos drill' },
     },
     verification: [
-      { type: 'auto', label: 'AUTO', text: 'SLO monitoring dashboard + Error Budget burn rate alert ใน production' },
-      { type: 'manual', label: 'MANUAL', text: 'DR Drill ทดสอบ failover จริงทุกไตรมาส วัด RTO/RPO จริง' },
-      { type: 'tool', label: 'TOOL', text: 'Chaos Engineering (Chaos Monkey/Gremlin) inject failure ใน staging' },
-      { type: 'auto', label: 'AUTO', text: 'Health check endpoint monitoring ทุก 30 วินาที พร้อม alerting' },
-      { type: 'manual', label: 'MANUAL', text: 'Game Day simulation ทีมรับมือกับ failure scenario ที่ออกแบบไว้' },
+      { type: 'auto',   label: 'AUTO',   text: 'Continuous MTBF/MTTR tracking ใน incident dashboard — alert เมื่อ burn rate เร่งขึ้น' },
+      { type: 'auto',   label: 'AUTO',   text: 'Circuit Breaker state monitoring + Retry rate dashboard — Grafana/Datadog real-time' },
+      { type: 'tool',   label: 'TOOL',   text: 'Chaos Engineering (Gremlin/Chaos Monkey) inject DB failure, network partition ใน staging ทุกสัปดาห์' },
+      { type: 'manual', label: 'MANUAL', text: 'DR Drill ทุกไตรมาส — failover จริง, วัด RTO/RPO ที่ได้จริงเทียบกับ target' },
+      { type: 'manual', label: 'MANUAL', text: 'Game Day Simulation — ทีมรับมือ failure scenario ที่ออกแบบไว้ ทดสอบ runbook และ escalation path' },
+      { type: 'auto',   label: 'AUTO',   text: 'Test coverage gate ใน CI pipeline — block merge ถ้า coverage < 80% หรือ Defect Escape Rate เกิน threshold' },
     ]
   },
   {
