@@ -3,881 +3,331 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>The History of System Tier Architecture · 1960–2025</title>
+<title>History of Tier Architecture · 1960–2025</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@300;400;600;700&family=Oswald:wght@300;400;500;600&display=swap');
-
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --ink:#1A1208;--paper:#F5EDD8;--paper2:#EDE0C4;--paper3:#E3D4B0;
-  --amber:#C17F24;--amber2:#8B5A1A;--amber3:#F0A830;
-  --rust:#9B3A1A;--rust2:#C44B22;
-  --navy:#1A2540;--navy2:#243255;
-  --muted:#6B5A3A;--dim:#9A8A6A;--faint:#BEB09A;
-  --active:#3A7BD5;--obsolete:#9B3A1A;--modern:#1A6B4A;
-  --line:#C8B890;
-}
+:root{--ink:#1A1208;--paper:#F5EDD8;--paper2:#EDE0C4;--paper3:#E3D4B0;--amber:#C17F24;--amber2:#8B5A1A;--amber3:#F0A830;--rust:#9B3A1A;--rust2:#C44B22;--muted:#6B5A3A;--dim:#9A8A6A;--faint:#BEB09A;--line:#C8B890;}
 html{scroll-behavior:smooth}
-body{
-  background:var(--paper);
-  color:var(--ink);
-  font-family:'Libre Baskerville',serif;
-  min-height:100vh;
-  overflow-x:hidden;
-}
-
-/* Grain texture overlay */
-body::before{
-  content:'';position:fixed;inset:0;pointer-events:none;z-index:100;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-  opacity:0.6;
-}
-
-/* ── MASTHEAD ── */
-.masthead{
-  background:var(--ink);color:var(--paper);
-  padding:28px 40px 22px;
-  border-bottom:4px double var(--amber);
-  text-align:center;
-  position:relative;overflow:hidden;
-}
-.masthead::after{
-  content:'';position:absolute;inset:0;
-  background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(255,255,255,.015) 3px,rgba(255,255,255,.015) 4px);
-  pointer-events:none;
-}
-.masthead-eyebrow{
-  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.5em;
-  color:var(--amber);text-transform:uppercase;margin-bottom:10px;
-}
-.masthead h1{
-  font-family:'Oswald',sans-serif;font-size:42px;font-weight:600;
-  letter-spacing:-.01em;line-height:1;margin-bottom:8px;
-  color:#F5EDD8;
-}
+body{background:var(--paper);color:var(--ink);font-family:'Libre Baskerville',serif;min-height:100vh;overflow-x:hidden;}
+.masthead{background:var(--ink);color:var(--paper);padding:28px 40px 22px;border-bottom:4px double var(--amber);text-align:center;position:relative;overflow:hidden;}
+.masthead-eyebrow{font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.5em;color:var(--amber3);text-transform:uppercase;margin-bottom:10px;}
+.masthead h1{font-family:'Oswald',sans-serif;font-size:42px;font-weight:600;line-height:1;margin-bottom:8px;color:#F5EDD8;}
 .masthead h1 span{color:var(--amber3);}
-.masthead-sub{
-  font-family:'Libre Baskerville',serif;font-style:italic;
-  font-size:13px;color:#A89880;letter-spacing:.03em;
-}
-.masthead-rule{
-  margin:14px auto 0;
-  border:none;border-top:1px solid #3A3020;width:60%;
-}
-
-/* ── LEGEND ── */
-.legend{
-  display:flex;gap:28px;justify-content:center;align-items:center;
-  padding:10px 40px;background:var(--paper2);
-  border-bottom:2px solid var(--line);
-  flex-wrap:wrap;
-}
-.legend-item{display:flex;align-items:center;gap:7px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--muted)}
+.masthead-sub{font-family:'Libre Baskerville',serif;font-style:italic;font-size:13px;color:#A89880;}
+.masthead-rule{margin:14px auto 0;border:none;border-top:1px solid #3A3020;width:60%;}
+.legend{display:flex;gap:20px;justify-content:center;align-items:center;padding:10px 40px;background:var(--paper2);border-bottom:2px solid var(--line);flex-wrap:wrap;}
+.legend-item{display:flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--muted)}
 .legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-
-/* ── ERA FILTER STRIP ── */
-.era-strip{
-  display:flex;gap:3px;padding:10px 40px;background:var(--ink);
-  overflow-x:auto;border-bottom:3px solid var(--amber2);
-  position:sticky;top:0;z-index:50;
-}
-.era-btn{
-  font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;
-  padding:5px 14px;border:1px solid #3A3020;background:transparent;
-  color:#7A6A50;cursor:pointer;border-radius:3px;white-space:nowrap;transition:all .15s;
-}
+.era-strip{display:flex;gap:3px;padding:10px 40px;background:var(--ink);overflow-x:auto;border-bottom:3px solid var(--amber2);position:sticky;top:0;z-index:50;}
+.era-btn{font-family:'JetBrains Mono',monospace;font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;padding:5px 14px;border:1px solid #3A3020;background:transparent;color:#7A6A50;cursor:pointer;border-radius:3px;white-space:nowrap;transition:all .15s;}
 .era-btn:hover{background:#2A2010;color:#C8A860;}
 .era-btn.active{background:var(--amber2);color:var(--paper);border-color:var(--amber);}
-
-/* ── TIMELINE WRAPPER ── */
 .timeline-outer{padding:40px 0 60px;position:relative;}
-
-/* Era background bands */
-.era-band{position:absolute;left:0;right:0;pointer-events:none;}
-.era-band-label{
-  position:absolute;left:20px;
-  font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.3em;
-  text-transform:uppercase;opacity:.18;
-  writing-mode:horizontal-tb;
-  color:var(--ink);
-}
-
-/* Center spine */
-.spine{
-  position:absolute;left:50%;top:0;bottom:0;
-  width:2px;background:var(--line);
-  transform:translateX(-50%);
-}
-.spine::before,.spine::after{
-  content:'';position:absolute;left:50%;transform:translateX(-50%);
-  width:8px;height:8px;border-radius:50%;background:var(--amber);
-}
-.spine::before{top:0;}
-.spine::after{bottom:0;}
-
-/* ── YEAR MARKER ── */
-.year-marker{
-  position:relative;display:flex;align-items:center;justify-content:center;
-  margin:6px 0;z-index:10;
-}
-.year-label{
-  background:var(--ink);color:var(--amber3);
-  font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;
-  padding:4px 16px;border:1px solid var(--amber2);
-  letter-spacing:.08em;z-index:10;position:relative;
-  box-shadow:0 2px 8px rgba(0,0,0,.2);
-}
-
-/* ── TIMELINE CARD ── */
-.tl-item{
-  position:relative;display:flex;align-items:flex-start;
-  margin-bottom:8px;padding:0 calc(50% + 28px) 0 40px;
-  min-height:10px;
-}
-.tl-item.right{
-  padding:0 40px 0 calc(50% + 28px);
-  flex-direction:row-reverse;
-}
-
-/* Connector dot on spine */
-.tl-item::before{
-  content:'';position:absolute;
-  left:calc(50% - 7px);top:18px;
-  width:14px;height:14px;border-radius:50%;
-  background:var(--paper);border:2px solid var(--amber);
-  z-index:5;box-shadow:0 0 0 3px var(--paper);
-  transition:all .2s;
-}
+.spine{position:absolute;left:50%;top:0;bottom:0;width:2px;background:var(--line);transform:translateX(-50%);}
+.spine::before,.spine::after{content:'';position:absolute;left:50%;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;background:var(--amber);}
+.spine::before{top:0;}.spine::after{bottom:0;}
+.year-marker{position:relative;display:flex;align-items:center;justify-content:center;margin:6px 0;z-index:10;}
+.year-label{background:var(--ink);color:var(--amber3);font-family:'Oswald',sans-serif;font-size:16px;font-weight:600;padding:4px 16px;border:1px solid var(--amber2);letter-spacing:.08em;z-index:10;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.2);}
+.era-header{text-align:center;padding:20px 0 8px;position:relative;z-index:10;}
+.era-header-inner{display:inline-block;background:var(--paper);padding:6px 24px;border:1px solid var(--amber2);font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.4em;text-transform:uppercase;color:var(--amber2);}
+.tl-item{position:relative;display:flex;align-items:flex-start;margin-bottom:8px;padding:0 calc(50% + 28px) 0 40px;min-height:10px;}
+.tl-item.right{padding:0 40px 0 calc(50% + 28px);flex-direction:row-reverse;}
+.tl-item::before{content:'';position:absolute;left:calc(50% - 7px);top:18px;width:14px;height:14px;border-radius:50%;background:var(--paper);border:2px solid var(--amber);z-index:5;box-shadow:0 0 0 3px var(--paper);transition:all .2s;}
 .tl-item:hover::before{transform:scale(1.3);background:var(--amber);}
-
-/* Connector line from card to spine */
-.tl-item::after{
-  content:'';position:absolute;top:24px;
-  height:1px;background:var(--line);
-  left:50%;width:calc(50% - 50% - 28px + 40px);
-}
-/* Complex: left items line goes right, right items line goes left */
-.tl-item:not(.right)::after{
-  left:auto;right:calc(50% + 7px);width:40px;
-}
-.tl-item.right::after{
-  left:calc(50% + 7px);width:40px;
-}
-
-.tl-card{
-  background:var(--paper);
-  border:1px solid var(--line);
-  border-radius:3px;
-  padding:14px 16px;
-  cursor:pointer;
-  transition:all .2s;
-  box-shadow:2px 3px 8px rgba(50,30,10,.08);
-  max-width:380px;
-  width:100%;
-}
-.tl-card:hover{
-  box-shadow:4px 6px 18px rgba(50,30,10,.16);
-  transform:translateY(-1px);
-  border-color:var(--amber);
-}
+.tl-item:not(.right)::after{content:'';position:absolute;top:24px;right:calc(50% + 7px);width:40px;height:1px;background:var(--line);}
+.tl-item.right::after{content:'';position:absolute;top:24px;left:calc(50% + 7px);width:40px;height:1px;background:var(--line);}
+.tl-card{background:var(--paper);border:1px solid var(--line);border-radius:3px;padding:14px 16px;cursor:pointer;transition:all .2s;box-shadow:2px 3px 8px rgba(50,30,10,.08);max-width:390px;width:100%;}
+.tl-card:hover{box-shadow:4px 6px 18px rgba(50,30,10,.16);transform:translateY(-1px);border-color:var(--amber);}
 .tl-card.expanded{border-color:var(--amber);background:var(--paper2);}
-
-.card-head{display:flex;align-items:flex-start;gap:10px;margin-bottom:0;}
+.java-highlight{border-color:var(--amber)!important;box-shadow:0 0 0 2px rgba(193,127,36,.2),2px 3px 8px rgba(50,30,10,.08)!important;}
+.java-flag{font-family:'JetBrains Mono',monospace;font-size:7px;padding:1px 6px;background:var(--amber2);color:var(--paper);border-radius:2px;margin-left:6px;vertical-align:middle;}
+.card-head{display:flex;align-items:flex-start;gap:10px;}
 .card-icon{font-size:22px;flex-shrink:0;margin-top:2px;line-height:1;}
 .card-meta{flex:1;min-width:0;}
-
-.card-year-badge{
-  font-family:'JetBrains Mono',monospace;font-size:9px;
-  padding:1px 7px;border-radius:2px;display:inline-block;margin-bottom:4px;
-  letter-spacing:.12em;
-}
-.card-title{
-  font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;
-  line-height:1.2;letter-spacing:.01em;color:var(--ink);
-}
-.card-subtitle{
-  font-family:'JetBrains Mono',monospace;font-size:8px;
-  color:var(--dim);margin-top:3px;letter-spacing:.08em;
-}
-
-/* Status badges */
+.card-year-badge{font-family:'JetBrains Mono',monospace;font-size:9px;padding:1px 7px;border-radius:2px;display:inline-block;margin-bottom:4px;letter-spacing:.12em;background:rgba(193,127,36,.12);color:var(--amber2);}
+.card-title{font-family:'Oswald',sans-serif;font-size:16px;font-weight:500;line-height:1.2;color:var(--ink);}
+.card-subtitle{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);margin-top:3px;letter-spacing:.08em;}
 .status-bar{display:flex;gap:5px;flex-wrap:wrap;margin-top:7px;}
-.s-badge{
-  font-family:'JetBrains Mono',monospace;font-size:7.5px;
-  padding:2px 7px;border-radius:2px;letter-spacing:.08em;
-}
+.s-badge{font-family:'JetBrains Mono',monospace;font-size:7.5px;padding:2px 7px;border-radius:2px;letter-spacing:.08em;}
 .s-active{background:rgba(26,107,74,.12);color:#1A6B4A;border:1px solid rgba(26,107,74,.25);}
 .s-legacy{background:rgba(155,58,26,.1);color:#9B3A1A;border:1px solid rgba(155,58,26,.2);}
 .s-modern{background:rgba(58,123,213,.1);color:#2A6BC4;border:1px solid rgba(58,123,213,.2);}
 .s-obsolete{background:rgba(80,60,30,.1);color:#6B5030;border:1px dashed rgba(100,80,40,.3);}
 .s-emerging{background:rgba(140,90,180,.1);color:#7A50A8;border:1px solid rgba(140,90,180,.25);}
-
-/* Expand section */
-.card-expand{
-  max-height:0;overflow:hidden;transition:max-height .35s ease,opacity .25s ease;
-  opacity:0;
-}
-.tl-card.expanded .card-expand{max-height:600px;opacity:1;}
-.expand-divider{
-  margin:12px 0 10px;border:none;
-  border-top:1px solid var(--line);
-}
-
-.card-desc{
-  font-size:11.5px;color:var(--muted);line-height:1.75;margin-bottom:10px;
-}
-
-/* Tier stack mini diagram */
+.card-expand{max-height:0;overflow:hidden;transition:max-height .4s ease,opacity .25s ease;opacity:0;}
+.tl-card.expanded .card-expand{max-height:1100px;opacity:1;}
+.expand-divider{margin:12px 0 10px;border:none;border-top:1px solid var(--line);}
+.problem-box{background:rgba(155,58,26,.07);border:1px solid rgba(155,58,26,.22);border-left:3px solid var(--rust2);border-radius:3px;padding:10px 12px;margin-bottom:12px;}
+.problem-box-label{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--rust2);margin-bottom:6px;}
+.problem-box-text{font-family:'JetBrains Mono',monospace;font-size:9px;color:#6A2A08;line-height:1.85;white-space:pre-line;}
+.card-desc{font-size:11.5px;color:var(--muted);line-height:1.75;margin-bottom:10px;}
 .mini-stack{display:flex;flex-direction:column;gap:2px;margin-bottom:10px;}
-.mini-layer{
-  display:flex;align-items:center;gap:8px;
-  padding:5px 9px;border-radius:2px;font-size:9px;
-}
+.mini-layer{display:flex;align-items:center;gap:8px;padding:5px 9px;border-radius:2px;}
 .mini-layer-icon{font-size:12px;flex-shrink:0;}
 .mini-layer-name{font-family:'JetBrains Mono',monospace;font-size:8px;font-weight:600;width:90px;flex-shrink:0;}
 .mini-layer-desc{font-family:'JetBrains Mono',monospace;font-size:8px;color:var(--dim);}
-.mini-arrow{text-align:center;color:var(--faint);font-size:9px;line-height:1;margin-left:18px;}
-
+.mini-arrow{text-align:center;color:var(--faint);font-size:9px;margin-left:18px;}
 .qa-chips{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px;}
-.qa-chip{
-  font-family:'JetBrains Mono',monospace;font-size:8px;
-  padding:2px 8px;border-radius:2px;border:1px solid var(--line);
-  background:var(--paper3);color:var(--muted);
-}
+.qa-chip{font-family:'JetBrains Mono',monospace;font-size:8px;padding:2px 8px;border-radius:2px;border:1px solid var(--line);background:var(--paper3);color:var(--muted);}
 .qa-chip.strong{border-color:var(--amber2);color:var(--amber2);background:rgba(193,127,36,.08);}
 .qa-chip.weak{border-color:var(--rust);color:var(--rust);background:rgba(155,58,26,.06);text-decoration:line-through;opacity:.7;}
-
 .examples-row{display:flex;gap:6px;flex-wrap:wrap;}
-.ex-pill{
-  font-size:9.5px;color:var(--ink);background:var(--paper3);
-  border:1px solid var(--line);padding:2px 9px;border-radius:12px;
-}
-
-.obsolete-note{
-  background:rgba(155,58,26,.06);border:1px dashed rgba(155,58,26,.25);
-  border-radius:3px;padding:7px 10px;margin-top:8px;
-  font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--rust2);
-  line-height:1.6;
-}
-.why-note{
-  background:rgba(26,107,74,.06);border:1px solid rgba(26,107,74,.15);
-  border-radius:3px;padding:7px 10px;margin-top:8px;
-  font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#1A5A3A;
-  line-height:1.6;
-}
-
-/* ── ERA SECTION HEADER ── */
-.era-header{
-  text-align:center;padding:20px 0 8px;position:relative;
-  z-index:10;
-}
-.era-header-inner{
-  display:inline-block;background:var(--paper);
-  padding:6px 24px;border:1px solid var(--amber2);
-  font-family:'Oswald',sans-serif;font-size:11px;letter-spacing:.4em;
-  text-transform:uppercase;color:var(--amber2);
-}
-
-/* ── JAVA HIGHLIGHT ── */
-.java-highlight{
-  border-color:var(--amber) !important;
-  box-shadow:0 0 0 2px rgba(193,127,36,.2), 2px 3px 8px rgba(50,30,10,.08) !important;
-}
-.java-flag{
-  font-family:'JetBrains Mono',monospace;font-size:7px;padding:1px 6px;
-  background:var(--amber2);color:var(--paper);border-radius:2px;
-  letter-spacing:.1em;vertical-align:middle;margin-left:6px;
-}
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar{width:8px;}
-::-webkit-scrollbar-track{background:var(--paper2);}
-::-webkit-scrollbar-thumb{background:var(--amber2);border-radius:4px;}
-
-/* ── FADE IN ANIMATION ── */
-@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
-.tl-item{animation:fadeUp .5s ease both;}
-
-/* ── FOOTER ── */
-.footer{
-  background:var(--ink);color:var(--dim);
-  text-align:center;padding:20px;
-  font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;
-  border-top:3px double var(--amber2);
-}
-
-/* Hidden items for filter */
-.tl-item.hidden{display:none;}
-.year-marker.hidden{display:none;}
-.era-header.hidden{display:none;}
+.ex-pill{font-size:9.5px;color:var(--ink);background:var(--paper3);border:1px solid var(--line);padding:2px 9px;border-radius:12px;}
+.obsolete-note{background:rgba(155,58,26,.06);border:1px dashed rgba(155,58,26,.25);border-radius:3px;padding:7px 10px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:var(--rust2);line-height:1.6;}
+.why-note{background:rgba(26,107,74,.06);border:1px solid rgba(26,107,74,.15);border-radius:3px;padding:7px 10px;margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#1A5A3A;line-height:1.6;}
+.sec-mini{font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--dim);margin-bottom:5px;text-transform:uppercase;}
+.hidden{display:none;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+.tl-item{animation:fadeUp .45s ease both;}
+.footer{background:var(--ink);color:var(--dim);text-align:center;padding:20px;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.15em;border-top:3px double var(--amber2);}
+::-webkit-scrollbar{width:8px;}::-webkit-scrollbar-track{background:var(--paper2);}::-webkit-scrollbar-thumb{background:var(--amber2);border-radius:4px;}
 </style>
 </head>
 <body>
-
-<!-- ── MASTHEAD ── -->
 <div class="masthead">
   <div class="masthead-eyebrow">System Analysis · Architecture Design · Historical Survey</div>
   <h1>The History of<br><span>Tier Architecture</span></h1>
   <hr class="masthead-rule">
-  <div class="masthead-sub">From Mainframe Terminals to Edge Computing &ensp;·&ensp; 1960 — 2025</div>
+  <div class="masthead-sub">From Mainframe Terminals to Edge Computing · 1960 — 2025</div>
 </div>
-
-<!-- ── LEGEND ── -->
 <div class="legend">
   <div class="legend-item"><div class="legend-dot" style="background:#1A6B4A"></div>Still Active</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#2A6BC4"></div>Modern / Mainstream</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#2A6BC4"></div>Modern</div>
   <div class="legend-item"><div class="legend-dot" style="background:#7A50A8"></div>Emerging</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#9B3A1A"></div>Legacy (still used)</div>
-  <div class="legend-item"><div class="legend-dot" style="background:#6B5030;outline:1px dashed #6B5030"></div>Largely Obsolete</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#9B3A1A"></div>Legacy</div>
+  <div class="legend-item"><div class="legend-dot" style="background:#6B5030;outline:1px dashed #6B5030"></div>Obsolete</div>
   <div style="width:1px;height:16px;background:var(--line)"></div>
-  <div class="legend-item" style="font-size:9px;color:var(--amber2)">☕ = Java / Servlet Era highlighted</div>
+  <div class="legend-item" style="color:#C44B22;font-family:'JetBrains Mono',monospace;font-size:9px;">🔴 ปัญหาที่พยายามแก้ (expand card to see)</div>
 </div>
-
-<!-- ── ERA FILTER ── -->
 <div class="era-strip">
-  <button class="era-btn active" data-era="all" onclick="filterEra('all',this)">All Eras</button>
-  <button class="era-btn" data-era="mainframe" onclick="filterEra('mainframe',this)">Mainframe Era (1960s–70s)</button>
-  <button class="era-btn" data-era="pc" onclick="filterEra('pc',this)">PC Era (1980s)</button>
-  <button class="era-btn" data-era="clientserver" onclick="filterEra('clientserver',this)">Client-Server (1980s–90s)</button>
-  <button class="era-btn" data-era="web1" onclick="filterEra('web1',this)">Web 1.0 (1993–2004)</button>
-  <button class="era-btn" data-era="web2" onclick="filterEra('web2',this)">Web 2.0 (2004–2012)</button>
-  <button class="era-btn" data-era="cloud" onclick="filterEra('cloud',this)">Cloud Era (2006–2016)</button>
-  <button class="era-btn" data-era="modern" onclick="filterEra('modern',this)">Modern (2013–present)</button>
-  <button class="era-btn" data-era="edge" onclick="filterEra('edge',this)">Edge Era (2017–present)</button>
+  <button class="era-btn active" onclick="filterEra('all',this)">All Eras</button>
+  <button class="era-btn" onclick="filterEra('mainframe',this)">Mainframe (1960s–70s)</button>
+  <button class="era-btn" onclick="filterEra('pc',this)">PC Era (1980s)</button>
+  <button class="era-btn" onclick="filterEra('clientserver',this)">Client-Server (1983–95)</button>
+  <button class="era-btn" onclick="filterEra('web1',this)">Web 1.0 (1991–2004)</button>
+  <button class="era-btn" onclick="filterEra('web2',this)">Web 2.0 (2004–2012)</button>
+  <button class="era-btn" onclick="filterEra('cloud',this)">Cloud Era (2006–2016)</button>
+  <button class="era-btn" onclick="filterEra('modern',this)">Modern (2013–present)</button>
+  <button class="era-btn" onclick="filterEra('edge',this)">Edge & AI (2017–present)</button>
 </div>
-
-<!-- ── TIMELINE ── -->
 <div class="timeline-outer">
   <div class="spine"></div>
-  <div id="timeline-content"></div>
+  <div id="tl"></div>
 </div>
-
-<div class="footer">SYSTEM ANALYSIS COURSE · ARCHITECTURE HISTORY REFERENCE · CLICK ANY CARD TO EXPAND DETAILS</div>
-
+<div class="footer">SYSTEM ANALYSIS COURSE · TIER ARCHITECTURE HISTORY · CLICK ANY CARD TO EXPAND</div>
 <script>
-const HISTORY = [
-  // ─── MAINFRAME ERA ───
-  {
-    era:"mainframe", year:"~1960s", side:"left",
-    icon:"🖥️", title:"Mainframe + Dumb Terminals",
-    subtitle:"1-Tier Physical · 2-Tier Logical (Terminal→Mainframe)",
-    status:[{t:"Legacy",c:"s-legacy"},{t:"Still in Banking/Gov",c:"s-active"}],
-    born:"~1960", obsolete:null,
-    desc:"The original architecture. IBM mainframes (360, 370) with VT100 terminals that could only display characters. All computation — logic, data, rendering — happened on the mainframe. Terminals were literally dumb: just keyboard input + screen output over serial cables.",
-    layers:[
-      {icon:"📟",name:"Terminal",desc:"Input/output only — no logic, no memory",c:"#9B3A1A"},
-      {icon:"🖥️",name:"Mainframe",desc:"Logic + Data + Rendering all on one machine",c:"#C44B22"},
-    ],
-    qaStrong:["Centralized Control","Security","Reliability","Consistent Updates"],
-    qaWeak:["Scalability","Cost","Developer Flexibility"],
-    examples:["IBM System/360","ENIAC","UNIVAC","IBM z/OS (still runs today)"],
-    obsoleteNote:null,
-    whyNote:"IBM mainframes still process 95% of credit card transactions globally. COBOL still runs the world's financial backbone.",
-  },
-  {
-    era:"mainframe", year:"~1969", side:"right",
-    icon:"🔗", title:"ARPANET Node Architecture",
-    subtitle:"Distributed Peer Nodes · No Central Server",
-    status:[{t:"Ancestor of Internet",c:"s-legacy"},{t:"Obsolete as-is",c:"s-obsolete"}],
-    born:"1969", obsolete:"1990",
-    desc:"ARPANET was the first packet-switched network. Each node was both client and server — a true peer-to-peer architecture before the term existed. Messages were routed hop-to-hop. This became the conceptual foundation for the Internet, TCP/IP, and modern P2P systems.",
-    layers:[
-      {icon:"💻",name:"Node A",desc:"Send + receive + route packets",c:"#6B5030"},
-      {icon:"💻",name:"Node B",desc:"Send + receive + route packets",c:"#6B5030"},
-    ],
-    qaStrong:["No Single Point of Failure","Decentralized","Resilient to Attack"],
-    qaWeak:["Consistency","Control","Discoverability"],
-    examples:["ARPANET (1969)","BITNET","Ancestor of BitTorrent, Bitcoin"],
-    obsoleteNote:"ARPANET decommissioned 1990. Replaced by modern Internet TCP/IP infrastructure.",
-    whyNote:null,
-  },
+const EN={mainframe:"Mainframe Era · 1960s–70s",pc:"Personal Computer Era · 1980s",clientserver:"Client-Server Era · 1983–1995",web1:"Web 1.0 Era · 1991–2004",web2:"Web 2.0 Era · 2004–2012",cloud:"Cloud Era · 2006–2016",modern:"Modern Era · 2013–Present",edge:"Edge & AI Era · 2017–Present"};
+const H=[
+{era:"mainframe",year:"~1960s",side:"l",icon:"🖥️",title:"Mainframe + Dumb Terminals",sub:"1-Tier Physical · 2-Tier Logical (Terminal→Mainframe)",st:[["Legacy","s-legacy"],["Still in Banking/Gov","s-active"]],born:"~1960",obs:null,
+prob:"คอมพิวเตอร์ยุคแรก (IBM 360) ราคา $5,000,000+ ต่อเครื่อง\nองค์กรมีเงินซื้อได้เพียงเครื่องเดียว แต่มีพนักงานหลายร้อยคน\n→ จะทำให้หลายคนใช้คอมพิวเตอร์เครื่องเดียวพร้อมกันได้อย่างไร?",
+desc:"IBM mainframes (360, 370) with VT100 terminals that could only display characters. All computation — logic, data, rendering — happened on the mainframe. Terminals were dumb: keyboard input + screen output only.",
+lay:[["📟","Terminal","Input/output only — no logic, no memory","#9B3A1A"],["🖥️","Mainframe","Logic + Data + Rendering all in one machine","#C44B22"]],
+pos:["Centralized Control","Security","Reliability"],neg:["Scalability","Very High Cost","Limited Flexibility"],
+ex:["IBM System/360","ENIAC","UNIVAC","IBM z/OS (still runs today)"],
+why:"IBM mainframes still process 95% of credit card transactions globally. COBOL still runs the world's financial backbone."},
 
-  // ─── PC ERA ───
-  {
-    era:"pc", year:"1981", side:"left",
-    icon:"💾", title:"1-Tier Standalone Desktop",
-    subtitle:"All logic + data on one personal machine",
-    status:[{t:"Still Active",c:"s-active"},{t:"Embedded Systems",c:"s-active"}],
-    born:"1981", obsolete:null,
-    desc:"IBM PC (1981) democratized computing. Software shipped on floppy disks and ran entirely locally — WordStar, Lotus 1-2-3, dBase II. No network required. The entire system was self-contained: presentation, logic, and data on one machine. Still the right architecture for desktop tools today.",
-    layers:[
-      {icon:"💻",name:"PC Application",desc:"UI + Logic + Local File Storage",c:"#38BDF8"},
-    ],
-    qaStrong:["Offline","Zero Latency","Low Cost","Privacy"],
-    qaWeak:["Data Sharing","Remote Updates","Collaboration"],
-    examples:["WordStar (1978)","Lotus 1-2-3 (1983)","dBase III","Microsoft Excel","Photoshop","Modern: VS Code, Figma Desktop"],
-    obsoleteNote:null,
-    whyNote:"Still the right choice for offline-first tools. VS Code, Figma Desktop, Excel — all 1-tier.",
-  },
+{era:"mainframe",year:"~1969",side:"r",icon:"🔗",title:"ARPANET Node Architecture",sub:"Distributed Peer Nodes · No Central Server",st:[["Ancestor of Internet","s-legacy"],["Obsolete as-is","s-obsolete"]],born:"1969",obs:"1990",
+prob:"สงครามเย็น — กระทรวงกลาโหมสหรัฐฯ กังวลว่า\nหากโซเวียตโจมตีด้วยนิวเคลียร์ที่ Washington D.C.\nระบบสื่อสารทหารที่ผ่านศูนย์กลางเดียวจะขาดสะบั้นทันที\n→ จะออกแบบเครือข่ายที่รอดจากการถูกทำลายบางส่วนได้อย่างไร?",
+desc:"ARPANET was the first packet-switched network. Each node was both client and server. Messages were routed hop-to-hop. This became the conceptual foundation for the Internet, TCP/IP, and modern P2P systems.",
+lay:[["💻","Node A","Send + receive + route packets","#6B5030"],["💻","Node B","Send + receive + route packets","#6B5030"]],
+pos:["No Single Point of Failure","Decentralized","Resilient to Attack"],neg:["No Consistency","Hard to Control","No Central Discovery"],
+ex:["ARPANET (1969)","BITNET","Ancestor of BitTorrent, Bitcoin"],
+gone:"Decommissioned 1990. Replaced by modern Internet TCP/IP infrastructure."},
 
-  // ─── CLIENT-SERVER ERA ───
-  {
-    era:"clientserver", year:"1983", side:"right",
-    icon:"🔌", title:"2-Tier Thick Client–Server",
-    subtitle:"LAN: Client has logic · Server has data",
-    status:[{t:"Legacy",c:"s-legacy"},{t:"Still in Enterprise",c:"s-active"}],
-    born:"~1983", obsolete:null,
-    desc:"Novell NetWare (1983) and Ethernet enabled LAN-based client-server computing. The client application contained UI AND business logic, connecting directly to a database server on the network. Every employee ran a fat client on their PC that talked to a shared SQL Server or Oracle database.",
-    layers:[
-      {icon:"🖥️",name:"Thick Client",desc:"UI + Business Logic (Windows/VB app)",c:"#60A5FA"},
-      {icon:"🗄️",name:"DB Server",desc:"SQL Server / Oracle — data tier",c:"#60A5FA"},
-    ],
-    qaStrong:["LAN Performance","Rich UI","Familiar for Devs"],
-    qaWeak:["Update Distribution","Internet Scaling","Security (DB exposed to network)"],
-    examples:["MS Access + SQL Server","SAP GUI (R/2)","Oracle Forms","Borland Delphi apps","PowerBuilder apps"],
-    obsoleteNote:"Largely replaced by web apps. Still common in manufacturing floor systems and legacy ERP.",
-    whyNote:null,
-  },
+{era:"pc",year:"1981",side:"l",icon:"💾",title:"1-Tier Standalone Desktop",sub:"All logic + data on one personal machine",st:[["Still Active","s-active"],["Embedded Systems","s-active"]],born:"1981",obs:null,
+prob:"Mainframe และ Terminal มีราคาแพงเกินไปสำหรับบุคคลทั่วไป\nการใช้คอมพิวเตอร์ต้องผ่านแผนก IT ขององค์กรเท่านั้น\n→ ทำอย่างไรให้บุคคลธรรมดาสามารถมีคอมพิวเตอร์ส่วนตัวได้ในราคาที่จับต้องได้?",
+desc:"IBM PC (1981) democratized computing. Software shipped on floppy disks and ran entirely locally — WordStar, Lotus 1-2-3, dBase II. No network required. The entire system was self-contained.",
+lay:[["💻","PC Application","UI + Logic + Local File Storage","#38BDF8"]],
+pos:["Offline Capable","Zero Latency","Low Cost","Privacy"],neg:["No Data Sharing","Hard to Update Remotely","No Collaboration"],
+ex:["WordStar","Lotus 1-2-3 (1983)","dBase III","Microsoft Excel","Photoshop","VS Code, Figma Desktop (modern)"],
+why:"Still the right choice for offline-first tools. VS Code, Figma Desktop, Excel — all 1-tier."},
 
-  // ─── WEB 1.0 ───
-  {
-    era:"web1", year:"1991–1993", side:"left",
-    icon:"🌐", title:"World Wide Web — Static HTML",
-    subtitle:"Thin client browser · Static file server · 2-tier",
-    status:[{t:"Still Active (static sites)",c:"s-active"}],
-    born:"1991", obsolete:null,
-    desc:"Tim Berners-Lee's HTTP + HTML at CERN. The first web architecture was the simplest possible: browser requests a file, server returns HTML. No business logic — just static documents. The web server was a file server. Apache 1.0 (1995) made this mainstream. Every personal homepage was this architecture.",
-    layers:[
-      {icon:"🌐",name:"Browser",desc:"Renders HTML — no logic",c:"#7DD3FC"},
-      {icon:"📁",name:"File Server",desc:"Apache / NCSA serving static .html files",c:"#7DD3FC"},
-    ],
-    qaStrong:["Simplicity","Speed","SEO","Global Scale via CDN"],
-    qaWeak:["Interactivity","Personalization","Dynamic Content"],
-    examples:["CERN first website (1991)","Netscape Navigator era sites","Personal homepages (GeoCities)","Modern: Hugo, Jekyll, Gatsby static sites"],
-    obsoleteNote:null,
-    whyNote:"Revived as JAMstack (2015+). Static site generators (Hugo, Eleventy) return to this pure model at massive scale.",
-  },
-  {
-    era:"web1", year:"1993", side:"right",
-    icon:"⚙️", title:"CGI Scripts",
-    subtitle:"Common Gateway Interface — first dynamic web",
-    status:[{t:"Largely Obsolete",c:"s-obsolete"}],
-    born:"1993", obsolete:"~2005",
-    desc:"The first dynamic web architecture. The web server spawns a new process for every request, running a script (Perl, Shell, C) that outputs HTML to stdout. Each request creates a new OS process — extremely expensive but revolutionary: web pages could now query databases and show dynamic content.",
-    layers:[
-      {icon:"🌐",name:"Browser",desc:"Sends HTTP request",c:"#9B3A1A"},
-      {icon:"🔧",name:"Web Server + CGI",desc:"Spawns new process per request → runs Perl/C script",c:"#9B3A1A"},
-      {icon:"🗄️",name:"Database",desc:"MySQL / flat file",c:"#9B3A1A"},
-    ],
-    qaStrong:["Dynamic HTML","Language Agnostic","Pioneering"],
-    qaWeak:["Performance (new process/request)","Scalability","Security"],
-    examples:["Perl CGI scripts","Early web forms","Guest books","Hit counters","Amazon's first checkout (Perl)"],
-    obsoleteNote:"Replaced by persistent server processes (FastCGI, PHP, Java Servlets). Too expensive per-request.",
-    whyNote:null,
-  },
-  {
-    era:"web1", year:"1994", side:"left",
-    icon:"🐘", title:"PHP / Server-Side HTML Templates",
-    subtitle:"Scripted HTML generation · 2.5-tier",
-    status:[{t:"Still Very Active",c:"s-active"},{t:"Powers 77% of Web",c:"s-modern"}],
-    born:"1994", obsolete:null,
-    desc:"Rasmus Lerdorf's PHP (1994) embedded code directly in HTML. The server-side script ran as a module inside Apache (mod_php) — no new process per request. PHP, ASP (1996), and ColdFusion made dynamic web accessible to millions of developers. WordPress, Drupal, and most CMS platforms still use this model today.",
-    layers:[
-      {icon:"🌐",name:"Browser",desc:"Receives complete rendered HTML",c:"#8B5CF6"},
-      {icon:"🐘",name:"PHP/ASP/ColdFusion",desc:"Template renders HTML inline — Apache module",c:"#8B5CF6"},
-      {icon:"🗄️",name:"MySQL",desc:"Relational DB queried per request",c:"#8B5CF6"},
-    ],
-    qaStrong:["Simplicity","SEO","Fast Delivery","Huge Ecosystem"],
-    qaWeak:["Separation of Concerns","Testing","Large App Maintainability"],
-    examples:["WordPress","Drupal","Joomla","Facebook (early PHP)","Wikipedia","Laravel","Symfony"],
-    obsoleteNote:null,
-    whyNote:"PHP powers 77% of all websites. WordPress alone is 43% of the web. Far from dead.",
-  },
-  {
-    era:"web1", year:"1995", side:"right",
-    icon:"☕", title:"Java Servlet / JSP",
-    subtitle:"Typed SSR · HttpServletRequest/Response · 3-tier",
-    status:[{t:"Legacy",c:"s-legacy"},{t:"Still Enterprise Standard",c:"s-active"}],
-    born:"1995", obsolete:null,
-    javaHighlight:true,
-    desc:"Java Servlet API (1995, released 1997 in JDK 1.1) brought object-oriented, compiled server-side web development. Unlike PHP/CGI, servlets are persistent objects — one instance handles thousands of requests in a thread pool. JSP (1999) added HTML templates with embedded Java. This became the foundation of enterprise Java web development.",
-    layers:[
-      {icon:"🌐",name:"Browser",desc:"Pure HTML response — no client logic",c:"#C17F24"},
-      {icon:"☕",name:"Servlet Container",desc:"Tomcat/JBoss — HttpServlet.doGet() builds HTML",c:"#C17F24"},
-      {icon:"🔗",name:"JDBC Layer",desc:"Database connection pool — PreparedStatement",c:"#C17F24"},
-      {icon:"🗄️",name:"Oracle/MySQL",desc:"Relational DB — true 3-tier",c:"#C17F24"},
-    ],
-    qaStrong:["Type Safety","Thread Pooling","Scalability vs CGI","Enterprise Integration"],
-    qaWeak:["Boilerplate","Deployment Complexity","Full Page Reload","HTML in Java = ugly"],
-    examples:["Java Servlet (1997)","JSP (1999)","Apache Tomcat (1999)","JBoss","WebLogic","Early Amazon","Early eBay","Spring MVC + Thymeleaf (modern heir)"],
-    obsoleteNote:null,
-    whyNote:"The direct ancestor of Spring MVC, Jakarta EE, and Thymeleaf. Still runs enormous amounts of enterprise Java. Every Spring Boot app with a view layer is a descendant.",
-    codeNote:`// Java Servlet — classic SSR pattern
-@WebServlet("/users")
-public class UserServlet extends HttpServlet {
-  protected void doGet(HttpServletRequest req,
-                       HttpServletResponse res) throws IOException {
-    List<User> users = userDAO.findAll(); // JDBC
-    req.setAttribute("users", users);
-    req.getRequestDispatcher("/users.jsp")
-       .forward(req, res); // renders HTML
-  }
-}`,
-  },
-  {
-    era:"web1", year:"1999", side:"left",
-    icon:"🗂️", title:"MVC Frameworks — Struts / Spring MVC",
-    subtitle:"Pattern layering over Servlet · Clear separation of concerns",
-    status:[{t:"Legacy",c:"s-legacy"},{t:"Spring MVC still dominant",c:"s-active"}],
-    born:"1999", obsolete:null,
-    desc:"Apache Struts (2000) and later Spring MVC (2002) imposed the Model-View-Controller pattern on top of Java Servlets. Controllers handled HTTP, Services had business logic, JSP/Thymeleaf templates rendered HTML. This made large-scale Java web apps maintainable and testable. Set the pattern every web framework since has followed.",
-    layers:[
-      {icon:"🌐",name:"Browser",desc:"Receives full HTML — thin client",c:"#22C55E"},
-      {icon:"🎮",name:"Controller",desc:"@GetMapping — handles HTTP, calls Service",c:"#22C55E"},
-      {icon:"⚙️",name:"Service Layer",desc:"Business logic — @Service components",c:"#22C55E"},
-      {icon:"📁",name:"Repository",desc:"JPA/JDBC — database access",c:"#22C55E"},
-      {icon:"🗄️",name:"Database",desc:"Oracle / PostgreSQL",c:"#22C55E"},
-    ],
-    qaStrong:["Testability","Separation of Concerns","Enterprise Scale","Team Maintainability"],
-    qaWeak:["XML Configuration Hell (Struts)","Boilerplate","Slow Startup","Heavy Deployment"],
-    examples:["Apache Struts (2000)","Spring MVC (2003)","ASP.NET WebForms","Ruby on Rails (2004)","Django (2005)","Thymeleaf (2011)"],
-    obsoleteNote:null,
-    whyNote:"Rails (2004) showed the world that MVC web frameworks could be elegant. Django followed. Spring MVC is still the standard for Java enterprise today.",
-  },
+{era:"clientserver",year:"1983",side:"r",icon:"🔌",title:"2-Tier Thick Client–Server",sub:"LAN: Client has logic · Server has shared data",st:[["Legacy","s-legacy"],["Still in Enterprise","s-active"]],born:"~1983",obs:null,
+prob:"PC แต่ละเครื่องในออฟฟิศมีข้อมูลของตัวเอง\nทีมขาย 50 คนมีฐานข้อมูลลูกค้าคนละชุดในเครื่องตัวเอง\nอัปเดตราคาสินค้า = ต้องไปอัปเดตทุกเครื่องด้วยตนเอง\n→ จะแชร์ข้อมูลเดียวกันทั้งทีมผ่าน LAN ได้อย่างไร โดยไม่กลับไปใช้ Mainframe?",
+desc:"Novell NetWare (1983) and Ethernet enabled LAN-based client-server computing. The client application contained UI AND business logic, connecting directly to a database server on the network.",
+lay:[["🖥️","Thick Client","UI + Business Logic (Windows/VB app)","#60A5FA"],["🗄️","DB Server","SQL Server / Oracle — data tier","#60A5FA"]],
+pos:["Fast LAN Performance","Rich UI","Shared Team Data"],neg:["Hard to Deploy Updates","Can't Scale to Internet","DB Exposed to Network"],
+ex:["MS Access + SQL Server","SAP GUI (R/2)","Oracle Forms","Borland Delphi","PowerBuilder"],
+gone:"Largely replaced by web apps. Still in manufacturing floor systems and legacy ERP."},
 
-  // ─── WEB 2.0 ───
-  {
-    era:"web2", year:"2005", side:"right",
-    icon:"✨", title:"Ajax & Web 2.0",
-    subtitle:"XMLHttpRequest — partial page updates without reload",
-    status:[{t:"Still Fundamental",c:"s-active"}],
-    born:"2005", obsolete:null,
-    desc:"Jesse James Garrett coined 'Ajax' in 2005. XMLHttpRequest (actually existed since 1999 in IE5) allowed browsers to fetch data from the server without reloading the page. Google Maps (2005) and Gmail demonstrated that web apps could feel like desktop apps. This split the architecture: server still renders HTML, but JavaScript updates parts of the page dynamically.",
-    layers:[
-      {icon:"🌐",name:"Browser + JS",desc:"XHR/fetch for partial updates — DOM manipulation",c:"#F59E0B"},
-      {icon:"⚙️",name:"App Server",desc:"Serves HTML pages + JSON API endpoints",c:"#F59E0B"},
-      {icon:"🗄️",name:"Database",desc:"Standard relational DB",c:"#F59E0B"},
-    ],
-    qaStrong:["User Experience","Partial Updates","No Full Page Reload","Rich Interactivity"],
-    qaWeak:["SEO (JS-rendered content)","Browser Back Button","Complexity vs SSR"],
-    examples:["Google Maps (2005)","Gmail (2004)","jQuery (2006)","XMLHttpRequest","Prototype.js"],
-    obsoleteNote:null,
-    whyNote:"Ajax birthed Web 2.0. jQuery made it accessible. This was the bridge between classic SSR and modern SPA.",
-  },
-  {
-    era:"web2", year:"2006", side:"left",
-    icon:"☁️", title:"Cloud Infrastructure — AWS IaaS",
-    subtitle:"Virtualized server tier · Pay-per-use infrastructure",
-    status:[{t:"Dominant",c:"s-modern"}],
-    born:"2006", obsolete:null,
-    desc:"Amazon Web Services launched S3 (March 2006) and EC2 (August 2006), inventing Infrastructure-as-a-Service. For the first time, companies could rent compute instead of buying servers. This didn't change the logical architecture but revolutionized the physical tier — the 'server tier' became virtual, elastic, and pay-per-use.",
-    layers:[
-      {icon:"🌐",name:"Browser",desc:"Same thin client",c:"#FB923C"},
-      {icon:"⚙️",name:"EC2 Instances",desc:"App servers — now virtual, auto-scaled",c:"#FB923C"},
-      {icon:"🗄️",name:"RDS / S3",desc:"Managed data tier — no hardware to own",c:"#FB923C"},
-    ],
-    qaStrong:["Elastic Scaling","No Hardware Cost","Global Regions","Managed Services"],
-    qaWeak:["Vendor Lock-in","Cost Management","Complexity at Scale"],
-    examples:["AWS (2006)","S3 + EC2","Later: GCP (2008), Azure (2010)","Dropbox (built on S3)"],
-    obsoleteNote:null,
-    whyNote:"AWS changed what 'server tier' means. You no longer own hardware. Every modern architecture assumes cloud infrastructure.",
-  },
-  {
-    era:"web2", year:"2008", side:"right",
-    icon:"🚀", title:"CDN as Architectural Tier",
-    subtitle:"Edge caching network — static assets globally distributed",
-    status:[{t:"Essential for Production",c:"s-modern"}],
-    born:"2008 (mainstream)", obsolete:null,
-    desc:"Akamai existed since 1998, but Cloudflare (2009) and CloudFront (2008) made CDN accessible to everyone. Adding a CDN transforms 3-tier into '3-tier + CDN layer'. Static assets (JS, CSS, images) are cached at 200+ edge nodes globally. The app server only handles dynamic requests. Dramatically reduces latency for global users.",
-    layers:[
-      {icon:"🌐",name:"Browser",desc:"Gets assets from nearest edge node",c:"#A78BFA"},
-      {icon:"🚀",name:"CDN Edge",desc:"CloudFront / Cloudflare — static cache",c:"#A78BFA"},
-      {icon:"⚙️",name:"Origin App Server",desc:"Dynamic requests only — far less load",c:"#A78BFA"},
-      {icon:"🗄️",name:"Database",desc:"Only hit for dynamic content",c:"#A78BFA"},
-    ],
-    qaStrong:["Global Performance","Origin Load Reduction","DDoS Mitigation","Cost Efficiency"],
-    qaWeak:["Cache Invalidation","Config Complexity","Stale Content Risk"],
-    examples:["CloudFront (2008)","Cloudflare (2009)","Fastly (2011)","Akamai (1998)"],
-    obsoleteNote:null,
-    whyNote:"Every modern production web app uses a CDN. Not using one in 2024 for a public product is a QA failure.",
-  },
+{era:"web1",year:"1991",side:"l",icon:"🌐",title:"World Wide Web — Static HTML",sub:"Thin client browser · Static file server · 2-tier",st:[["Still Active","s-active"]],born:"1991",obs:null,
+prob:"Tim Berners-Lee ที่ CERN เจอปัญหา: นักวิทยาศาสตร์ทั่วโลก\nแชร์เอกสารวิจัยด้วย format ที่ต่างกัน (Word, PostScript, LaTeX)\nต้องใช้ซอฟต์แวร์คนละตัวเพื่อเปิดแต่ละ format\n→ จะสร้างวิธีแชร์เอกสารข้ามเครื่องข้ามระบบปฏิบัติการ\nโดยไม่ต้องติดตั้งซอฟต์แวร์พิเศษได้อย่างไร?",
+desc:"Tim Berners-Lee's HTTP + HTML at CERN (1991). Simplest possible: browser requests a file, server returns HTML. No business logic — just static documents. Apache 1.0 (1995) made this mainstream.",
+lay:[["🌐","Browser","Renders HTML — no logic","#7DD3FC"],["📁","File Server","Apache serving static .html files","#7DD3FC"]],
+pos:["Dead Simple","Fast","Excellent SEO","Global Scale via CDN"],neg:["No Interactivity","No Personalization","Static Content Only"],
+ex:["CERN first website (1991)","Netscape Navigator era","GeoCities","Hugo, Jekyll, Gatsby, Astro (modern)"],
+why:"Revived as JAMstack (2015+). Static site generators return to this pure model at massive scale."},
 
-  // ─── MODERN ERA ───
-  {
-    era:"modern", year:"2009", side:"left",
-    icon:"🟩", title:"Node.js — JavaScript on the Server",
-    subtitle:"Event-loop server · Non-blocking I/O · Full-stack JS",
-    status:[{t:"Mainstream",c:"s-modern"}],
-    born:"2009", obsolete:null,
-    desc:"Ryan Dahl's Node.js (2009) ran JavaScript on the server using Chrome's V8 engine. For the first time, one language (JavaScript) could be used on both client and server. Non-blocking I/O made it ideal for high-concurrency I/O-bound workloads. Enabled the concept of isomorphic/universal rendering later.",
-    layers:[
-      {icon:"🌐",name:"Browser (JS)",desc:"Client-side JavaScript",c:"#84CC16"},
-      {icon:"🟩",name:"Node.js Server",desc:"Same language — Express/Fastify API",c:"#84CC16"},
-      {icon:"🗄️",name:"MongoDB / Postgres",desc:"Data tier",c:"#84CC16"},
-    ],
-    qaStrong:["Shared Language","NPM Ecosystem","High Concurrency","JSON Native"],
-    qaWeak:["CPU-Intensive Tasks","Callback Complexity (pre-async)","Single Thread"],
-    examples:["Express.js","LinkedIn (early backend)","Netflix","Uber (early)","Socket.io"],
-    obsoleteNote:null,
-    whyNote:"Node.js enabled the MEAN/MERN stack and made full-stack JavaScript mainstream. Every modern JS framework has a Node.js server component.",
-  },
-  {
-    era:"modern", year:"2010", side:"right",
-    icon:"📱", title:"Mobile App + Backend",
-    subtitle:"Native thick client · REST API · Mobile-first architecture",
-    status:[{t:"Dominant",c:"s-modern"}],
-    born:"2010", obsolete:null,
-    desc:"The iPhone (2007) and Android (2008) created a new client tier. Native mobile apps were thick clients again — compiled, with local storage, offline capability — but talking to REST APIs over the internet. The 'backend for mobile' became a distinct architectural concern. Led to REST API standardization and eventually BFF pattern.",
-    layers:[
-      {icon:"📱",name:"Native Mobile App",desc:"iOS/Android — local storage, offline capable",c:"#F97316"},
-      {icon:"🔧",name:"REST API",desc:"JSON over HTTPS — mobile-optimized endpoints",c:"#F97316"},
-      {icon:"🗄️",name:"Cloud Database",desc:"AWS RDS / MongoDB Atlas",c:"#F97316"},
-    ],
-    qaStrong:["Offline Capable","Native Performance","Push Notifications","App Store Distribution"],
-    qaWeak:["App Store Review Delays","Multiple Codebases (iOS+Android)","Update Distribution"],
-    examples:["Instagram (2010)","WhatsApp (2009)","Uber (2009)","Twitter iOS","Parse (early BaaS)"],
-    obsoleteNote:null,
-    whyNote:"Mobile forced the separation of API from UI rendering. This is why REST APIs became the standard — not browser requests, but mobile app requests drove the API economy.",
-  },
-  {
-    era:"modern", year:"2013", side:"left",
-    icon:"⚛️", title:"SPA — Single Page Application",
-    subtitle:"Thick browser client · JSON API backend · Client-side routing",
-    status:[{t:"Mainstream",c:"s-modern"}],
-    born:"2013", obsolete:null,
-    desc:"AngularJS (2010), Backbone.js, and then React (2013) shifted application rendering entirely to the browser. The server now serves only JSON data — no HTML. The browser downloads a JS bundle and renders everything client-side. This created the 'Rich Client + API' architecture: a thick browser client talking to a thin JSON API server.",
-    layers:[
-      {icon:"⚛️",name:"SPA (Browser)",desc:"React/Vue/Angular — full rendering in browser",c:"#38BDF8"},
-      {icon:"🔧",name:"REST/GraphQL API",desc:"JSON only — no HTML generation",c:"#38BDF8"},
-      {icon:"🗄️",name:"Database",desc:"PostgreSQL / MongoDB",c:"#38BDF8"},
-    ],
-    qaStrong:["Rich Interactivity","Offline (PWA)","Native-like UX","Independent Deploy"],
-    qaWeak:["Initial Load (JS bundle)","SEO (requires SSR fix)","Client-side State Complexity"],
-    examples:["Gmail (Angular)","Facebook (React)","Airbnb","Netflix (React)","GitHub (React)"],
-    obsoleteNote:null,
-    whyNote:"SPA shifted the thick/thin balance back toward the client. The browser became a runtime, not a renderer. This bifurcated the industry into SPA vs SSR camps — still debated today.",
-  },
-  {
-    era:"modern", year:"2015", side:"right",
-    icon:"🔬", title:"Microservices Architecture",
-    subtitle:"Per-service tier stacks · API gateway · Independent deployment",
-    status:[{t:"Enterprise Standard",c:"s-modern"}],
-    born:"2015 (mainstream)", obsolete:null,
-    desc:"Martin Fowler and James Lewis formalized 'microservices' in 2014 after Netflix, Amazon, and Uber had been practicing it for years. Each business capability becomes its own independently deployable service with its own tier stack (own app server, own database). The tier model shifts from system-wide to per-service.",
-    layers:[
-      {icon:"🌐",name:"Client",desc:"Browser / Mobile",c:"#34D399"},
-      {icon:"🚪",name:"API Gateway",desc:"Auth, routing, rate limiting",c:"#34D399"},
-      {icon:"🔬",name:"Service A–N",desc:"Each with own app + DB tier",c:"#34D399"},
-    ],
-    qaStrong:["Team Autonomy","Independent Scaling","Technology Choice","Fault Isolation"],
-    qaWeak:["Operational Complexity","Distributed Tracing","Network Overhead","Data Consistency"],
-    examples:["Netflix (~700 services)","Amazon","Uber","Spotify","Airbnb"],
-    obsoleteNote:null,
-    whyNote:"Microservices is a team scaling solution, not a technology solution. The tiers multiply — each service brings its own stack.",
-  },
+{era:"web1",year:"1993",side:"r",icon:"⚙️",title:"CGI Scripts",sub:"Common Gateway Interface — first dynamic web",st:[["Largely Obsolete","s-obsolete"]],born:"1993",obs:"~2005",
+prob:"เว็บไซต์ static ทำได้แค่แสดงข้อมูลที่เขียนไว้ล่วงหน้า\nธนาคารต้องการแสดงยอดเงินของลูกค้าแต่ละคน\nร้านค้าต้องการแสดงสินค้าจาก database แบบ real-time\n→ จะสร้าง HTML แบบ dynamic ที่ดึงข้อมูลจาก database มาแสดงได้อย่างไร?",
+desc:"The web server spawns a new OS process for every HTTP request, running a script (Perl, Shell, C) that outputs HTML to stdout. Revolutionary: web pages could now query databases and show dynamic content.",
+lay:[["🌐","Browser","Sends HTTP request","#9B3A1A"],["🔧","Web Server + CGI","Spawns new OS process per request","#9B3A1A"],["🗄️","Database","MySQL / flat file","#9B3A1A"]],
+pos:["First Dynamic Web","Language Agnostic","Pioneering"],neg:["1 OS process per request = slow","No Scalability","Security Risks"],
+ex:["Perl CGI scripts","Early web forms","Guest books","Amazon's first checkout (Perl)"],
+gone:"Replaced by persistent processes (PHP mod_apache, Java Servlets). Spawning 1000 OS processes/second kills the server."},
 
-  // ─── CLOUD / SERVERLESS ───
-  {
-    era:"cloud", year:"2014–2016", side:"left",
-    icon:"⚡", title:"Serverless / FaaS",
-    subtitle:"No persistent app tier · Functions run per request · AWS Lambda",
-    status:[{t:"Growing",c:"s-modern"}],
-    born:"2014 (hook.io) · 2014 (AWS Lambda)", obsolete:null,
-    desc:"AWS Lambda (2014) eliminated the application server tier entirely. Instead of running a persistent process, you define a function that spins up per request and costs nothing when idle. The tier model collapses: client → function → managed data service. No servers to provision, patch, or scale.",
-    layers:[
-      {icon:"🌐",name:"Client",desc:"SPA / Mobile",c:"#E879F9"},
-      {icon:"⚡",name:"Lambda Function",desc:"Stateless — spins up per request",c:"#E879F9"},
-      {icon:"☁️",name:"BaaS",desc:"DynamoDB / S3 / Cognito — managed services",c:"#E879F9"},
-    ],
-    qaStrong:["Zero Server Ops","Pay per Request","Auto-scaling","Cost at Low Traffic"],
-    qaWeak:["Cold Start Latency","Vendor Lock-in","15-min Max Runtime","Local Dev"],
-    examples:["AWS Lambda (2014)","Google Cloud Functions (2016)","Netlify Functions","Vercel Functions"],
-    obsoleteNote:null,
-    whyNote:"Serverless doesn't eliminate tiers — it abstracts them. The 'application tier' still exists, you just don't manage it.",
-  },
-  {
-    era:"modern", year:"2016", side:"right",
-    icon:"🔄", title:"SSR Revival — Next.js / Nuxt",
-    subtitle:"Universal rendering · Server + Client in one framework",
-    status:[{t:"Mainstream",c:"s-modern"}],
-    born:"2016", obsolete:null,
-    desc:"Next.js (2016) reunited the SSR and SPA camps. The same React components render on the server for first load (SEO, performance) then hydrate to a full SPA on the client. This is the spiritual successor to Java Servlet SSR — but with JavaScript and React. The server renders HTML, the browser takes over.",
-    layers:[
-      {icon:"🌐",name:"Browser",desc:"Receives SSR HTML → hydrates to React SPA",c:"#F0ABFC"},
-      {icon:"🔄",name:"Next.js Server",desc:"getServerSideProps / Server Components",c:"#F0ABFC"},
-      {icon:"🗄️",name:"Database",desc:"Prisma / Drizzle — accessed server-side",c:"#F0ABFC"},
-    ],
-    qaStrong:["SEO","First Paint Speed","Full-stack in JS","DX"],
-    qaWeak:["Hydration Complexity","Cache Strategy","Always-on Server"],
-    examples:["Next.js (Vercel)","Nuxt.js (Vue)","SvelteKit","Remix","Astro"],
-    obsoleteNote:null,
-    whyNote:"Next.js App Router (2023) with React Server Components is the most significant SSR evolution since Java Servlets. The wheel has turned full circle — server rendering is back.",
-  },
-  {
-    era:"modern", year:"2017", side:"left",
-    icon:"📱", title:"Progressive Web App (PWA)",
-    subtitle:"Web app with offline + install + push notifications",
-    status:[{t:"Active",c:"s-active"}],
-    born:"2015 (spec) · 2017 (mainstream)", obsolete:null,
-    desc:"Google popularized PWA (2015). Service Workers enable offline caching — the browser becomes a thick client for web apps. Add to Home Screen makes web apps installable without the App Store. Twitter Lite (2017) reduced data usage by 70% with PWA. The architecture adds an offline-capable layer between browser and server.",
-    layers:[
-      {icon:"📱",name:"PWA (Browser)",desc:"Service Worker caches assets + data",c:"#34D399"},
-      {icon:"☁️",name:"CDN + API",desc:"Static shell + dynamic API",c:"#34D399"},
-      {icon:"🗄️",name:"Database",desc:"Server-side data store",c:"#34D399"},
-    ],
-    qaStrong:["Offline","No App Store","Cross-platform","Installable"],
-    qaWeak:["iOS PWA Limitations","Complex Caching","Push (iOS restrictions)"],
-    examples:["Twitter Lite","Starbucks PWA","Pinterest PWA","Uber Lite"],
-    obsoleteNote:null,
-    whyNote:"PWA is the web's answer to native mobile. Service Worker is the architectural innovation — it inserts a programmable proxy layer between the page and network.",
-  },
+{era:"web1",year:"1994",side:"l",icon:"🐘",title:"PHP / Server-Side HTML Templates",sub:"Scripted HTML generation · mod_php · 2.5-tier",st:[["Still Very Active","s-active"],["Powers 77% of Web","s-modern"]],born:"1994",obs:null,
+prob:"CGI สร้าง OS Process ใหม่ทุก request — เปลือง CPU และ memory มาก\nเว็บไซต์ที่มี traffic สูงพังเพราะ server รับ process ไม่ไหว\nยิ่งไปกว่านั้น Perl/C ยากเกินไปสำหรับ web developer ทั่วไป\n→ จะทำ dynamic web ให้เร็วขึ้น และให้ developer ทั่วไปเขียนได้ง่าย?",
+desc:"Rasmus Lerdorf's PHP (1994) embedded code directly in HTML. Ran as Apache module (mod_php) — no new process per request. PHP, ASP (1996), and ColdFusion made dynamic web accessible to millions.",
+lay:[["🌐","Browser","Receives complete rendered HTML","#8B5CF6"],["🐘","PHP/ASP/ColdFusion","Template renders HTML — Apache module","#8B5CF6"],["🗄️","MySQL","Relational DB queried per request","#8B5CF6"]],
+pos:["Easy to Learn","Good SEO","Fast First Paint","Huge Ecosystem"],neg:["Logic + HTML Mixed","Hard to Test","Messy at Large Scale"],
+ex:["WordPress","Drupal","Joomla","Facebook (early)","Wikipedia","Laravel","Symfony"],
+why:"PHP powers 77% of all websites. WordPress alone is 43% of the web. Far from dead — Laravel is modern and excellent."},
 
-  // ─── EDGE ERA ───
-  {
-    era:"edge", year:"2017", side:"right",
-    icon:"🌍", title:"Edge Computing — Cloudflare Workers",
-    subtitle:"Application logic runs at the network edge globally",
-    status:[{t:"Emerging → Mainstream",c:"s-emerging"}],
-    born:"2017", obsolete:null,
-    desc:"Cloudflare Workers (2017) moved JavaScript execution to Cloudflare's 300+ global PoPs. Unlike CDN (which only caches), edge workers run application logic near the user. A database query from Bangkok doesn't route to us-east-1 — the edge worker handles auth, routing, and light compute at the nearest node.",
-    layers:[
-      {icon:"🌐",name:"Browser",desc:"Sends request",c:"#6EE7B7"},
-      {icon:"🌍",name:"Edge Worker",desc:"300+ PoPs — runs auth, routing, A/B, API",c:"#6EE7B7"},
-      {icon:"🗄️",name:"Origin Database",desc:"Central — only for writes and complex reads",c:"#6EE7B7"},
-    ],
-    qaStrong:["Sub-20ms Global","Zero Cold Starts","No Server Provisioning","DDoS Resistance"],
-    qaWeak:["CPU Time Limits","No Long Computation","New Mental Model","Limited DB Access"],
-    examples:["Cloudflare Workers (2017)","Vercel Edge Runtime","Deno Deploy","Netlify Edge","Fastly Compute"],
-    obsoleteNote:null,
-    whyNote:"Edge computing is the next tier evolution. The application tier is no longer in a datacenter — it's everywhere simultaneously.",
-  },
-  {
-    era:"edge", year:"2020", side:"left",
-    icon:"🟢", title:"BaaS — Backend as a Service",
-    subtitle:"Managed backend tiers · Supabase · Firebase · Amplify",
-    status:[{t:"Mainstream for SMBs",c:"s-modern"}],
-    born:"~2011 (Parse/Firebase) · 2020 (Supabase)", obsolete:null,
-    desc:"BaaS eliminates the custom backend tier. Supabase and Firebase provide auth, realtime database, storage, and edge functions as fully managed services. The client connects directly (with RLS security policies). For many apps, there is no custom application server tier — just a client and managed services.",
-    layers:[
-      {icon:"🌐",name:"Client (SPA/Mobile)",desc:"Direct API calls with auth token",c:"#86EFAC"},
-      {icon:"☁️",name:"BaaS Platform",desc:"Auth + DB + Storage + Edge Functions",c:"#86EFAC"},
-    ],
-    qaStrong:["Zero Backend Code","Built-in Auth","Realtime","Fast MVP"],
-    qaWeak:["Vendor Lock-in","Custom Logic Limits","Cost at Scale","Compliance"],
-    examples:["Firebase (Google)","Supabase","AWS Amplify","PocketBase","Appwrite","Nhost"],
-    obsoleteNote:null,
-    whyNote:"BaaS is the end point of the thin application tier journey — the tier disappears entirely, replaced by managed services.",
-  },
-  {
-    era:"edge", year:"2023", side:"right",
-    icon:"🤖", title:"AI Inference Tier",
-    subtitle:"Dedicated ML inference layer between app and data tiers",
-    status:[{t:"Emerging",c:"s-emerging"}],
-    born:"2023", obsolete:null,
-    desc:"LLMs and ML models are too compute-intensive to run in the application tier. A new dedicated inference tier has emerged — GPU clusters (or edge inference) between the application logic and the data layer. RAG architecture adds a vector database as an additional data tier. Architecturally, AI has added new tiers to N-tier systems.",
-    layers:[
-      {icon:"🌐",name:"Client",desc:"Browser / App — streaming SSE responses",c:"#F472B6"},
-      {icon:"⚙️",name:"App Tier",desc:"Orchestration — LangChain / LlamaIndex",c:"#F472B6"},
-      {icon:"🤖",name:"Inference Tier",desc:"GPU cluster — OpenAI / Anthropic / local LLM",c:"#F472B6"},
-      {icon:"🔍",name:"Vector DB Tier",desc:"Pinecone / pgvector — RAG retrieval",c:"#F472B6"},
-      {icon:"🗄️",name:"Data Tier",desc:"Primary database",c:"#F472B6"},
-    ],
-    qaStrong:["AI Capabilities","RAG Accuracy","Specialized Scaling","Modality Support"],
-    qaWeak:["Cost","Latency","Non-determinism","New Failure Modes"],
-    examples:["ChatGPT architecture","Perplexity AI","GitHub Copilot","Cursor","Any RAG system"],
-    obsoleteNote:null,
-    whyNote:"AI adds new tiers. Any system integrating LLMs needs to think about inference tier isolation, cost control, and the new failure mode of non-deterministic responses.",
-  },
+{era:"web1",year:"1997",side:"r",icon:"☕",title:"Java Servlet / JSP",sub:"Typed SSR · HttpServletRequest/Response · 3-tier",st:[["Legacy","s-legacy"],["Still Enterprise Standard","s-active"]],born:"1997",obs:null,java:true,
+prob:"PHP ยืดหยุ่น แต่ขาด type safety และผสม HTML กับ logic ปะปนกัน\nองค์กรขนาดใหญ่ (ธนาคาร, ประกัน, airline) ต้องการ:\n  — Compile-time type checking เพื่อ catch bug ก่อน production\n  — Thread pool แทนการ spawn process ใหม่ทุก request\n  — Object lifecycle ที่ reuse ข้าม request ได้\n→ จะสร้าง enterprise-grade web server ที่ type-safe และ scale ได้จริง?",
+desc:"Java Servlet API (1997) brought object-oriented, compiled server-side web development. Unlike PHP/CGI, servlets are persistent objects — one instance handles thousands of requests in a thread pool. JSP (1999) added HTML templates with embedded Java.",
+lay:[["🌐","Browser","Pure HTML response — no client logic","#C17F24"],["☕","Servlet Container","Tomcat/JBoss — HttpServlet.doGet()","#C17F24"],["🔗","JDBC Layer","Connection pool — PreparedStatement","#C17F24"],["🗄️","Oracle/MySQL","Relational DB — true 3-tier","#C17F24"]],
+pos:["Type Safety","Thread Pool Efficiency","Enterprise Integration","Object Reuse"],neg:["Verbose Boilerplate","Complex WAR Deployment","Full Page Reload"],
+ex:["Apache Tomcat","JBoss","WebLogic","Early Amazon","Early eBay","Spring MVC + Thymeleaf (modern heir)"],
+why:"Direct ancestor of Spring MVC, Jakarta EE, and Thymeleaf. Every Spring Boot app with a view layer descends from this."},
+
+{era:"web1",year:"2000",side:"l",icon:"🗂️",title:"MVC Frameworks — Struts / Spring MVC",sub:"Pattern layering over Servlet · Clear separation of concerns",st:[["Legacy","s-legacy"],["Spring MVC still dominant","s-active"]],born:"2000",obs:null,
+prob:"Servlet และ JSP ทำงานได้ แต่ทีม 20+ คนทำงานใน codebase เดียว\nไม่มีกฎบังคับว่า business logic ต้องอยู่ที่ไหน\n→ SQL queries ปะปนอยู่ใน JSP\n→ Business logic หลุดเข้าไปใน Controller\n→ จะบังคับโครงสร้างให้ทีมใหญ่เขียน web app อย่าง testable\nและดูแลรักษาได้ในระยะยาวได้อย่างไร?",
+desc:"Apache Struts (2000) and Spring MVC (2002) imposed the MVC pattern on Java Servlets. Set the pattern every web framework since has followed. Rails, Django, Laravel — all implement MVC or close variants.",
+lay:[["🌐","Browser","Receives full HTML — thin client","#22C55E"],["🎮","Controller","@GetMapping — handles HTTP, calls Service","#22C55E"],["⚙️","Service Layer","Business logic — @Service components","#22C55E"],["📁","Repository","JPA/JDBC — database access","#22C55E"],["🗄️","Database","Oracle / PostgreSQL","#22C55E"]],
+pos:["Testability","Separation of Concerns","Enterprise Scale","Team Maintainability"],neg:["XML Config Hell (Struts)","Boilerplate","Slow Startup","Heavy Deployment"],
+ex:["Apache Struts (2000)","Spring MVC (2003)","Ruby on Rails (2004)","Django (2005)","Thymeleaf (2011)"],
+why:"Rails (2004) showed MVC could be elegant. Spring MVC is still the Java enterprise standard today."},
+
+{era:"web2",year:"2005",side:"r",icon:"✨",title:"Ajax & Web 2.0",sub:"XMLHttpRequest — partial page updates without reload",st:[["Still Fundamental","s-active"]],born:"2005",obs:null,
+prob:"Web 1.0: ทุก action ของ user ต้องโหลด page ใหม่ทั้งหน้า\n  — กด 'like' รูปภาพ → รอ 2 วินาที → page reload ทั้งหมด\n  — Google Maps ยุคแรก: เลื่อนแผนที่ → โหลดใหม่ทั้งหน้า\nWeb app รู้สึกช้าและน่าหงุดหงิดเทียบกับ desktop app\n→ จะทำให้ web app ตอบสนองแบบ real-time โดยไม่ต้อง reload page?",
+desc:"Jesse James Garrett coined 'Ajax' in 2005. XMLHttpRequest allowed browsers to fetch data from the server without reloading the page. Google Maps (2005) and Gmail demonstrated web apps could feel like desktop apps.",
+lay:[["🌐","Browser + JS","XHR/fetch for partial updates — DOM manipulation","#F59E0B"],["⚙️","App Server","Serves HTML pages + JSON API endpoints","#F59E0B"],["🗄️","Database","Standard relational DB","#F59E0B"]],
+pos:["Instant Feedback UX","Partial Updates","No Full Page Reload"],neg:["SEO Issues (JS not indexed)","Back Button Problems","Added Complexity"],
+ex:["Google Maps (2005)","Gmail (2004)","jQuery (2006)","Prototype.js"],
+why:"Ajax birthed Web 2.0. jQuery made it accessible to millions. The bridge between classic SSR and modern SPA."},
+
+{era:"web2",year:"2006",side:"l",icon:"☁️",title:"Cloud Infrastructure — AWS IaaS",sub:"Virtualized server tier · Pay-per-use infrastructure",st:[["Dominant","s-modern"]],born:"2006",obs:null,
+prob:"Startup อยากเปิดตัวเว็บไซต์ → ต้องซื้อ server ล่วงหน้า $50,000+\nสั่ง server → รอ 3 เดือนส่งของ → ติดตั้ง → configure → deploy\nถ้า traffic ไม่มาตามที่คาด = เงินจมกับ hardware ที่ไม่ได้ใช้\nถ้า traffic มากกว่าที่คาด = server พังและต้องรออีก 3 เดือน\n→ จะให้ startup เริ่มต้นได้ทันทีและจ่ายเฉพาะที่ใช้จริงได้อย่างไร?",
+desc:"Amazon Web Services launched S3 (March 2006) and EC2 (August 2006), inventing Infrastructure-as-a-Service. For the first time, companies could rent compute instead of buying servers.",
+lay:[["🌐","Browser","Same thin client","#FB923C"],["⚙️","EC2 Instances","App servers — virtual, auto-scaled","#FB923C"],["🗄️","RDS / S3","Managed data tier — no hardware to own","#FB923C"]],
+pos:["Elastic Scaling","No Upfront Hardware Cost","Global Regions","Managed Services"],neg:["Vendor Lock-in","Cost Management","Security Shared Responsibility"],
+ex:["AWS (2006)","S3 + EC2","GCP (2008)","Azure (2010)","Dropbox (built on S3)"],
+why:"AWS changed what 'server tier' means. You no longer own hardware. Every modern architecture assumes cloud infrastructure."},
+
+{era:"web2",year:"2008",side:"r",icon:"🚀",title:"CDN as Architectural Tier",sub:"Edge caching — static assets distributed globally",st:[["Essential for Production","s-modern"]],born:"2008 (mainstream)",obs:null,
+prob:"เว็บไซต์ host อยู่ที่ Virginia, USA\nผู้ใช้จาก Tokyo ต้องดาวน์โหลด JS/CSS/รูปภาพข้ามมหาสมุทรทุก page load (~150ms)\nทุก user ทุก session โหลด assets ชุดเดิมซ้ำจาก origin server\nยิ่ง traffic สูง origin server ยิ่งแบก load มากขึ้นเรื่อยๆ\n→ จะลด latency สำหรับ user ทั่วโลกและลด load ที่ origin server ได้อย่างไร?",
+desc:"Cloudflare (2009) and CloudFront (2008) made CDN accessible to everyone. Static assets cached at 200+ edge nodes globally. The app server only handles dynamic requests.",
+lay:[["🌐","Browser","Gets assets from nearest edge node","#A78BFA"],["🚀","CDN Edge","CloudFront / Cloudflare — 200+ PoPs","#A78BFA"],["⚙️","Origin App Server","Dynamic requests only — much less load","#A78BFA"],["🗄️","Database","Only hit for dynamic content","#A78BFA"]],
+pos:["Global Low Latency","Reduces Origin Load","DDoS Mitigation","Cost Efficient"],neg:["Cache Invalidation Hard","Stale Content Risk","Config Complexity"],
+ex:["CloudFront (2008)","Cloudflare (2009)","Fastly (2011)","Akamai (1998)"],
+why:"Every modern production web app uses a CDN. Not using one in 2024 for a public product is a QA failure."},
+
+{era:"modern",year:"2009",side:"l",icon:"🟩",title:"Node.js — JavaScript on the Server",sub:"Event-loop · Non-blocking I/O · Full-stack JS",st:[["Mainstream","s-modern"]],born:"2009",obs:null,
+prob:"1. Backend (Java/Python/Ruby) และ Frontend (JS) คือสองโลกที่แยกกัน\n   Developer ต้องเรียนสองภาษา สอง ecosystem สำหรับงานชิ้นเดียว\n2. Apache thread model: ทุก connection กิน 1 thread\n   Server ที่ handle 10,000 connections พร้อมกันต้องการ RAM มหาศาล\n→ จะทำ high-concurrency server ที่ใช้ JavaScript ได้\nให้ทีมเล็กทำ full-stack ได้คนเดียวได้อย่างไร?",
+desc:"Ryan Dahl's Node.js (2009) ran JavaScript on the server using Chrome's V8 engine. Non-blocking I/O made it ideal for high-concurrency I/O-bound workloads. Enabled isomorphic/universal rendering later.",
+lay:[["🌐","Browser (JS)","Client-side JavaScript","#84CC16"],["🟩","Node.js Server","Same language — Express/Fastify API","#84CC16"],["🗄️","MongoDB / Postgres","Data tier","#84CC16"]],
+pos:["Shared Language (JS everywhere)","High Concurrency","NPM Ecosystem","JSON Native"],neg:["CPU-Intensive Tasks Block","Callback Hell (pre-async/await)"],
+ex:["Express.js","LinkedIn (early backend)","Netflix","Uber (early)","Socket.io"],
+why:"Node.js enabled the MEAN/MERN stack and made full-stack JavaScript mainstream. Next.js, Nuxt all run on Node."},
+
+{era:"modern",year:"2010",side:"r",icon:"📱",title:"Mobile App + Backend",sub:"Native thick client · REST API · Mobile-first architecture",st:[["Dominant","s-modern"]],born:"2010",obs:null,
+prob:"iPhone (2007) เปลี่ยนโลก แต่เว็บไซต์ถูกออกแบบสำหรับหน้าจอใหญ่\n  — หน้าจอ 3.5 นิ้ว + touchscreen + bandwidth จำกัด\n  — Web app บน mobile: ช้า, ไม่ smooth, ไม่มี push notification\n  — ไม่ทำงาน offline, ไม่เข้าถึง GPS/camera/contacts ได้\n→ จะสร้าง UX ที่ดีบนมือถือได้อย่างไร ในขณะที่ใช้ backend เดิมร่วมกับ web?",
+desc:"The iPhone (2007) and Android (2008) created a new client tier. Native mobile apps were thick clients again — compiled, with local storage, offline capability — but talking to REST APIs over the internet.",
+lay:[["📱","Native Mobile App","iOS/Android — local storage, offline capable","#F97316"],["🔧","REST API","JSON over HTTPS — mobile-optimized endpoints","#F97316"],["🗄️","Cloud Database","AWS RDS / MongoDB Atlas","#F97316"]],
+pos:["Offline Capable","Native Performance","Push Notifications","Hardware Access (GPS/Camera)"],neg:["App Store Review Delays","Two Codebases (iOS+Android)","Update Distribution"],
+ex:["Instagram (2010)","WhatsApp (2009)","Uber (2009)","Twitter iOS"],
+why:"Mobile forced the separation of API from UI rendering. This is why REST APIs became the standard."},
+
+{era:"modern",year:"2013",side:"l",icon:"⚛️",title:"SPA — Single Page Application",sub:"Thick browser client · JSON API backend · Client-side routing",st:[["Mainstream","s-modern"]],born:"2013",obs:null,
+prob:"แม้จะมี Ajax แต่ server ยังต้อง render HTML ทุกครั้งที่เปลี่ยนหน้า\nทุก navigation = round-trip ไป server → server render → ส่ง HTML กลับ\nทำไมต้องให้ server ทำงาน render ในเมื่อ browser สมัยใหม่ทรงพลังมาก?\nยิ่งไปกว่านั้น mobile web ต้องการ UX เหมือน native app\n→ จะย้าย rendering ทั้งหมดไปที่ browser\nให้ server ส่งแค่ JSON data ได้อย่างไร?",
+desc:"AngularJS (2010), Backbone.js, and React (2013) shifted rendering entirely to the browser. The server now serves only JSON — no HTML. Created the 'Rich Client + API' architecture.",
+lay:[["⚛️","SPA (Browser)","React/Vue/Angular — full rendering in browser","#38BDF8"],["🔧","REST/GraphQL API","JSON only — no HTML generation","#38BDF8"],["🗄️","Database","PostgreSQL / MongoDB","#38BDF8"]],
+pos:["Rich Interactivity","Native-like UX","Independent Frontend/Backend Deploy"],neg:["Initial Load Slow (big JS bundle)","SEO Requires Fix","Client-side State Complexity"],
+ex:["Gmail (Angular)","Facebook (React)","Airbnb","Netflix (React)","GitHub"],
+why:"SPA shifted rendering back to the client. The browser became a runtime, not a renderer."},
+
+{era:"modern",year:"2015",side:"r",icon:"🔬",title:"Microservices Architecture",sub:"Per-service tier stacks · API gateway · Independent deployment",st:[["Enterprise Standard","s-modern"]],born:"2015 (mainstream)",obs:null,
+prob:"Netflix (2012): วิศวกร 800+ คน ทำงานใน monolith เดียวกัน\n  — ทุก deploy ต้องรอทุกทีม → สัปดาห์ละครั้งเท่านั้น\n  — Bug จาก feature อื่นพัง feature ของเรา\n  — Video streaming ต้อง scale พร้อมกับ user profile ทั้งที่ traffic ต่างกันมาก\n→ จะให้ทีม 800+ คน deploy อิสระต่อกันได้\nและ scale แต่ละ feature แยกกันได้อย่างไร?",
+desc:"Martin Fowler and James Lewis formalized 'microservices' in 2014 after Netflix, Amazon, and Uber had been practicing it. Each business capability becomes its own independently deployable service.",
+lay:[["🌐","Client","Browser / Mobile","#34D399"],["🚪","API Gateway","Auth, routing, rate limiting","#34D399"],["🔬","Service A–N","Each with own app + DB tier","#34D399"]],
+pos:["Team Autonomy","Independent Scaling","Technology Choice per Service","Fault Isolation"],neg:["Ops Complexity","Distributed Tracing Hard","Network Overhead","Data Consistency"],
+ex:["Netflix (~700 services)","Amazon","Uber","Spotify","Airbnb"],
+why:"Microservices is a team scaling solution. If you have < 50 engineers, you almost certainly don't need it."},
+
+{era:"cloud",year:"2014",side:"l",icon:"⚡",title:"Serverless / FaaS",sub:"No persistent app tier · Functions run per request · AWS Lambda",st:[["Growing","s-modern"]],born:"2014 (AWS Lambda)",obs:null,
+prob:"Microservices แก้ปัญหาทีมได้ แต่ยังต้องดูแล server ตลอด 24/7:\n  — จ่ายค่า EC2 instance ที่รัน idle อยู่ตลอดเวลา\n  — Patch OS, update security, monitor, configure auto-scale\n  — Weekend side project: จ่าย $50/เดือน ทั้งที่มีคนใช้แค่ 10 นาที\n→ จะกำจัด server management ออกไปทั้งหมด\nและจ่ายเฉพาะตอนที่ code รันจริงๆ ได้อย่างไร?",
+desc:"AWS Lambda (2014) eliminated the application server tier entirely. Instead of running a persistent process, you define a function that spins up per request and costs nothing when idle.",
+lay:[["🌐","Client","SPA / Mobile","#E879F9"],["⚡","Lambda Function","Stateless — spins up per request, $0 idle","#E879F9"],["☁️","BaaS","DynamoDB / S3 / Cognito — managed services","#E879F9"]],
+pos:["Zero Server Ops","Pay per Execution","Perfect Auto-scaling","Zero Cost When Idle"],neg:["Cold Start Latency","Vendor Lock-in","15-min Max Runtime","Local Dev Harder"],
+ex:["AWS Lambda (2014)","Google Cloud Functions (2016)","Netlify Functions","Vercel Functions"],
+why:"Serverless doesn't eliminate tiers — it abstracts them. The 'application tier' still exists, you just don't manage it."},
+
+{era:"modern",year:"2016",side:"r",icon:"🔄",title:"SSR Revival — Next.js / Nuxt",sub:"Universal rendering · Server + Client in one framework",st:[["Mainstream","s-modern"]],born:"2016",obs:null,
+prob:"SPA มีสองปัญหาที่ client-side rendering แก้ไม่ได้:\n1. SEO: Google Crawler เห็นแค่ <div id='root'></div> ว่างเปล่า\n   ไม่มี content → rank ใน Google ไม่ได้ → e-commerce ตาย\n2. First Paint ช้า: user ต้องรอ download JS bundle 500KB–2MB\n   ก่อนถึงจะเห็นอะไร → bounce rate สูง\n→ จะได้ทั้ง SEO ของ SSR และ interactivity ของ SPA ในเวลาเดียวกัน?",
+desc:"Next.js (2016) reunited the SSR and SPA camps. The same React components render on the server for first load then hydrate to a full SPA on the client. The spiritual successor to Java Servlet SSR.",
+lay:[["🌐","Browser","Receives SSR HTML → hydrates to React SPA","#F0ABFC"],["🔄","Next.js Server","getServerSideProps / Server Components","#F0ABFC"],["🗄️","Database","Prisma / Drizzle — accessed server-side","#F0ABFC"]],
+pos:["SEO","Fast First Paint","Full-stack in JS","Best of SSR + SPA"],neg:["Hydration Complexity","Cache Strategy Hard","Always-on Server Cost"],
+ex:["Next.js (Vercel)","Nuxt.js (Vue)","SvelteKit","Remix","Astro"],
+why:"Next.js App Router (2023) with React Server Components is the most significant SSR evolution since Java Servlets."},
+
+{era:"modern",year:"2017",side:"l",icon:"📱",title:"Progressive Web App (PWA)",sub:"Offline-capable web · Service Worker · Installable",st:[["Active","s-active"]],born:"2015 (spec) · 2017 (mainstream)",obs:null,
+prob:"ผู้ใช้ใน Emerging Markets (India, SEA, Africa):\n  — ใช้ data plan แบบจำกัด (100MB/วัน)\n  — internet ขาดหายบ่อย\n  — storage ไม่พอลง native app 50MB+\nTwitter ใน India: user ไม่ยอม download Twitter app ขนาดใหญ่\n→ จะทำ web app ให้ทำงาน offline ได้, ติดตั้งบน home screen ได้\nกิน data น้อย และไม่ต้องผ่าน App Store ได้อย่างไร?",
+desc:"Google popularized PWA (2015). Service Workers enable offline caching — the browser becomes a thick client. Twitter Lite (2017) reduced data usage by 70% with PWA. Add to Home Screen makes web apps installable.",
+lay:[["📱","PWA (Browser)","Service Worker caches assets + data offline","#34D399"],["☁️","CDN + API","Static shell + dynamic API","#34D399"],["🗄️","Database","Server-side data store","#34D399"]],
+pos:["Offline Capable","No App Store","Cross-platform","Installable","Low Data Usage"],neg:["iOS PWA Limitations","Complex Cache Strategy","Limited Push on iOS"],
+ex:["Twitter Lite","Starbucks PWA","Pinterest PWA","Uber Lite"],
+why:"PWA is the web's answer to native mobile. Service Worker inserts a programmable proxy between the page and network."},
+
+{era:"edge",year:"2017",side:"r",icon:"🌍",title:"Edge Computing — Cloudflare Workers",sub:"Application logic at the network edge globally",st:[["Emerging → Mainstream","s-emerging"]],born:"2017",obs:null,
+prob:"Cloud แก้ปัญหา hardware แต่ datacenter ยังอยู่แค่ 20–30 แห่งทั่วโลก\nUser ใน Bangkok request → CDN miss → ต้องวิ่งไป us-east-1 Virginia\nAuth logic, A/B testing, geo-routing ต้อง execute ที่ origin เสมอ\nCDN แค่ cache static file ไม่สามารถ run logic ได้\n→ จะ execute application logic ใกล้ user ที่สุดใน 300+ locations ได้อย่างไร\nโดยไม่ต้องตั้ง datacenter เอง?",
+desc:"Cloudflare Workers (2017) moved JavaScript execution to Cloudflare's 300+ global PoPs. Unlike CDN (which only caches), edge workers run application logic near the user.",
+lay:[["🌐","Browser","Sends request","#6EE7B7"],["🌍","Edge Worker","300+ PoPs — runs auth, routing, A/B, API","#6EE7B7"],["🗄️","Origin Database","Central — only for writes and complex reads","#6EE7B7"]],
+pos:["Sub-20ms Global Latency","Zero Cold Starts","DDoS Resistance","No Server Provisioning"],neg:["CPU Time Limits","No Long Computation","New Mental Model","Limited DB Access Patterns"],
+ex:["Cloudflare Workers (2017)","Vercel Edge Runtime","Deno Deploy","Netlify Edge Functions"],
+why:"Edge computing is the next tier evolution. The application tier is no longer in a datacenter — it's everywhere simultaneously."},
+
+{era:"edge",year:"2020",side:"l",icon:"🟢",title:"BaaS — Backend as a Service",sub:"Managed backend tiers · Supabase · Firebase",st:[["Mainstream for SMBs","s-modern"]],born:"~2011 (Parse/Firebase) · 2020 (Supabase)",obs:null,
+prob:"ทุก app ต้องสร้างสิ่งเดิมซ้ำๆ ทุกครั้ง:\n  → Auth (login, JWT token, password reset, OAuth)\n  → File storage (upload, resize, CDN delivery)\n  → Real-time sync, Email verification, Row-level security\nDeveloper เสียเวลา 2–4 สัปดาห์กับ 'plumbing' ก่อนจะเริ่ม business feature\n→ จะกำจัด undifferentiated backend work ออกไปทั้งหมดได้อย่างไร?",
+desc:"BaaS eliminates the custom backend tier. Supabase and Firebase provide auth, realtime database, storage, and edge functions as fully managed services.",
+lay:[["🌐","Client (SPA/Mobile)","Direct API calls with auth token","#86EFAC"],["☁️","BaaS Platform","Auth + DB + Storage + Edge Functions","#86EFAC"]],
+pos:["Zero Backend Code","Built-in Auth","Real-time Out of Box","Fastest MVP Time"],neg:["Vendor Lock-in","Custom Logic Limits","Cost at Scale","Compliance Concerns"],
+ex:["Firebase (Google)","Supabase","AWS Amplify","PocketBase","Appwrite","Nhost"],
+why:"BaaS is the endpoint of the thin application tier journey — the tier disappears, replaced by managed services."},
+
+{era:"edge",year:"2023",side:"r",icon:"🤖",title:"AI Inference Tier",sub:"Dedicated ML inference layer · RAG · Non-deterministic tier",st:[["Emerging","s-emerging"]],born:"2023",obs:null,
+prob:"LLM อย่าง GPT-4 ต้องการ GPU A100 หลายสิบตัวเพื่อรัน inference\nไม่สามารถใส่ไว้ใน application tier ปกติได้เลย\nRAG systems ต้องการ vector similarity search ก่อนส่งไป LLM\nการตอบกลับแบบ streaming ต้องการ SSE connection พิเศษ\n'Correctness' กลายเป็น probabilistic ไม่ใช่ deterministic\n→ architecture แบบเดิมรองรับ AI component ไม่ได้\nจะออกแบบ tier ใหม่สำหรับ LLM อย่างไร?",
+desc:"LLMs are too compute-intensive to run in the application tier. A new dedicated inference tier has emerged — GPU clusters between the application logic and the data layer. RAG architecture adds a vector database as an additional data tier.",
+lay:[["🌐","Client","Browser / App — streaming SSE responses","#F472B6"],["⚙️","App Tier","Orchestration — LangChain / LlamaIndex","#F472B6"],["🤖","Inference Tier","GPU cluster — OpenAI / Anthropic / local LLM","#F472B6"],["🔍","Vector DB Tier","Pinecone / pgvector — RAG retrieval","#F472B6"],["🗄️","Data Tier","Primary database","#F472B6"]],
+pos:["AI Capabilities","RAG Accuracy","Specialized GPU Scaling","Streaming Responses"],neg:["High Cost","Latency","Non-determinism","Hallucination Risk"],
+ex:["ChatGPT architecture","Perplexity AI","GitHub Copilot","Cursor","Any RAG system"],
+why:"AI adds new tiers. Any system integrating LLMs needs to think about inference tier isolation, cost control, and non-deterministic failure modes."},
 ];
 
-const ERA_NAMES = {
-  mainframe:"Mainframe Era · 1960s–70s",
-  pc:"Personal Computer Era · 1980s",
-  clientserver:"Client-Server Era · 1983–1995",
-  web1:"Web 1.0 Era · 1991–2004",
-  web2:"Web 2.0 Era · 2004–2012",
-  cloud:"Cloud Era · 2006–2016",
-  modern:"Modern Era · 2013–Present",
-  edge:"Edge & AI Era · 2017–Present",
-};
-
-function renderTimeline(filter){
-  const container = document.getElementById("timeline-content");
-  container.innerHTML = "";
-  let lastEra = null;
-  let itemIdx = 0;
-
-  HISTORY.forEach((item, i) => {
-    // Era header
-    if(item.era !== lastEra){
-      const eraDiv = document.createElement("div");
-      eraDiv.className = "era-header" + (filter!=="all"&&item.era!==filter?" hidden":"");
-      eraDiv.dataset.era = item.era;
-      eraDiv.innerHTML = `<div class="era-header-inner">${ERA_NAMES[item.era]||item.era}</div>`;
-      container.appendChild(eraDiv);
-      lastEra = item.era;
+function render(filter){
+  const c=document.getElementById("tl");c.innerHTML="";
+  let lastEra=null,idx=0;
+  H.forEach(item=>{
+    const vis=filter==="all"||item.era===filter;
+    if(item.era!==lastEra){
+      const d=document.createElement("div");
+      d.className="era-header"+(vis?"":" hidden");
+      d.innerHTML='<div class="era-header-inner">'+EN[item.era]+'</div>';
+      c.appendChild(d);lastEra=item.era;
     }
-
-    // Year marker
-    const ym = document.createElement("div");
-    ym.className = "year-marker" + (filter!=="all"&&item.era!==filter?" hidden":"");
-    ym.dataset.era = item.era;
-    ym.innerHTML = `<div class="year-label">${item.year}</div>`;
-    container.appendChild(ym);
-
-    // Card
-    const div = document.createElement("div");
-    div.className = "tl-item"+(item.side==="right"?" right":"")+(filter!=="all"&&item.era!==filter?" hidden":"");
-    div.dataset.era = item.era;
-    div.style.animationDelay = (itemIdx*0.04)+"s";
-
-    const statusHTML = item.status.map(s=>`<span class="s-badge ${s.c}">${s.t}</span>`).join("");
-    const javaFlag = item.javaHighlight ? `<span class="java-flag">☕ JAVA SERVLET</span>` : "";
-
-    div.innerHTML = `<div class="tl-card${item.javaHighlight?" java-highlight":""}" onclick="toggleExpand(this)">
-      <div class="card-head">
-        <div class="card-icon">${item.icon}</div>
-        <div class="card-meta">
-          <span class="card-year-badge" style="background:rgba(193,127,36,.12);color:var(--amber2)">Born: ${item.born}${item.obsolete?` · Obsolete: ~${item.obsolete}`:""}</span>
-          <div class="card-title">${item.title}${javaFlag}</div>
-          <div class="card-subtitle">${item.subtitle}</div>
-          <div class="status-bar">${statusHTML}</div>
-        </div>
-      </div>
-      <div class="card-expand">
-        <hr class="expand-divider">
-        <div class="card-desc">${item.desc}</div>
-        <div class="sec-mini-label" style="font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--dim);margin-bottom:5px;text-transform:uppercase">Tier Structure</div>
-        <div class="mini-stack">
-          ${item.layers.map((l,li)=>`
-            ${li>0?`<div class="mini-arrow">↕</div>`:""}
-            <div class="mini-layer" style="background:${l.c}10;border:1px solid ${l.c}28">
-              <span class="mini-layer-icon">${l.icon}</span>
-              <span class="mini-layer-name" style="color:${l.c}">${l.name}</span>
-              <span class="mini-layer-desc">${l.desc}</span>
-            </div>`).join("")}
-        </div>
-        ${item.codeNote?`<div style="margin-top:8px;background:#1A1208;border:1px solid #3A2A14;border-radius:3px;padding:9px 11px;font-family:'JetBrains Mono',monospace;font-size:8.5px;color:#C8A860;line-height:1.7;overflow-x:auto;white-space:pre">${item.codeNote}</div>`:""}
-        <div style="margin:8px 0 5px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase">QA Characteristics</div>
-        <div class="qa-chips">
-          ${item.qaStrong.map(q=>`<span class="qa-chip strong">✓ ${q}</span>`).join("")}
-          ${item.qaWeak.map(q=>`<span class="qa-chip weak">✗ ${q}</span>`).join("")}
-        </div>
-        <div style="margin:8px 0 5px;font-family:'JetBrains Mono',monospace;font-size:8px;letter-spacing:.2em;color:var(--dim);text-transform:uppercase">Key Systems</div>
-        <div class="examples-row">
-          ${item.examples.map(e=>`<span class="ex-pill">${e}</span>`).join("")}
-        </div>
-        ${item.obsoleteNote?`<div class="obsolete-note">⚰ Why it declined: ${item.obsoleteNote}</div>`:""}
-        ${item.whyNote?`<div class="why-note">💡 Why it still matters: ${item.whyNote}</div>`:""}
-      </div>
-    </div>`;
-
-    container.appendChild(div);
-    if(filter==="all"||item.era===filter) itemIdx++;
+    const ym=document.createElement("div");
+    ym.className="year-marker"+(vis?"":" hidden");
+    ym.innerHTML='<div class="year-label">'+item.year+'</div>';
+    c.appendChild(ym);
+    const div=document.createElement("div");
+    div.className="tl-item"+(item.side==="r"?" right":"")+(vis?"":" hidden");
+    div.style.animationDelay=(idx*0.04)+"s";
+    const stH=item.st.map(s=>'<span class="s-badge '+s[1]+'">'+s[0]+'</span>').join("");
+    const jF=item.java?'<span class="java-flag">☕ JAVA SERVLET</span>':"";
+    const lyH=item.lay.map((l,i)=>(i>0?'<div class="mini-arrow">↕</div>':"")+'<div class="mini-layer" style="background:'+l[3]+'10;border:1px solid '+l[3]+'28"><span class="mini-layer-icon">'+l[0]+'</span><span class="mini-layer-name" style="color:'+l[3]+'">'+l[1]+'</span><span class="mini-layer-desc">'+l[2]+'</span></div>').join("");
+    const qaH=[...item.pos.map(q=>'<span class="qa-chip strong">✓ '+q+'</span>'),...item.neg.map(q=>'<span class="qa-chip weak">✗ '+q+'</span>')].join("");
+    const exH=item.ex.map(e=>'<span class="ex-pill">'+e+'</span>').join("");
+    const ext=(item.gone?'<div class="obsolete-note">⚰ Why it declined: '+item.gone+'</div>':"")+(item.why?'<div class="why-note">💡 '+item.why+'</div>':"");
+    div.innerHTML='<div class="tl-card'+(item.java?" java-highlight":"")+'" onclick="toggleExpand(this)"><div class="card-head"><div class="card-icon">'+item.icon+'</div><div class="card-meta"><span class="card-year-badge">Born: '+item.born+(item.obs?' · Obsolete: ~'+item.obs:"")+'</span><div class="card-title">'+item.title+jF+'</div><div class="card-subtitle">'+item.sub+'</div><div class="status-bar">'+stH+'</div></div></div><div class="card-expand"><hr class="expand-divider">'+(item.prob?'<div class="problem-box"><div class="problem-box-label">🔴 ปัญหาที่พยายามแก้ / Problem Being Solved</div><div class="problem-box-text">'+item.prob+'</div></div>':"")+'<div class="card-desc">'+item.desc+'</div><div class="sec-mini">Tier Structure</div><div class="mini-stack">'+lyH+'</div><div class="sec-mini" style="margin-top:8px">QA Characteristics</div><div class="qa-chips">'+qaH+'</div><div class="sec-mini">Key Systems</div><div class="examples-row">'+exH+'</div>'+ext+'</div></div>';
+    c.appendChild(div);
+    if(vis)idx++;
   });
 }
-
-function toggleExpand(card){
-  card.classList.toggle("expanded");
-}
-
-function filterEra(era, btn){
-  document.querySelectorAll(".era-btn").forEach(b=>b.classList.remove("active"));
-  btn.classList.add("active");
-  renderTimeline(era);
-}
-
-renderTimeline("all");
+function toggleExpand(x){x.classList.toggle("expanded");}
+function filterEra(e,b){document.querySelectorAll(".era-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");render(e);}
+render("all");
 </script>
 </body>
 </html>
